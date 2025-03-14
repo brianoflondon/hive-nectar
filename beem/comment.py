@@ -635,21 +635,31 @@ class Comment(BlockchainObject):
             return None
         self.blockchain.rpc.set_next_node_on_empty_reply(False)
         
-        if self.blockchain.rpc.get_use_appbase():
-            # Use bridge API instead of tags API
-            content_replies = self.blockchain.rpc.get_post({
-                'author': post_author, 
-                'permlink': post_permlink,
-                'observer': self.observer
-            }, api="bridge")
-            if 'discussion' in content_replies:
-                content_replies = content_replies['discussion']
-        else:
-            content_replies = self.blockchain.rpc.get_post(post_author, post_permlink, api="bridge")
-            
+        # Use bridge.get_discussion API
+        content_replies = self.blockchain.rpc.get_discussion({
+            'author': post_author, 
+            'permlink': post_permlink,
+            'observer': self.observer
+        }, api="bridge")
+        
+        if not content_replies:
+            return []
+        
+        # The response format is a dict with keys in 'author/permlink' format
+        # We need to extract the replies by filtering out the original post
+        original_key = f"{post_author}/{post_permlink}"
+        replies = []
+        
+        for key, content in content_replies.items():
+            # Skip the original post
+            if key == original_key:
+                continue
+            # Add the reply
+            replies.append(content)
+        
         if raw_data:
-            return content_replies
-        return [Comment(c, blockchain_instance=self.blockchain) for c in content_replies]
+            return replies
+        return [Comment(c, blockchain_instance=self.blockchain) for c in replies]
 
     def get_all_replies(self, parent=None):
         """ Returns all content replies
