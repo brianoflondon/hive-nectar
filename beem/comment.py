@@ -637,7 +637,7 @@ class Comment(BlockchainObject):
         
         if self.blockchain.rpc.get_use_appbase():
             # Use bridge API instead of tags API
-            content_replies = self.blockchain.rpc.get_content_replies({
+            content_replies = self.blockchain.rpc.get_post({
                 'author': post_author, 
                 'permlink': post_permlink,
                 'observer': self.observer
@@ -645,7 +645,7 @@ class Comment(BlockchainObject):
             if 'discussion' in content_replies:
                 content_replies = content_replies['discussion']
         else:
-            content_replies = self.blockchain.rpc.get_content_replies(post_author, post_permlink, api="bridge")
+            content_replies = self.blockchain.rpc.get_post(post_author, post_permlink, api="bridge")
             
         if raw_data:
             return content_replies
