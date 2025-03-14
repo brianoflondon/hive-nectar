@@ -634,12 +634,19 @@ class Comment(BlockchainObject):
         if not self.blockchain.is_connected():
             return None
         self.blockchain.rpc.set_next_node_on_empty_reply(False)
+        
         if self.blockchain.rpc.get_use_appbase():
-            content_replies = self.blockchain.rpc.get_content_replies({'author': post_author, 'permlink': post_permlink}, api="tags")
-            if 'discussions' in content_replies:
-                content_replies = content_replies['discussions']
+            # Use bridge API instead of tags API
+            content_replies = self.blockchain.rpc.get_content_replies({
+                'author': post_author, 
+                'permlink': post_permlink,
+                'observer': self.observer
+            }, api="bridge")
+            if 'discussion' in content_replies:
+                content_replies = content_replies['discussion']
         else:
-            content_replies = self.blockchain.rpc.get_content_replies(post_author, post_permlink, api="tags")
+            content_replies = self.blockchain.rpc.get_content_replies(post_author, post_permlink, api="bridge")
+            
         if raw_data:
             return content_replies
         return [Comment(c, blockchain_instance=self.blockchain) for c in content_replies]
