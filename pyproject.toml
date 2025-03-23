@@ -7,13 +7,14 @@ name = "beem"
 version = "0.25.00"
 description = "Unofficial Python library for HIVE and STEEM"
 readme = "README.rst"
-requires-python = ">=3.6"
+requires-python = ">=3.8"
 license = {file = "LICENSE.txt"}
 authors = [
     {name = "Holger Nahrstaedt", email = "nahrstaedt@gmail.com"},
 ]
 maintainers = [
     {name = "Holger Nahrstaedt", email = "nahrstaedt@gmail.com"},
+    {name = "Michael Garcia", email = "thecrazygm@gmail.com"}
 ]
 keywords = ["hive", "steem", "library", "api", "rpc"]
 classifiers = [
@@ -21,10 +22,9 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Financial and Insurance Industry",
