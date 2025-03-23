@@ -26,7 +26,7 @@ test:
 	python -m pytest
 
 build: generate-versions
-	python -m build
+	uv build
 
 install: build
 	uv pip install -e .

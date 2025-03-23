@@ -57,6 +57,9 @@ beempy = "beem.cli:cli"
 [tool.hatch.build.targets.wheel]
 packages = ["beem", "beemapi", "beembase", "beemgraphenebase", "beemgrapheneapi", "beemstorage"]
 
+[tool.uv]
+default-groups = []
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
@@ -95,25 +98,25 @@ warn_unused_configs = true
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
 
-# [tool.uv.developers]
-# python-dev-deps = [
-#     "mock>=2.0.0",
-#     "pytest",
-#     "pytest-mock",
-#     "pytest-cov",
-#     "parameterized",
-#     "coverage",
-#     "tox",
-#     "sphinx",
-#     "doc8",
-#     "ruff",
-#     "mypy",
-#     "bandit",
-#     "readme_renderer",
-#     "sphinx-click",
-#     "codacy-coverage",
-#     "codecov",
-#     "build",
-#     "twine",
-#     "tomli",
-# ]
+[dependency-groups]
+dev = [
+    "mock>=2.0.0",
+    "pytest",
+    "pytest-mock",
+    "pytest-cov",
+    "parameterized",
+    "coverage",
+    "tox",
+    "sphinx",
+    "doc8",
+    "ruff",
+    "mypy",
+    "bandit",
+    "readme_renderer",
+    "sphinx-click",
+    "codacy-coverage",
+    "codecov",
+    "build",
+    "twine",
+    "tomli",
+]
