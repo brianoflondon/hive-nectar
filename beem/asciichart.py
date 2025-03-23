@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
-from math import cos
-from math import sin
-from math import pi
-from math import floor
-from math import ceil
+from math import ceil, floor
 
 # Basic idea from https://github.com/kroitor/asciichart
 # ╱ ╲ ╳ ─ └┲┲┲─
@@ -13,42 +9,47 @@ from math import ceil
 class AsciiChart(object):
     """Can be used to plot price and trade history
 
-        :param int height: Height of the plot
-        :param int width: Width of the plot
-        :param int offset: Offset between tick strings and y-axis (default is 3)
-        :param str placeholder: Defines how the numbers on the y-axes are formatted (default is '{:8.2f}')
-        :param str charset: sets the charset for plotting, uft8 or ascii (default: utf8)
+    :param int height: Height of the plot
+    :param int width: Width of the plot
+    :param int offset: Offset between tick strings and y-axis (default is 3)
+    :param str placeholder: Defines how the numbers on the y-axes are formatted (default is '{:8.2f}')
+    :param str charset: sets the charset for plotting, uft8 or ascii (default: utf8)
     """
-    def __init__(self, height=None, width=None, offset=3, placeholder=u'{:8.2f} ', charset=u'utf8'):
+
+    def __init__(self, height=None, width=None, offset=3, placeholder="{:8.2f} ", charset="utf8"):
         self.height = height
         self.width = width
         self.offset = offset
         self.placeholder = placeholder
         self.clear_data()
-        if charset == u'ascii' or sys.version_info[0] < 3:
-            self.char_set = {'first_axis_elem': u'|',
-                             'axis_elem': u'|',
-                             'axis_elem_with_graph': u'|',
-                             'curve_ar': u'\\',
-                             'curve_lb': u'\\',
-                             'curve_br': u'/',
-                             'curve_la': u'/',
-                             'curve_hl': u'-',
-                             'curve_vl': u'|',
-                             'curve_hl_dot': u'-',
-                             'curve_vl_dot': u'|'}
+        if charset == "ascii" or sys.version_info[0] < 3:
+            self.char_set = {
+                "first_axis_elem": "|",
+                "axis_elem": "|",
+                "axis_elem_with_graph": "|",
+                "curve_ar": "\\",
+                "curve_lb": "\\",
+                "curve_br": "/",
+                "curve_la": "/",
+                "curve_hl": "-",
+                "curve_vl": "|",
+                "curve_hl_dot": "-",
+                "curve_vl_dot": "|",
+            }
         else:
-            self.char_set = {'first_axis_elem': u'┼',
-                             'axis_elem': u'┤',
-                             'axis_elem_with_graph': u'┼',
-                             'curve_ar': u'╰',
-                             'curve_lb': u'╮',
-                             'curve_br': u'╭',
-                             'curve_la': u'╯',
-                             'curve_hl': u'─',
-                             'curve_vl': u'│',
-                             'curve_hl_dot': u'┈',
-                             'curve_vl_dot': u'┊'}
+            self.char_set = {
+                "first_axis_elem": "┼",
+                "axis_elem": "┤",
+                "axis_elem_with_graph": "┼",
+                "curve_ar": "╰",
+                "curve_lb": "╮",
+                "curve_br": "╭",
+                "curve_la": "╯",
+                "curve_hl": "─",
+                "curve_vl": "│",
+                "curve_hl_dot": "┈",
+                "curve_vl_dot": "┊",
+            }
 
     def clear_data(self):
         """Clears all data"""
@@ -71,18 +72,18 @@ class AsciiChart(object):
     def adapt_on_series(self, series):
         """Calculates the minimum, maximum and length from the given list
 
-            :param list series: time series to plot
+        :param list series: time series to plot
 
-            .. testcode::
+        .. testcode::
 
-                from beem.asciichart import AsciiChart
-                chart = AsciiChart()
-                series = [1, 2, 3, 7, 2, -4, -2]
-                chart.adapt_on_series(series)
-                chart.new_chart()
-                chart.add_axis()
-                chart.add_curve(series)
-                print(str(chart))
+            from beem.asciichart import AsciiChart
+            chart = AsciiChart()
+            series = [1, 2, 3, 7, 2, -4, -2]
+            chart.adapt_on_series(series)
+            chart.new_chart()
+            chart.add_axis()
+            chart.add_curve(series)
+            print(str(chart))
 
         """
         self.minimum = min(series)
@@ -91,8 +92,7 @@ class AsciiChart(object):
         self._calc_plot_parameter()
 
     def _calc_plot_parameter(self, minimum=None, maximum=None, n=None):
-        """Calculates parameter from minimum, maximum and length
-        """
+        """Calculates parameter from minimum, maximum and length"""
         if minimum is not None:
             self.minimum = minimum
         if maximum is not None:
@@ -124,12 +124,12 @@ class AsciiChart(object):
     def plot(self, series, return_str=False):
         """All in one function for plotting
 
-            .. testcode::
+        .. testcode::
 
-                from beem.asciichart import AsciiChart
-                chart = AsciiChart()
-                series = [1, 2, 3, 7, 2, -4, -2]
-                chart.plot(series)
+            from beem.asciichart import AsciiChart
+            chart = AsciiChart()
+            series = [1, 2, 3, 7, 2, -4, -2]
+            chart.plot(series)
         """
         self.clear_data()
         self.adapt_on_series(series)
@@ -144,16 +144,16 @@ class AsciiChart(object):
     def new_chart(self, minimum=None, maximum=None, n=None):
         """Clears the canvas
 
-            .. testcode::
+        .. testcode::
 
-                from beem.asciichart import AsciiChart
-                chart = AsciiChart()
-                series = [1, 2, 3, 7, 2, -4, -2]
-                chart.adapt_on_series(series)
-                chart.new_chart()
-                chart.add_axis()
-                chart.add_curve(series)
-                print(str(chart))
+            from beem.asciichart import AsciiChart
+            chart = AsciiChart()
+            series = [1, 2, 3, 7, 2, -4, -2]
+            chart.adapt_on_series(series)
+            chart.new_chart()
+            chart.add_axis()
+            chart.add_curve(series)
+            print(str(chart))
 
         """
         if minimum is not None:
@@ -163,21 +163,23 @@ class AsciiChart(object):
         if n is not None:
             self.n = n
         self._calc_plot_parameter()
-        self.canvas = [[u' '] * (int(self.n / self.skip) + self.offset) for i in range(self.rows + 1)]
+        self.canvas = [
+            [" "] * (int(self.n / self.skip) + self.offset) for i in range(self.rows + 1)
+        ]
 
     def add_axis(self):
         """Adds a y-axis to the canvas
 
-            .. testcode::
+        .. testcode::
 
-                from beem.asciichart import AsciiChart
-                chart = AsciiChart()
-                series = [1, 2, 3, 7, 2, -4, -2]
-                chart.adapt_on_series(series)
-                chart.new_chart()
-                chart.add_axis()
-                chart.add_curve(series)
-                print(str(chart))
+            from beem.asciichart import AsciiChart
+            chart = AsciiChart()
+            series = [1, 2, 3, 7, 2, -4, -2]
+            chart.adapt_on_series(series)
+            chart.new_chart()
+            chart.add_axis()
+            chart.add_curve(series)
+            print(str(chart))
 
         """
         # axis and labels
@@ -185,7 +187,9 @@ class AsciiChart(object):
         intmin2 = int(self.min2)
         intmax2 = int(self.max2)
         for y in range(intmin2, intmax2 + 1):
-            label = self.placeholder.format(float(self.maximum) - ((y - intmin2) * interval / self.rows))
+            label = self.placeholder.format(
+                float(self.maximum) - ((y - intmin2) * interval / self.rows)
+            )
             if label:
                 self._set_y_axis_elem(y, label)
 
@@ -204,18 +208,18 @@ class AsciiChart(object):
     def add_curve(self, series):
         """Add a curve to the canvas
 
-            :param list series: List width float data points
+        :param list series: List width float data points
 
-            .. testcode::
+        .. testcode::
 
-                from beem.asciichart import AsciiChart
-                chart = AsciiChart()
-                series = [1, 2, 3, 7, 2, -4, -2]
-                chart.adapt_on_series(series)
-                chart.new_chart()
-                chart.add_axis()
-                chart.add_curve(series)
-                print(str(chart))
+            from beem.asciichart import AsciiChart
+            chart = AsciiChart()
+            series = [1, 2, 3, 7, 2, -4, -2]
+            chart.adapt_on_series(series)
+            chart.new_chart()
+            chart.add_axis()
+            chart.add_curve(series)
+            print(str(chart))
 
         """
         if self.n is None:
@@ -224,9 +228,9 @@ class AsciiChart(object):
             self.new_chart()
         y0 = self._map_y(series[0])
         self._set_elem(y0, -1, self.char_set["axis_elem_with_graph"])
-        for x in range(0, len(series[::self.skip]) - 1):
-            y0 = self._map_y(series[::self.skip][x + 0])
-            y1 = self._map_y(series[::self.skip][x + 1])
+        for x in range(0, len(series[:: self.skip]) - 1):
+            y0 = self._map_y(series[:: self.skip][x + 0])
+            y1 = self._map_y(series[:: self.skip][x + 1])
             if y0 == y1:
                 self._draw_h_line(y0, x, x + 1, line=self.char_set["curve_hl"])
             else:
@@ -246,12 +250,12 @@ class AsciiChart(object):
         self._set_elem(y1, x, c1)
         self._set_elem(y0, x, c0)
 
-    def _draw_h_line(self, y, x_start, x_end, line=u'-'):
+    def _draw_h_line(self, y, x_start, x_end, line="-"):
         """Plot horizontal line"""
         for x in range(x_start, x_end):
             self._set_elem(y, x, line)
 
-    def _draw_v_line(self, y_start, y_end, x, line=u'|'):
+    def _draw_v_line(self, y_start, y_end, x, line="|"):
         """Plot vertical line"""
         for y in range(y_start, y_end):
             self._set_elem(y, x, line)
@@ -261,6 +265,6 @@ class AsciiChart(object):
         self.canvas[self.rows - y][x + self.offset] = c
 
     def __repr__(self):
-        return '\n'.join([''.join(row) for row in self.canvas])
+        return "\n".join(["".join(row) for row in self.canvas])
 
     __str__ = __repr__

@@ -2,34 +2,40 @@
 # Inspired by https://raw.githubusercontent.com/xeroc/python-graphenelib/master/graphenestorage/base.py
 import logging
 
+from .exceptions import KeyAlreadyInStoreException
+from .interfaces import (
+    ConfigInterface,
+    EncryptedKeyInterface,
+    EncryptedTokenInterface,
+    KeyInterface,
+    TokenInterface,
+)
 from .masterpassword import MasterPassword
-from .interfaces import KeyInterface, ConfigInterface, EncryptedKeyInterface, TokenInterface, EncryptedTokenInterface
 from .ram import InRamStore
 from .sqlite import SQLiteStore
-from .exceptions import KeyAlreadyInStoreException
 
 log = logging.getLogger(__name__)
 
 
 # Configuration
 class InRamConfigurationStore(InRamStore, ConfigInterface):
-    """ A simple example that stores configuration in RAM.
+    """A simple example that stores configuration in RAM.
 
-        Internally, this works by simply inheriting
-        :class:`beemstorage.ram.InRamStore`. The interface is defined in
-        :class:`beemstorage.interfaces.ConfigInterface`.
+    Internally, this works by simply inheriting
+    :class:`beemstorage.ram.InRamStore`. The interface is defined in
+    :class:`beemstorage.interfaces.ConfigInterface`.
     """
 
     pass
 
 
 class SqliteConfigurationStore(SQLiteStore, ConfigInterface):
-    """ This is the configuration storage that stores key/value
-        pairs in the `config` table of the SQLite3 database.
+    """This is the configuration storage that stores key/value
+    pairs in the `config` table of the SQLite3 database.
 
-        Internally, this works by simply inheriting
-        :class:`beemstorage.sqlite.SQLiteStore`. The interface is defined
-        in :class:`beemstorage.interfaces.ConfigInterface`.
+    Internally, this works by simply inheriting
+    :class:`beemstorage.sqlite.SQLiteStore`. The interface is defined
+    in :class:`beemstorage.interfaces.ConfigInterface`.
     """
 
     #: The table name for the configuration
@@ -42,11 +48,11 @@ class SqliteConfigurationStore(SQLiteStore, ConfigInterface):
 
 # Keys
 class InRamPlainKeyStore(InRamStore, KeyInterface):
-    """ A simple in-RAM Store that stores keys unencrypted in RAM
+    """A simple in-RAM Store that stores keys unencrypted in RAM
 
-        Internally, this works by simply inheriting
-        :class:`beemstorage.ram.InRamStore`. The interface is defined in
-        :class:`beemstorage.interfaces.KeyInterface`.
+    Internally, this works by simply inheriting
+    :class:`beemstorage.ram.InRamStore`. The interface is defined in
+    :class:`beemstorage.interfaces.KeyInterface`.
     """
 
     def getPublicKeys(self):
@@ -65,13 +71,13 @@ class InRamPlainKeyStore(InRamStore, KeyInterface):
 
 
 class SqlitePlainKeyStore(SQLiteStore, KeyInterface):
-    """ This is the key storage that stores the public key and the
-        **unencrypted** private key in the `keys` table in the SQLite3
-        database.
+    """This is the key storage that stores the public key and the
+    **unencrypted** private key in the `keys` table in the SQLite3
+    database.
 
-        Internally, this works by simply inheriting
-        :class:`beemstorage.ram.InRamStore`. The interface is defined in
-        :class:`beemstorage.interfaces.KeyInterface`.
+    Internally, this works by simply inheriting
+    :class:`beemstorage.ram.InRamStore`. The interface is defined in
+    :class:`beemstorage.interfaces.KeyInterface`.
     """
 
     #: The table name for the configuration
@@ -96,15 +102,14 @@ class SqlitePlainKeyStore(SQLiteStore, KeyInterface):
         SQLiteStore.delete(self, str(pub))
 
     def is_encrypted(self):
-        """ Returns False, as we are not encrypted here
-        """
+        """Returns False, as we are not encrypted here"""
         return False
 
 
 class KeyEncryption(MasterPassword, EncryptedKeyInterface):
-    """ This is an interface class that provides the methods required for
-        EncryptedKeyInterface and links them to the MasterPassword-provided
-        functionatlity, accordingly.
+    """This is an interface class that provides the methods required for
+    EncryptedKeyInterface and links them to the MasterPassword-provided
+    functionatlity, accordingly.
     """
 
     def __init__(self, *args, **kwargs):
@@ -130,15 +135,15 @@ class KeyEncryption(MasterPassword, EncryptedKeyInterface):
 
 
 class InRamEncryptedKeyStore(InRamStore, KeyEncryption):
-    """ An in-RAM Store that stores keys **encrypted** in RAM.
+    """An in-RAM Store that stores keys **encrypted** in RAM.
 
-        Internally, this works by simply inheriting
-        :class:`beemstorage.ram.InRamStore`. The interface is defined in
-        :class:`beemstorage.interfaces.KeyInterface`.
+    Internally, this works by simply inheriting
+    :class:`beemstorage.ram.InRamStore`. The interface is defined in
+    :class:`beemstorage.interfaces.KeyInterface`.
 
-        .. note:: This module also inherits
-            :class:`beemstorage.masterpassword.MasterPassword` which offers
-            additional methods and deals with encrypting the keys.
+    .. note:: This module also inherits
+        :class:`beemstorage.masterpassword.MasterPassword` which offers
+        additional methods and deals with encrypting the keys.
     """
 
     def __init__(self, *args, **kwargs):
@@ -147,16 +152,16 @@ class InRamEncryptedKeyStore(InRamStore, KeyEncryption):
 
 
 class SqliteEncryptedKeyStore(SQLiteStore, KeyEncryption):
-    """ This is the key storage that stores the public key and the
-        **encrypted** private key in the `keys` table in the SQLite3 database.
+    """This is the key storage that stores the public key and the
+    **encrypted** private key in the `keys` table in the SQLite3 database.
 
-        Internally, this works by simply inheriting
-        :class:`beemstorage.ram.InRamStore`. The interface is defined in
-        :class:`beemstorage.interfaces.KeyInterface`.
+    Internally, this works by simply inheriting
+    :class:`beemstorage.ram.InRamStore`. The interface is defined in
+    :class:`beemstorage.interfaces.KeyInterface`.
 
-        .. note:: This module also inherits
-            :class:`beemstorage.masterpassword.MasterPassword` which offers
-            additional methods and deals with encrypting the keys.
+    .. note:: This module also inherits
+        :class:`beemstorage.masterpassword.MasterPassword` which offers
+        additional methods and deals with encrypting the keys.
     """
 
     __tablename__ = "keys"
@@ -170,11 +175,11 @@ class SqliteEncryptedKeyStore(SQLiteStore, KeyEncryption):
 
 # Token
 class InRamPlainTokenStore(InRamStore, TokenInterface):
-    """ A simple in-RAM Store that stores token unencrypted in RAM
+    """A simple in-RAM Store that stores token unencrypted in RAM
 
-        Internally, this works by simply inheriting
-        :class:`beemstorage.ram.InRamStore`. The interface is defined in
-        :class:`beemstorage.interfaces.TokenInterface`.
+    Internally, this works by simply inheriting
+    :class:`beemstorage.ram.InRamStore`. The interface is defined in
+    :class:`beemstorage.interfaces.TokenInterface`.
     """
 
     def getPublicNames(self):
@@ -193,13 +198,13 @@ class InRamPlainTokenStore(InRamStore, TokenInterface):
 
 
 class SqlitePlainTokenStore(SQLiteStore, TokenInterface):
-    """ This is the token storage that stores the public key and the
-        **unencrypted** private key in the `tokens` table in the SQLite3
-        database.
+    """This is the token storage that stores the public key and the
+    **unencrypted** private key in the `tokens` table in the SQLite3
+    database.
 
-        Internally, this works by simply inheriting
-        :class:`beemstorage.ram.InRamStore`. The interface is defined in
-        :class:`beemstorage.interfaces.TokenInterface`.
+    Internally, this works by simply inheriting
+    :class:`beemstorage.ram.InRamStore`. The interface is defined in
+    :class:`beemstorage.interfaces.TokenInterface`.
     """
 
     #: The table name for the configuration
@@ -227,15 +232,14 @@ class SqlitePlainTokenStore(SQLiteStore, TokenInterface):
         SQLiteStore.delete(self, str(name))
 
     def is_encrypted(self):
-        """ Returns False, as we are not encrypted here
-        """
+        """Returns False, as we are not encrypted here"""
         return False
 
 
 class TokenEncryption(MasterPassword, EncryptedTokenInterface):
-    """ This is an interface class that provides the methods required for
-        EncryptedTokenInterface and links them to the MasterPassword-provided
-        functionatlity, accordingly.
+    """This is an interface class that provides the methods required for
+    EncryptedTokenInterface and links them to the MasterPassword-provided
+    functionatlity, accordingly.
     """
 
     def __init__(self, *args, **kwargs):
@@ -264,15 +268,15 @@ class TokenEncryption(MasterPassword, EncryptedTokenInterface):
 
 
 class InRamEncryptedTokenStore(InRamStore, TokenEncryption):
-    """ An in-RAM Store that stores token **encrypted** in RAM.
+    """An in-RAM Store that stores token **encrypted** in RAM.
 
-        Internally, this works by simply inheriting
-        :class:`beemstorage.ram.InRamStore`. The interface is defined in
-        :class:`beemstorage.interfaces.TokenInterface`.
+    Internally, this works by simply inheriting
+    :class:`beemstorage.ram.InRamStore`. The interface is defined in
+    :class:`beemstorage.interfaces.TokenInterface`.
 
-        .. note:: This module also inherits
-            :class:`beemstorage.masterpassword.MasterPassword` which offers
-            additional methods and deals with encrypting the keys.
+    .. note:: This module also inherits
+        :class:`beemstorage.masterpassword.MasterPassword` which offers
+        additional methods and deals with encrypting the keys.
     """
 
     def __init__(self, *args, **kwargs):
@@ -281,16 +285,16 @@ class InRamEncryptedTokenStore(InRamStore, TokenEncryption):
 
 
 class SqliteEncryptedTokenStore(SQLiteStore, TokenEncryption):
-    """ This is the key storage that stores the account name and the
-        **encrypted** token in the `token` table in the SQLite3 database.
+    """This is the key storage that stores the account name and the
+    **encrypted** token in the `token` table in the SQLite3 database.
 
-        Internally, this works by simply inheriting
-        :class:`beemstorage.ram.InRamStore`. The interface is defined in
-        :class:`beemstorage.interfaces.TokenInterface`.
+    Internally, this works by simply inheriting
+    :class:`beemstorage.ram.InRamStore`. The interface is defined in
+    :class:`beemstorage.interfaces.TokenInterface`.
 
-        .. note:: This module also inherits
-            :class:`beemstorage.masterpassword.MasterPassword` which offers
-            additional methods and deals with encrypting the token.
+    .. note:: This module also inherits
+        :class:`beemstorage.masterpassword.MasterPassword` which offers
+        additional methods and deals with encrypting the token.
     """
 
     __tablename__ = "token"

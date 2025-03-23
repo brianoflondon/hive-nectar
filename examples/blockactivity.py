@@ -1,41 +1,45 @@
-import sys
-from datetime import datetime, timedelta
 import argparse
-from timeit import default_timer as timer
 import logging
-from beem.blockchain import Blockchain
+import sys
+from datetime import timedelta
+from timeit import default_timer as timer
+
+from beem import Blurt, Hive, Steem
 from beem.block import Block
-from beem import Hive, Blurt, Steem
-from beem.utils import parse_time
+from beem.blockchain import Blockchain
 from beem.nodelist import NodeList
+from beem.utils import parse_time
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
 def parse_args(args=None):
-    d = 'Verify blocktivity by counting operations and trx for the last 24 hours.'
+    d = "Verify blocktivity by counting operations and trx for the last 24 hours."
     parser = argparse.ArgumentParser(description=d)
-    parser.add_argument('blockchain', type=str, nargs='?',
-                        default=sys.stdin,
-                        help='Blockchain (hive, blurt or steem)')
+    parser.add_argument(
+        "blockchain",
+        type=str,
+        nargs="?",
+        default=sys.stdin,
+        help="Blockchain (hive, blurt or steem)",
+    )
     return parser.parse_args(args)
 
 
 def main(args=None):
-    
     args = parse_args(args)
     blockchain = args.blockchain
-    
+
     nodelist = NodeList()
     nodelist.update_nodes(weights={"block": 1})
-    
+
     if blockchain == "hive" or blockchain is None:
         max_batch_size = 50
         threading = False
         thread_num = 16
         block_debug = 1000
-        
+
         nodes = nodelist.get_hive_nodes()
         blk_inst = Hive(node=nodes, num_retries=3, num_retries_call=3, timeout=30)
     elif blockchain == "blurt":
@@ -43,7 +47,11 @@ def main(args=None):
         threading = False
         thread_num = 8
         block_debug = 20
-        nodes = ["https://api.blurt.blog", "https://rpc.blurtworld.com", "https://rpc.blurtworld.com"]
+        nodes = [
+            "https://api.blurt.blog",
+            "https://rpc.blurtworld.com",
+            "https://rpc.blurtworld.com",
+        ]
         blk_inst = Blurt(node=nodes, num_retries=3, num_retries_call=3, timeout=30)
     elif blockchain == "steem":
         max_batch_size = 50
@@ -61,8 +69,10 @@ def main(args=None):
     total_trx = 0
     duration_s = 60 * 60 * 24
     blocksperday = int(duration_s / 3)
-    
-    blockchain = Blockchain(blockchain_instance=blk_inst, )
+
+    blockchain = Blockchain(
+        blockchain_instance=blk_inst,
+    )
     current_block_num = blockchain.get_current_block_num()
     last_block_id = current_block_num - blocksperday
 
@@ -71,7 +81,12 @@ def main(args=None):
     stopTime = last_block.time() + timedelta(seconds=duration_s)
 
     start = timer()
-    for entry in blockchain.blocks(start=last_block_id, max_batch_size=max_batch_size, threading=threading, thread_num=thread_num):
+    for entry in blockchain.blocks(
+        start=last_block_id,
+        max_batch_size=max_batch_size,
+        threading=threading,
+        thread_num=thread_num,
+    ):
         if "block" in entry:
             block_time = parse_time(entry["block"]["timestamp"])
         else:
@@ -90,28 +105,37 @@ def main(args=None):
 
         ops_per_day = total_ops / block_count * blocksperday
         if block_count % (block_debug) == 0:
-            print("%d blocks remaining... estimated ops per day: %.1f" % (blocksperday - block_count, ops_per_day))
+            print(
+                "%d blocks remaining... estimated ops per day: %.1f"
+                % (blocksperday - block_count, ops_per_day)
+            )
 
     duration = timer() - start
-    
+
     stopTime = last_block.time() + timedelta(seconds=duration_s)
     start = timer()
-    for entry in blockchain.blocks(start=last_block_id, max_batch_size=max_batch_size, threading=threading, thread_num=thread_num, only_virtual_ops=True): 
+    for entry in blockchain.blocks(
+        start=last_block_id,
+        max_batch_size=max_batch_size,
+        threading=threading,
+        thread_num=thread_num,
+        only_virtual_ops=True,
+    ):
         block_time = entry["timestamp"]
         if block_time > stopTime:
-            break        
+            break
         for tx in entry["operations"]:
             for op in tx["op"]:
                 total_virtual_ops += 1
 
-    duration = timer() - start    
-    
-    
+    duration = timer() - start
+
     print("Received %.2f blocks/s." % (block_count / duration))
     print("Bocks: %d, duration %.3f s" % (block_count, duration))
     print("Operations per day: %d" % total_ops)
     print("Trx per day: %d" % total_trx)
     print("Virtual Operations per day: %d" % total_virtual_ops)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     sys.exit(main())

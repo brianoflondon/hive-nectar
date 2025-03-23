@@ -1,31 +1,32 @@
 # -*- coding: utf-8 -*-
-from itertools import cycle
-import threading
-import sys
 import json
-import signal
 import logging
-import ssl
 import re
-import time
-import warnings
-import six
+import ssl
+
+from beemgraphenebase.chains import known_chains
+from beemgraphenebase.version import version as beem_version
+
 from .exceptions import (
-    UnauthorizedError, RPCConnection, RPCError, RPCErrorDoRetry, NumRetriesReached, CallRetriesReached, WorkingNodeMissing, TimeoutException
-)
-from .rpcutils import (
-    is_network_appbase_ready,
-    get_api_name, get_query
+    CallRetriesReached,
+    RPCConnection,
+    RPCError,
+    RPCErrorDoRetry,
+    UnauthorizedError,
+    WorkingNodeMissing,
 )
 from .node import Nodes
-from beemgraphenebase.version import version as beem_version
-from beemgraphenebase.chains import known_chains
-from _thread import interrupt_main
+from .rpcutils import get_api_name, get_query, is_network_appbase_ready
+
 WEBSOCKET_MODULE = None
 if not WEBSOCKET_MODULE:
     try:
         import websocket
-        from websocket._exceptions import WebSocketConnectionClosedException, WebSocketTimeoutException
+        from websocket._exceptions import (
+            WebSocketConnectionClosedException,
+            WebSocketTimeoutException,
+        )
+
         WEBSOCKET_MODULE = "websocket"
     except ImportError:
         WEBSOCKET_MODULE = None
@@ -34,8 +35,9 @@ if not REQUEST_MODULE:
     try:
         import requests
         from requests.adapters import HTTPAdapter
-        from requests.packages.urllib3.util.retry import Retry
         from requests.exceptions import ConnectionError
+        from requests.packages.urllib3.util.retry import Retry
+
         REQUEST_MODULE = "requests"
     except ImportError:
         REQUEST_MODULE = None
@@ -45,6 +47,7 @@ log = logging.getLogger(__name__)
 
 class SessionInstance(object):
     """Singelton for the Session Instance"""
+
     instance = None
 
 
@@ -68,7 +71,7 @@ def create_ws_instance(use_ssl=True, enable_multithread=True):
         raise Exception()
     if use_ssl:
         ssl_defaults = ssl.get_default_verify_paths()
-        sslopt_ca_certs = {'ca_certs': ssl_defaults.cafile}
+        sslopt_ca_certs = {"ca_certs": ssl_defaults.cafile}
         return websocket.WebSocket(sslopt=sslopt_ca_certs, enable_multithread=enable_multithread)
     else:
         return websocket.WebSocket(enable_multithread=enable_multithread)
@@ -117,10 +120,10 @@ class GrapheneRPC(object):
 
     def __init__(self, urls, user=None, password=None, **kwargs):
         """Init."""
-        self.rpc_methods = {'offline': -1, 'ws': 0, 'jsonrpc': 1, 'wsappbase': 2, 'appbase': 3}
+        self.rpc_methods = {"offline": -1, "ws": 0, "jsonrpc": 1, "wsappbase": 2, "appbase": 3}
         self.current_rpc = self.rpc_methods["ws"]
         self._request_id = 0
-        self.timeout = kwargs.get('timeout', 60)
+        self.timeout = kwargs.get("timeout", 60)
         num_retries = kwargs.get("num_retries", 100)
         num_retries_call = kwargs.get("num_retries_call", 5)
         self.use_condenser = kwargs.get("use_condenser", False)
@@ -178,7 +181,7 @@ class GrapheneRPC(object):
 
     def is_appbase_ready(self):
         """Check if node is appbase ready"""
-        return self.current_rpc in [self.rpc_methods['wsappbase'], self.rpc_methods['appbase']]
+        return self.current_rpc in [self.rpc_methods["wsappbase"], self.rpc_methods["appbase"]]
 
     def get_use_appbase(self):
         """Returns True if appbase ready and appbase calls are set"""
@@ -206,21 +209,23 @@ class GrapheneRPC(object):
                     self.session = shared_session_instance()
                     if self.use_tor:
                         self.session.proxies = {}
-                        self.session.proxies['http'] = 'socks5h://localhost:9050'
-                        self.session.proxies['https'] = 'socks5h://localhost:9050'                        
+                        self.session.proxies["http"] = "socks5h://localhost:9050"
+                        self.session.proxies["https"] = "socks5h://localhost:9050"
                     self.current_rpc = self.rpc_methods["appbase"]
-                    self.headers = {'User-Agent': 'beem v%s' % (beem_version),
-                                    'content-type': 'application/json; charset=utf-8'}
+                    self.headers = {
+                        "User-Agent": "beem v%s" % (beem_version),
+                        "content-type": "application/json; charset=utf-8",
+                    }
             try:
                 if self.ws:
                     self.ws.connect(self.url)
                     self.rpclogin(self.user, self.password)
                 if self.disable_chain_detection:
                     # Set to appbase rpc format
-                    if self.current_rpc == self.rpc_methods['ws']:
-                        self.current_rpc = self.rpc_methods['wsappbase']
+                    if self.current_rpc == self.rpc_methods["ws"]:
+                        self.current_rpc = self.rpc_methods["wsappbase"]
                     else:
-                        self.current_rpc = self.rpc_methods['appbase']
+                        self.current_rpc = self.rpc_methods["appbase"]
                     break
                 try:
                     props = None
@@ -231,10 +236,10 @@ class GrapheneRPC(object):
                 except Exception as e:
                     if re.search("Bad Cast:Invalid cast from type", str(e)):
                         # retry with not appbase
-                        if self.current_rpc == self.rpc_methods['wsappbase']:
-                            self.current_rpc = self.rpc_methods['ws']
+                        if self.current_rpc == self.rpc_methods["wsappbase"]:
+                            self.current_rpc = self.rpc_methods["ws"]
                         else:
-                            self.current_rpc = self.rpc_methods['appbase']
+                            self.current_rpc = self.rpc_methods["appbase"]
                         props = self.get_config(api="database")
                 if props is None:
                     raise RPCError("Could not receive answer for get_config")
@@ -254,7 +259,7 @@ class GrapheneRPC(object):
 
     def rpclogin(self, user, password):
         """Login into Websocket"""
-        if self.ws and self.current_rpc == self.rpc_methods['ws'] and user and password:
+        if self.ws and self.current_rpc == self.rpc_methods["ws"] and user and password:
             self.login(user, password, api="login_api")
 
     def rpcclose(self):
@@ -266,16 +271,17 @@ class GrapheneRPC(object):
 
     def request_send(self, payload):
         if self.user is not None and self.password is not None:
-            response = self.session.post(self.url,
-                                         data=payload,
-                                         headers=self.headers,
-                                         timeout=self.timeout,
-                                         auth=(self.user, self.password))
+            response = self.session.post(
+                self.url,
+                data=payload,
+                headers=self.headers,
+                timeout=self.timeout,
+                auth=(self.user, self.password),
+            )
         else:
-            response = self.session.post(self.url,
-                                         data=payload,
-                                         headers=self.headers,
-                                         timeout=self.timeout)
+            response = self.session.post(
+                self.url, data=payload, headers=self.headers, timeout=self.timeout
+            )
         if response.status_code == 401:
             raise UnauthorizedError
         return response
@@ -288,12 +294,12 @@ class GrapheneRPC(object):
         return reply
 
     def version_string_to_int(self, network_version):
-        version_list = network_version.split('.')
+        version_list = network_version.split(".")
         return int(int(version_list[0]) * 1e8 + int(version_list[1]) * 1e4 + int(version_list[2]))
 
     def get_network(self, props=None):
-        """ Identify the connected network. This call returns a
-            dictionary with keys chain_id, core_symbol and prefix
+        """Identify the connected network. This call returns a
+        dictionary with keys chain_id, core_symbol and prefix
         """
         if props is None:
             props = self.get_config(api="database")
@@ -315,12 +321,10 @@ class GrapheneRPC(object):
             sorted_prefix_count = sorted(prefix_count.items(), key=lambda x: x[1], reverse=True)
             if sorted_prefix_count[0][1] > 1:
                 blockchain_name = sorted_prefix_count[0][0]
-        if blockchain_name is None and 'HIVE_CHAIN_ID' in props and 'STEEM_CHAIN_ID' in props:
-            del props['STEEM_CHAIN_ID']
-        
-        
+        if blockchain_name is None and "HIVE_CHAIN_ID" in props and "STEEM_CHAIN_ID" in props:
+            del props["STEEM_CHAIN_ID"]
+
         for key in props:
-            
             if key[-8:] == "CHAIN_ID" and blockchain_name is None:
                 chain_id = props[key]
                 blockchain_name = key.split("_")[0]
@@ -329,7 +333,7 @@ class GrapheneRPC(object):
             elif key[-13:] == "CHAIN_VERSION" and blockchain_name is None:
                 network_version = props[key]
             elif key[-13:] == "CHAIN_VERSION" and key.split("_")[0] == blockchain_name:
-                network_version = props[key]            
+                network_version = props[key]
             elif key[-14:] == "ADDRESS_PREFIX" and blockchain_name is None:
                 prefix = props[key]
             elif key[-14:] == "ADDRESS_PREFIX" and key.split("_")[0] == blockchain_name:
@@ -338,9 +342,19 @@ class GrapheneRPC(object):
                 value = {}
                 value["asset"] = props[key]["nai"]
                 value["precision"] = props[key]["decimals"]
-                if "IS_TEST_NET" in props and props["IS_TEST_NET"] and "nai" in props[key] and props[key]["nai"] == "@@000000013":
+                if (
+                    "IS_TEST_NET" in props
+                    and props["IS_TEST_NET"]
+                    and "nai" in props[key]
+                    and props[key]["nai"] == "@@000000013"
+                ):
                     value["symbol"] = "TBD"
-                elif "IS_TEST_NET" in props and props["IS_TEST_NET"] and "nai" in props[key] and props[key]["nai"] == "@@000000021":
+                elif (
+                    "IS_TEST_NET" in props
+                    and props["IS_TEST_NET"]
+                    and "nai" in props[key]
+                    and props[key]["nai"] == "@@000000021"
+                ):
                     value["symbol"] = "TESTS"
                 else:
                     value["symbol"] = key[:-7]
@@ -349,23 +363,42 @@ class GrapheneRPC(object):
         symbol_id = 0
         if len(symbols) == 2:
             symbol_id = 1
-        for s in sorted(symbols, key=lambda self: self['asset'], reverse=False):
+        for s in sorted(symbols, key=lambda self: self["asset"], reverse=False):
             s["id"] = symbol_id
             symbol_id += 1
             chain_assets.append(s)
-        if chain_id is not None and network_version is not None and len(chain_assets) > 0 and prefix is not None:
-            chain_config = {"prefix": prefix, "chain_id": chain_id, "min_version": network_version, "chain_assets": chain_assets}
+        if (
+            chain_id is not None
+            and network_version is not None
+            and len(chain_assets) > 0
+            and prefix is not None
+        ):
+            chain_config = {
+                "prefix": prefix,
+                "chain_id": chain_id,
+                "min_version": network_version,
+                "chain_assets": chain_assets,
+            }
 
         if chain_id is None:
             raise RPCError("Connecting to unknown network!")
         highest_version_chain = None
         for k, v in list(self.known_chains.items()):
-            if blockchain_name is not None and blockchain_name not in k and blockchain_name != "STEEMIT" and blockchain_name != "CHAIN":
-                continue 
-            if v["chain_id"] == chain_id and self.version_string_to_int(v["min_version"]) <= self.version_string_to_int(network_version):
+            if (
+                blockchain_name is not None
+                and blockchain_name not in k
+                and blockchain_name != "STEEMIT"
+                and blockchain_name != "CHAIN"
+            ):
+                continue
+            if v["chain_id"] == chain_id and self.version_string_to_int(
+                v["min_version"]
+            ) <= self.version_string_to_int(network_version):
                 if highest_version_chain is None:
                     highest_version_chain = v
-                elif self.version_string_to_int(v["min_version"]) > self.version_string_to_int(highest_version_chain["min_version"]):
+                elif self.version_string_to_int(v["min_version"]) > self.version_string_to_int(
+                    highest_version_chain["min_version"]
+                ):
                     highest_version_chain = v
         if highest_version_chain is None and chain_config is not None:
             return chain_config
@@ -384,9 +417,17 @@ class GrapheneRPC(object):
             raise RPCErrorDoRetry("Bad Gateway")
         elif re.search("Too Many Requests", reply) or re.search("429", reply):
             raise RPCErrorDoRetry("Too Many Requests")
-        elif re.search("Service Temporarily Unavailable", reply) or re.search("Service Unavailable", reply) or re.search("503", reply):
+        elif (
+            re.search("Service Temporarily Unavailable", reply)
+            or re.search("Service Unavailable", reply)
+            or re.search("503", reply)
+        ):
             raise RPCErrorDoRetry("Service Temporarily Unavailable")
-        elif re.search("Gateway Time-out", reply) or re.search("Gateway Timeout", reply) or re.search("504", reply):
+        elif (
+            re.search("Gateway Time-out", reply)
+            or re.search("Gateway Timeout", reply)
+            or re.search("504", reply)
+        ):
             raise RPCErrorDoRetry("Gateway Time-out")
         elif re.search("HTTP Version not supported", reply) or re.search("505", reply):
             raise RPCError("HTTP Version not supported")
@@ -423,18 +464,24 @@ class GrapheneRPC(object):
         while True:
             self.nodes.increase_error_cnt_call()
             try:
-                if self.current_rpc == self.rpc_methods['ws'] or \
-                   self.current_rpc == self.rpc_methods['wsappbase']:
-                    reply = self.ws_send(json.dumps(payload, ensure_ascii=False).encode('utf8'))
+                if (
+                    self.current_rpc == self.rpc_methods["ws"]
+                    or self.current_rpc == self.rpc_methods["wsappbase"]
+                ):
+                    reply = self.ws_send(json.dumps(payload, ensure_ascii=False).encode("utf8"))
                 else:
-                    response = self.request_send(json.dumps(payload, ensure_ascii=False).encode('utf8'))
+                    response = self.request_send(
+                        json.dumps(payload, ensure_ascii=False).encode("utf8")
+                    )
                     reply = response.text
                 if not bool(reply):
                     try:
                         self.nodes.sleep_and_check_retries("Empty Reply", call_retry=True)
                     except CallRetriesReached:
                         self.nodes.increase_error_cnt()
-                        self.nodes.sleep_and_check_retries("Empty Reply", sleep=False, call_retry=False)
+                        self.nodes.sleep_and_check_retries(
+                            "Empty Reply", sleep=False, call_retry=False
+                        )
                         self.rpcconnect()
                 else:
                     break
@@ -472,20 +519,20 @@ class GrapheneRPC(object):
 
         log.debug(json.dumps(reply))
 
-        if isinstance(ret, dict) and 'error' in ret:
-            if 'detail' in ret['error']:
-                raise RPCError(ret['error']['detail'])
+        if isinstance(ret, dict) and "error" in ret:
+            if "detail" in ret["error"]:
+                raise RPCError(ret["error"]["detail"])
             else:
-                raise RPCError(ret['error']['message'])
+                raise RPCError(ret["error"]["message"])
         else:
             if isinstance(ret, list):
                 ret_list = []
                 for r in ret:
-                    if isinstance(r, dict) and 'error' in r:
-                        if 'detail' in r['error']:
-                            raise RPCError(r['error']['detail'])
+                    if isinstance(r, dict) and "error" in r:
+                        if "detail" in r["error"]:
+                            raise RPCError(r["error"]["detail"])
                         else:
-                            raise RPCError(r['error']['message'])
+                            raise RPCError(r["error"]["message"])
                     elif isinstance(r, dict) and "result" in r:
                         ret_list.append(r["result"])
                     else:
@@ -496,7 +543,9 @@ class GrapheneRPC(object):
                 self.nodes.reset_error_cnt_call()
                 return ret["result"]
             elif isinstance(ret, int):
-                raise RPCError("Client returned invalid format. Expected JSON! Output: %s" % (str(ret)))
+                raise RPCError(
+                    "Client returned invalid format. Expected JSON! Output: %s" % (str(ret))
+                )
             else:
                 self.nodes.reset_error_cnt_call()
                 return ret
@@ -506,19 +555,25 @@ class GrapheneRPC(object):
     ####################################################################
     def __getattr__(self, name):
         """Map all methods to RPC calls and pass through the arguments."""
-        def method(*args, **kwargs):
 
+        def method(*args, **kwargs):
             api_name = get_api_name(self.is_appbase_ready(), *args, **kwargs)
             if self.is_appbase_ready() and self.use_condenser and api_name != "bridge":
                 api_name = "condenser_api"
-            if (api_name is None):
-                api_name = 'database_api'
+            if api_name is None:
+                api_name = "database_api"
 
             # let's be able to define the num_retries per query
             stored_num_retries_call = self.nodes.num_retries_call
             self.nodes.num_retries_call = kwargs.get("num_retries_call", stored_num_retries_call)
             add_to_queue = kwargs.get("add_to_queue", False)
-            query = get_query(self.is_appbase_ready() and not self.use_condenser or api_name == "bridge", self.get_request_id(), api_name, name, args)
+            query = get_query(
+                self.is_appbase_ready() and not self.use_condenser or api_name == "bridge",
+                self.get_request_id(),
+                api_name,
+                name,
+                args,
+            )
             if add_to_queue:
                 self.rpc_queue.append(query)
                 self.nodes.num_retries_call = stored_num_retries_call
@@ -530,4 +585,5 @@ class GrapheneRPC(object):
             r = self.rpcexec(query)
             self.nodes.num_retries_call = stored_num_retries_call
             return r
+
         return method

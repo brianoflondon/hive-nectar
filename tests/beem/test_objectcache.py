@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import time
 import unittest
-from beem import Steem, exceptions
-from beem.instance import set_shared_steem_instance
+
 from beem.blockchainobject import ObjectCache
 
 
 class Testcases(unittest.TestCase):
-
     def test_cache(self):
         cache = ObjectCache(default_expiration=1, auto_clean=False)
         self.assertEqual(str(cache), "ObjectCache(n=0, default_expiration=1)")

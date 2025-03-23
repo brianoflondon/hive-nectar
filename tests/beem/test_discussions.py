@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 import unittest
-from parameterized import parameterized
-from pprint import pprint
+
 from beem import Steem
 from beem.discussions import (
-    Query, Discussions_by_trending, Comment_discussions_by_payout,
-    Post_discussions_by_payout, Discussions_by_created, Discussions_by_active,
-    Discussions_by_cashout, Discussions_by_votes,
-    Discussions_by_children, Discussions_by_hot, Discussions_by_feed, Discussions_by_blog,
-    Discussions_by_comments, Discussions_by_promoted, Discussions
+    Discussions,
+    Discussions_by_blog,
+    Discussions_by_comments,
+    Discussions_by_created,
+    Discussions_by_feed,
+    Discussions_by_promoted,
+    Discussions_by_trending,
+    Query,
 )
-from datetime import datetime
 from beem.instance import set_shared_steem_instance
-from .nodes import get_hive_nodes, get_steem_nodes
+
+from .nodes import get_hive_nodes
 
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 
@@ -21,13 +23,13 @@ class Testcases(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         node_list = get_hive_nodes()
-      
+
         cls.bts = Steem(
             node=node_list,
             use_condenser=False,
             nobroadcast=True,
             keys={"active": wif},
-            num_retries=10
+            num_retries=10,
         )
         # from getpass import getpass
         # self.bts.wallet.unlock(getpass())
@@ -42,7 +44,7 @@ class Testcases(unittest.TestCase):
         d = Discussions_by_trending(query, steem_instance=bts)
         self.assertEqual(len(d), 10)
 
-    #def test_comment_payout(self):
+    # def test_comment_payout(self):
     #    bts = self.bts
     #    query = Query()
     #    query["limit"] = 10
@@ -50,7 +52,7 @@ class Testcases(unittest.TestCase):
     #    d = Comment_discussions_by_payout(query, steem_instance=bts)
     #    self.assertEqual(len(d), 10)
 
-    #def test_post_payout(self):
+    # def test_post_payout(self):
     #    bts = self.bts
 
     #    query = Query()
@@ -67,7 +69,7 @@ class Testcases(unittest.TestCase):
         d = Discussions_by_created(query, steem_instance=bts)
         self.assertEqual(len(d), 2)
 
-    #def test_active(self):
+    # def test_active(self):
     #    #bts = self.bts
     #    query = Query()
     #    query["limit"] = 10
@@ -75,13 +77,13 @@ class Testcases(unittest.TestCase):
     #    d = Discussions_by_active(query, steem_instance=bts)
     #    self.assertEqual(len(d), 10)
 
-    #def test_cashout(self):
+    # def test_cashout(self):
     #    bts = self.bts
     #    query = Query(limit=10)
     #    Discussions_by_cashout(query, steem_instance=bts)
     #    # self.assertEqual(len(d), 10)
 
-    #def test_votes(self):
+    # def test_votes(self):
     #    bts = self.bts
     #    query = Query()
     #    query["limit"] = 10
@@ -89,7 +91,7 @@ class Testcases(unittest.TestCase):
     #    d = Discussions_by_votes(query, steem_instance=bts)
     #    self.assertEqual(len(d), 10)
 
-    #def test_children(self):
+    # def test_children(self):
     #    bts = self.bts
     #    query = Query()
     #    query["limit"] = 10

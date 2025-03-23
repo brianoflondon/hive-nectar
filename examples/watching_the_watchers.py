@@ -1,14 +1,14 @@
 from __future__ import print_function
-import sys
-from datetime import datetime, timedelta
-import time
-import io
+
+import logging
+from datetime import timedelta
+
+from beem import exceptions
+from beem.account import Account
 from beem.blockchain import Blockchain
 from beem.comment import Comment
-from beem.account import Account
-from beem.utils import parse_time, construct_authorperm
-from beem import exceptions
-import logging
+from beem.utils import construct_authorperm
+
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -90,9 +90,11 @@ class WatchingTheWatchersBot:
                 for index in range(0, len(accounts)):
                     a = accounts[index]
                     account = acclist[index]
-                    vp = (a["vesting_shares"].amount +
-                          a["received_vesting_shares"].amount -
-                          a["delegated_vesting_shares"].amount) / 1000000.0
+                    vp = (
+                        a["vesting_shares"].amount
+                        + a["received_vesting_shares"].amount
+                        - a["delegated_vesting_shares"].amount
+                    ) / 1000000.0
                     fish = "redfish"
                     if vp >= 1.0:
                         fish = "minnow"
@@ -117,10 +119,12 @@ class WatchingTheWatchersBot:
                         accl2.append(proxy)
                     if len(accl2) > 0:
                         lookup_accounts(accl2)
+
             accounts = []
             for a in acclist:
                 accounts.append(Account(a))
             user_info(accounts)
+
         if vote_event["weight"] < 0:
             authorperm = construct_authorperm(vote_event["author"], vote_event["permlink"])
             # print(authorperm)
@@ -129,10 +133,10 @@ class WatchingTheWatchersBot:
             except exceptions.ContentDoesNotExistsException:
                 print("Could not find Comment: %s" % (authorperm))
             al = list()
-            if not vote_event["voter"] in self.looked_up:
+            if vote_event["voter"] not in self.looked_up:
                 al.append(vote_event["voter"])
                 self.looked_up.add(vote_event["voter"])
-            if not vote_event["author"] in self.looked_up:
+            if vote_event["author"] not in self.looked_up:
                 al.append(vote_event["author"])
                 self.looked_up.add(vote_event["author"])
             if len(al) > 0:
@@ -149,6 +153,8 @@ if __name__ == "__main__":
     stop = cur_block.identifier
     startdate = cur_block.time() - timedelta(days=1)
     start = blockchain.get_estimated_block_num(startdate, accurate=True)
-    for vote in blockchain.stream(opNames=["vote"], start=start, stop=stop, threading=threading, thread_num=thread_num):
+    for vote in blockchain.stream(
+        opNames=["vote"], start=start, stop=stop, threading=threading, thread_num=thread_num
+    ):
         tb.vote(vote)
     wtw.report()

@@ -1,17 +1,19 @@
-from flask import Flask, request
-from beem.steemconnect import SteemConnect
 import getpass
+
+from flask import Flask, request
+
+from beem.steemconnect import SteemConnect
 
 app = Flask(__name__)
 
 
 c = SteemConnect(client_id="beem.app", scope="login,vote,custom_json", get_refresh_token=False)
 # replace test with our wallet password
-wallet_password = getpass.getpass('Wallet-Password:')
+wallet_password = getpass.getpass("Wallet-Password:")
 c.steem.wallet.unlock(wallet_password)
 
 
-@app.route('/')
+@app.route("/")
 def index():
     login_url = c.get_login_url(
         "http://localhost:5000/welcome",
@@ -19,7 +21,7 @@ def index():
     return "<a href='%s'>Login with SteemConnect</a>" % login_url
 
 
-@app.route('/welcome')
+@app.route("/welcome")
 def welcome():
     access_token = request.args.get("access_token", None)
     name = request.args.get("username", None)

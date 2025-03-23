@@ -1,68 +1,88 @@
 # -*- coding: utf-8 -*-
-import unittest
-from datetime import datetime, date, timedelta
 import os
+import unittest
+from datetime import datetime
+
 from ruamel.yaml import YAML
+
 from beem.utils import (
-    formatTimedelta,
+    addTzInfo,
     assets_from_string,
-    resolve_authorperm,
-    resolve_authorpermvoter,
     construct_authorperm,
     construct_authorpermvoter,
-    sanitize_permlink,
-    derive_permlink,
-    resolve_root_identifier,
-    remove_from_dict,
-    formatToTimeStamp,
-    formatTimeString,
-    addTzInfo,
-    derive_beneficiaries,
-    derive_tags,
-    seperate_yaml_dict_from_body,
-    make_patch,
     create_new_password,
+    create_yaml_header,
+    derive_beneficiaries,
+    derive_permlink,
+    derive_tags,
+    formatTimedelta,
+    formatTimeString,
+    formatToTimeStamp,
     generate_password,
     import_coldcard_wif,
     import_pubkeys,
-    create_yaml_header
+    make_patch,
+    remove_from_dict,
+    resolve_authorperm,
+    resolve_authorpermvoter,
+    resolve_root_identifier,
+    sanitize_permlink,
+    seperate_yaml_dict_from_body,
 )
 
 
 class Testcases(unittest.TestCase):
     def test_constructAuthorperm(self):
         self.assertEqual(construct_authorperm("A", "B"), "@A/B")
-        self.assertEqual(construct_authorperm({'author': "A", 'permlink': "B"}), "@A/B")
+        self.assertEqual(construct_authorperm({"author": "A", "permlink": "B"}), "@A/B")
 
     def test_resolve_root_identifier(self):
         self.assertEqual(resolve_root_identifier("/a/@b/c"), ("@b/c", "a"))
 
     def test_constructAuthorpermvoter(self):
         self.assertEqual(construct_authorpermvoter("A", "B", "C"), "@A/B|C")
-        self.assertEqual(construct_authorpermvoter({'author': "A", 'permlink': "B", 'voter': 'C'}), "@A/B|C")
-        self.assertEqual(construct_authorpermvoter({'authorperm': "A/B", 'voter': 'C'}), "@A/B|C")
+        self.assertEqual(
+            construct_authorpermvoter({"author": "A", "permlink": "B", "voter": "C"}), "@A/B|C"
+        )
+        self.assertEqual(construct_authorpermvoter({"authorperm": "A/B", "voter": "C"}), "@A/B|C")
 
     def test_assets_from_string(self):
-        self.assertEqual(assets_from_string('USD:BTS'), ['USD', 'BTS'])
-        self.assertEqual(assets_from_string('BTSBOTS.S1:BTS'), ['BTSBOTS.S1', 'BTS'])
+        self.assertEqual(assets_from_string("USD:BTS"), ["USD", "BTS"])
+        self.assertEqual(assets_from_string("BTSBOTS.S1:BTS"), ["BTSBOTS.S1", "BTS"])
 
     def test_authorperm_resolve(self):
-        self.assertEqual(resolve_authorperm('https://d.tube/#!/v/pottlund/m5cqkd1a'),
-                         ('pottlund', 'm5cqkd1a'))
-        self.assertEqual(resolve_authorperm("https://steemit.com/witness-category/@gtg/24lfrm-gtg-witness-log"),
-                         ('gtg', '24lfrm-gtg-witness-log'))
-        self.assertEqual(resolve_authorperm("@gtg/24lfrm-gtg-witness-log"),
-                         ('gtg', '24lfrm-gtg-witness-log'))
-        self.assertEqual(resolve_authorperm("https://busy.org/@gtg/24lfrm-gtg-witness-log"),
-                         ('gtg', '24lfrm-gtg-witness-log'))
-        self.assertEqual(resolve_authorperm('https://dlive.io/livestream/atnazo/61dd94c1-8ff3-11e8-976f-0242ac110003'),
-                         ('atnazo', '61dd94c1-8ff3-11e8-976f-0242ac110003'))
+        self.assertEqual(
+            resolve_authorperm("https://d.tube/#!/v/pottlund/m5cqkd1a"), ("pottlund", "m5cqkd1a")
+        )
+        self.assertEqual(
+            resolve_authorperm("https://steemit.com/witness-category/@gtg/24lfrm-gtg-witness-log"),
+            ("gtg", "24lfrm-gtg-witness-log"),
+        )
+        self.assertEqual(
+            resolve_authorperm("@gtg/24lfrm-gtg-witness-log"), ("gtg", "24lfrm-gtg-witness-log")
+        )
+        self.assertEqual(
+            resolve_authorperm("https://busy.org/@gtg/24lfrm-gtg-witness-log"),
+            ("gtg", "24lfrm-gtg-witness-log"),
+        )
+        self.assertEqual(
+            resolve_authorperm(
+                "https://dlive.io/livestream/atnazo/61dd94c1-8ff3-11e8-976f-0242ac110003"
+            ),
+            ("atnazo", "61dd94c1-8ff3-11e8-976f-0242ac110003"),
+        )
 
     def test_authorpermvoter_resolve(self):
-        self.assertEqual(resolve_authorpermvoter('theaussiegame/cryptokittie-giveaway-number-2|test'),
-                         ('theaussiegame', 'cryptokittie-giveaway-number-2', 'test'))
-        self.assertEqual(resolve_authorpermvoter('holger80/virtuelle-cloud-mining-ponzi-schemen-auch-bekannt-als-hypt|holger80'),
-                         ('holger80', 'virtuelle-cloud-mining-ponzi-schemen-auch-bekannt-als-hypt', 'holger80'))
+        self.assertEqual(
+            resolve_authorpermvoter("theaussiegame/cryptokittie-giveaway-number-2|test"),
+            ("theaussiegame", "cryptokittie-giveaway-number-2", "test"),
+        )
+        self.assertEqual(
+            resolve_authorpermvoter(
+                "holger80/virtuelle-cloud-mining-ponzi-schemen-auch-bekannt-als-hypt|holger80"
+            ),
+            ("holger80", "virtuelle-cloud-mining-ponzi-schemen-auch-bekannt-als-hypt", "holger80"),
+        )
 
     def test_sanitizePermlink(self):
         self.assertEqual(sanitize_permlink("aAf_0.12"), "aaf-0-12")
@@ -77,14 +97,18 @@ class Testcases(unittest.TestCase):
         for char in title:
             self.assertFalse(char in permlink)
         self.assertEqual(len(derive_permlink("", parent_permlink=256 * "a")), 256)
-        self.assertEqual(len(derive_permlink("", parent_permlink=256 * "a", parent_author="test")), 256)
+        self.assertEqual(
+            len(derive_permlink("", parent_permlink=256 * "a", parent_author="test")), 256
+        )
         self.assertEqual(len(derive_permlink("a" * 1024)), 256)
 
     def test_patch(self):
-        self.assertEqual(make_patch("aa", "ab"), '@@ -1,2 +1,2 @@\n a\n-a\n+b\n')
-        self.assertEqual(make_patch("aa\n", "ab\n"), '@@ -1,3 +1,3 @@\n a\n-a\n+b\n %0A\n')
-        self.assertEqual(make_patch("Hello!\n Das ist ein Test!\nEnd.\n", "Hello!\n This is a Test\nEnd.\n"),
-                          '@@ -5,25 +5,22 @@\n o!%0A \n-Da\n+Thi\n s is\n-t ein\n+ a\n  Test\n-!\n %0AEnd\n')
+        self.assertEqual(make_patch("aa", "ab"), "@@ -1,2 +1,2 @@\n a\n-a\n+b\n")
+        self.assertEqual(make_patch("aa\n", "ab\n"), "@@ -1,3 +1,3 @@\n a\n-a\n+b\n %0A\n")
+        self.assertEqual(
+            make_patch("Hello!\n Das ist ein Test!\nEnd.\n", "Hello!\n This is a Test\nEnd.\n"),
+            "@@ -5,25 +5,22 @@\n o!%0A \n-Da\n+Thi\n s is\n-t ein\n+ a\n  Test\n-!\n %0AEnd\n",
+        )
 
         s1 = "test1\ntest2\ntest3\ntest4\ntest5\ntest6\n"
         s2 = "test1\ntest2\ntest3\ntest4\ntest5\ntest6\n"
@@ -101,25 +125,27 @@ class Testcases(unittest.TestCase):
 
         s2 = "test2\ntest3\ntest4\ntest5\ntest6\n"
         patch = make_patch(s1, s2)
-        self.assertEqual(patch,  '@@ -1,10 +1,4 @@\n-test1%0A\n test\n')
+        self.assertEqual(patch, "@@ -1,10 +1,4 @@\n-test1%0A\n test\n")
 
         s2 = ""
         patch = make_patch(s1, s2)
-        self.assertEqual(patch, '@@ -1,36 +0,0 @@\n-test1%0Atest2%0Atest3%0Atest4%0Atest5%0Atest6%0A\n')
+        self.assertEqual(
+            patch, "@@ -1,36 +0,0 @@\n-test1%0Atest2%0Atest3%0Atest4%0Atest5%0Atest6%0A\n"
+        )
 
     def test_formatTimedelta(self):
         now = datetime.now()
-        self.assertEqual(formatTimedelta(now - now), '0:00:00')
+        self.assertEqual(formatTimedelta(now - now), "0:00:00")
 
     def test_remove_from_dict(self):
-        a = {'a': 1, 'b': 2}
-        b = {'b': 2}
-        self.assertEqual(remove_from_dict(a, ['b'], keep_keys=True), {'b': 2})
-        self.assertEqual(remove_from_dict(a, ['a'], keep_keys=False), {'b': 2})
-        self.assertEqual(remove_from_dict(b, ['b'], keep_keys=True), {'b': 2})
-        self.assertEqual(remove_from_dict(b, ['a'], keep_keys=False), {'b': 2})
+        a = {"a": 1, "b": 2}
+        b = {"b": 2}
+        self.assertEqual(remove_from_dict(a, ["b"], keep_keys=True), {"b": 2})
+        self.assertEqual(remove_from_dict(a, ["a"], keep_keys=False), {"b": 2})
+        self.assertEqual(remove_from_dict(b, ["b"], keep_keys=True), {"b": 2})
+        self.assertEqual(remove_from_dict(b, ["a"], keep_keys=False), {"b": 2})
         self.assertEqual(remove_from_dict(b, [], keep_keys=True), {})
-        self.assertEqual(remove_from_dict(a, ['a', 'b'], keep_keys=False), {})
+        self.assertEqual(remove_from_dict(a, ["a", "b"], keep_keys=False), {})
 
     def test_formatDateTimetoTimeStamp(self):
         t = "1970-01-01T00:00:00"
@@ -148,19 +174,29 @@ class Testcases(unittest.TestCase):
         self.assertEqual(b, [{"account": "holger80", "weight": 10000}])
         t = "holger80:30,beembot:40"
         b = derive_beneficiaries(t)
-        self.assertEqual(b, [{"account": "beembot", "weight": 4000}, {"account": "holger80", "weight": 3000}])
+        self.assertEqual(
+            b, [{"account": "beembot", "weight": 4000}, {"account": "holger80", "weight": 3000}]
+        )
         t = "holger80:30.00%,beembot:40.00%"
         b = derive_beneficiaries(t)
-        self.assertEqual(b, [{"account": "beembot", "weight": 4000}, {"account": "holger80", "weight": 3000}]) 
+        self.assertEqual(
+            b, [{"account": "beembot", "weight": 4000}, {"account": "holger80", "weight": 3000}]
+        )
         t = "holger80:30%, beembot:40%"
         b = derive_beneficiaries(t)
-        self.assertEqual(b, [{"account": "beembot", "weight": 4000}, {"account": "holger80", "weight": 3000}])        
+        self.assertEqual(
+            b, [{"account": "beembot", "weight": 4000}, {"account": "holger80", "weight": 3000}]
+        )
         t = "holger80:30,beembot"
         b = derive_beneficiaries(t)
-        self.assertEqual(b, [{"account": "beembot", "weight": 7000}, {"account": "holger80", "weight": 3000}])
+        self.assertEqual(
+            b, [{"account": "beembot", "weight": 7000}, {"account": "holger80", "weight": 3000}]
+        )
         t = ["holger80:30", "beembot"]
         b = derive_beneficiaries(t)
-        self.assertEqual(b, [{"account": "beembot", "weight": 7000}, {"account": "holger80", "weight": 3000}])
+        self.assertEqual(
+            b, [{"account": "beembot", "weight": 7000}, {"account": "holger80", "weight": 3000}]
+        )
 
     def test_derive_tags(self):
         t = "test1,test2"
@@ -190,7 +226,7 @@ class Testcases(unittest.TestCase):
         parameter = yaml_safe.load(yaml_content)
         self.assertEqual(parameter["title"], "test")
         self.assertEqual(parameter["author"], "holger80")
-        self.assertEqual(parameter["max_accepted_payout"], "100")  
+        self.assertEqual(parameter["max_accepted_payout"], "100")
 
     def test_create_new_password(self):
         new_password = create_new_password()
@@ -211,14 +247,14 @@ class Testcases(unittest.TestCase):
         self.assertAlmostEqual(new_password, "P5K2YUVmWfxbmvsNxCsfvArXdGXm7d5DC9pn4yD75k2UaSYgkXTh")
 
     def test_import_coldcard_wif(self):
-        data_dir = os.path.join(os.path.dirname(__file__), 'data')
+        data_dir = os.path.join(os.path.dirname(__file__), "data")
         file = os.path.join(data_dir, "drv-wif-idx100.txt")
         wif, path = import_coldcard_wif(file)
         self.assertEqual(wif, "L5K7x3Zs6jgY5jMovRzdgucWHmvuidyPj1f8ioCAzGjHMhjmL5EL")
         self.assertEqual(path, "m/83696968'/2'/100'")
 
     def test_import_pubkeys(self):
-        data_dir = os.path.join(os.path.dirname(__file__), 'data')
+        data_dir = os.path.join(os.path.dirname(__file__), "data")
         file = os.path.join(data_dir, "pubkey.json")
         owner, active, posting, memo = import_pubkeys(file)
         self.assertEqual(owner, "STM51mq6zWEz3NGRYL8uMpJAe9c1qzf4ufh2ha4QqWzizqVrPL9Nq")

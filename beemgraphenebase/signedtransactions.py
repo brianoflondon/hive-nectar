@@ -1,36 +1,40 @@
 # -*- coding: utf-8 -*-
-from beemgraphenebase.py23 import py23_bytes, bytes_types
-import ecdsa
 import hashlib
+import logging
 from binascii import hexlify, unhexlify
 from collections import OrderedDict
 
+import ecdsa
+
+from beemgraphenebase.py23 import py23_bytes
+
 from .account import PublicKey
+from .chains import known_chains
+from .ecdsasig import sign_message, verify_message
+from .objects import GrapheneObject, isArgsThisClass
+from .operations import Operation
 from .types import (
     Array,
+    PointInTime,
     Set,
     Signature,
-    PointInTime,
     Uint16,
     Uint32,
 )
-from .objects import GrapheneObject, isArgsThisClass
-from .operations import Operation
-from .chains import known_chains
-from .ecdsasig import sign_message, verify_message
-import logging
+
 log = logging.getLogger(__name__)
 
 
 class Signed_Transaction(GrapheneObject):
-    """ Create a signed transaction and offer method to create the
-        signature
+    """Create a signed transaction and offer method to create the
+    signature
 
-        :param num ref_block_num: reference block number
-        :param num ref_block_prefix: 
-        :param str expiration: expiration date
-        :param array operations:  array of operations
+    :param num ref_block_num: reference block number
+    :param num ref_block_prefix:
+    :param str expiration: expiration date
+    :param array operations:  array of operations
     """
+
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
             self.data = args[0].data
@@ -45,28 +49,35 @@ class Signed_Transaction(GrapheneObject):
             if "signatures" not in kwargs:
                 kwargs["signatures"] = Array([])
             else:
-                kwargs["signatures"] = Array([Signature(unhexlify(a)) for a in kwargs["signatures"]])
+                kwargs["signatures"] = Array(
+                    [Signature(unhexlify(a)) for a in kwargs["signatures"]]
+                )
 
             if "operations" in kwargs:
                 opklass = self.getOperationKlass()
                 if all([not isinstance(a, opklass) for a in kwargs["operations"]]):
-                    kwargs['operations'] = Array([opklass(a, prefix=prefix) for a in kwargs["operations"]])
+                    kwargs["operations"] = Array(
+                        [opklass(a, prefix=prefix) for a in kwargs["operations"]]
+                    )
                 else:
-                    kwargs['operations'] = Array(kwargs["operations"])
+                    kwargs["operations"] = Array(kwargs["operations"])
 
-            super(Signed_Transaction, self).__init__(OrderedDict([
-                ('ref_block_num', Uint16(kwargs['ref_block_num'])),
-                ('ref_block_prefix', Uint32(kwargs['ref_block_prefix'])),
-                ('expiration', PointInTime(kwargs['expiration'])),
-                ('operations', kwargs['operations']),
-                ('extensions', kwargs['extensions']),
-                ('signatures', kwargs['signatures']),
-            ]))
+            super(Signed_Transaction, self).__init__(
+                OrderedDict(
+                    [
+                        ("ref_block_num", Uint16(kwargs["ref_block_num"])),
+                        ("ref_block_prefix", Uint32(kwargs["ref_block_prefix"])),
+                        ("expiration", PointInTime(kwargs["expiration"])),
+                        ("operations", kwargs["operations"]),
+                        ("extensions", kwargs["extensions"]),
+                        ("signatures", kwargs["signatures"]),
+                    ]
+                )
+            )
 
     @property
     def id(self):
-        """ The transaction id of this transaction
-        """
+        """The transaction id of this transaction"""
         # Store signatures temporarily since they are not part of
         # transaction id
         sigs = self.data["signatures"]
@@ -85,16 +96,15 @@ class Signed_Transaction(GrapheneObject):
         return Operation
 
     def derSigToHexSig(self, s):
-        """ Format DER to HEX signature
-        """
+        """Format DER to HEX signature"""
         s, junk = ecdsa.der.remove_sequence(unhexlify(s))
         if junk:
-            log.debug('JUNK: %s', hexlify(junk).decode('ascii'))
-        if not (junk == b''):
+            log.debug("JUNK: %s", hexlify(junk).decode("ascii"))
+        if not (junk == b""):
             raise AssertionError()
         x, s = ecdsa.der.remove_integer(s)
         y, s = ecdsa.der.remove_integer(s)
-        return '%064x%064x' % (x, y)
+        return "%064x%064x" % (x, y)
 
     def getKnownChains(self):
         return known_chains
@@ -141,26 +151,19 @@ class Signed_Transaction(GrapheneObject):
 
         for signature in signatures:
             if recover_parameter:
-                p = verify_message(
-                    self.message,
-                    py23_bytes(signature)
-                )
+                p = verify_message(self.message, py23_bytes(signature))
             else:
                 p = None
             if p is None:
                 for i in range(4):
                     try:
-                        p = verify_message(
-                            self.message,
-                            py23_bytes(signature),
-                            recover_parameter=i
-                        )
-                        phex = hexlify(p).decode('ascii')
+                        p = verify_message(self.message, py23_bytes(signature), recover_parameter=i)
+                        phex = hexlify(p).decode("ascii")
                         pubKeysFound.append(phex)
                     except Exception:
                         p = None
             else:
-                phex = hexlify(p).decode('ascii')
+                phex = hexlify(p).decode("ascii")
                 pubKeysFound.append(phex)
 
         for pubkey in pubkeys:
@@ -175,10 +178,10 @@ class Signed_Transaction(GrapheneObject):
         return pubKeysFound
 
     def sign(self, wifkeys, chain=None):
-        """ Sign the transaction with the provided private keys.
+        """Sign the transaction with the provided private keys.
 
-            :param array wifkeys: Array of wif keys
-            :param str chain: identifier for the chain
+        :param array wifkeys: Array of wif keys
+        :param str chain: identifier for the chain
 
         """
         if not chain:

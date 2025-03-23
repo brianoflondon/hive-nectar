@@ -1,42 +1,38 @@
 # -*- coding: utf-8 -*-
 import unittest
+
 import mock
+
 from beem import Hive
-from beem.message import Message
 from beem.account import Account
 from beem.instance import set_shared_steem_instance
-from .nodes import get_hive_nodes, get_steem_nodes
+from beem.message import Message
+
+from .nodes import get_hive_nodes
 
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 core_unit = "STM"
 
 
 class Testcases(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
-        cls.bts = Hive(
-            node=get_hive_nodes(),
-            nobroadcast=True,
-            keys=[wif],
-            num_retries=10
-        )
+        cls.bts = Hive(node=get_hive_nodes(), nobroadcast=True, keys=[wif], num_retries=10)
         set_shared_steem_instance(cls.bts)
 
     def test_sign_message(self):
         def new_refresh(self):
             dict.__init__(
-                self, {
-                "identifier": "test",
-                "name": "test",
-                "id_item": "name",
-                "memo_key": "STM6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
-                })
+                self,
+                {
+                    "identifier": "test",
+                    "name": "test",
+                    "id_item": "name",
+                    "memo_key": "STM6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
+                },
+            )
 
-        with mock.patch(
-            "beem.account.Account.refresh",
-            new=new_refresh
-        ):
+        with mock.patch("beem.account.Account.refresh", new=new_refresh):
             account = Account("test")
             account["memo_key"] = "STM6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
             p = Message("message foobar").sign(account=account)
@@ -45,17 +41,16 @@ class Testcases(unittest.TestCase):
     def test_verify_message(self):
         def new_refresh(self):
             dict.__init__(
-                self, {
-                "identifier": "test",
-                "name": "test",
-                "id_item": "name",
-                "memo_key": "STM6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
-                })
+                self,
+                {
+                    "identifier": "test",
+                    "name": "test",
+                    "id_item": "name",
+                    "memo_key": "STM6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
+                },
+            )
 
-        with mock.patch(
-            "beem.account.Account.refresh",
-            new=new_refresh
-        ):
+        with mock.patch("beem.account.Account.refresh", new=new_refresh):
             Message(
                 "-----BEGIN HIVE SIGNED MESSAGE-----\n"
                 "message foobar\n"

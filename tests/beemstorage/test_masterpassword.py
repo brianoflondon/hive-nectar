@@ -1,12 +1,6 @@
-from builtins import chr
-from builtins import range
-from builtins import str
-import unittest
-import hashlib
-from binascii import hexlify, unhexlify
 import os
-import json
-from pprint import pprint
+import unittest
+
 from beemstorage.base import InRamConfigurationStore, InRamEncryptedKeyStore
 from beemstorage.exceptions import WrongMasterPasswordException
 
@@ -20,7 +14,7 @@ class Testcases(unittest.TestCase):
         master = keys._new_masterpassword(password)
         self.assertEqual(
             len(master),
-            len("66eaab244153031e8172e6ffed321" "7288515ddb63646bbefa981a654bdf25b9f"),
+            len("66eaab244153031e8172e6ffed3217288515ddb63646bbefa981a654bdf25b9f"),
         )
         with self.assertRaises(Exception):
             keys._new_masterpassword(master)

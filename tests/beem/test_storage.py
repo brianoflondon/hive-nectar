@@ -1,22 +1,13 @@
 # -*- coding: utf-8 -*-
-import string
 import unittest
-from parameterized import parameterized
-import random
-import json
-from pprint import pprint
+
 from beem import Steem
-from beem.amount import Amount
-from beem.memo import Memo
-from beem.version import version as beem_version
-from beem.wallet import Wallet
-from beem.witness import Witness
-from beem.account import Account
-from beemgraphenebase.account import PrivateKey
 from beem.instance import set_shared_steem_instance, shared_steem_instance
-from .nodes import get_hive_nodes, get_steem_nodes
+from beem.wallet import Wallet
+
+from .nodes import get_steem_nodes
+
 # Py3 compatibility
-import sys
 core_unit = "STM"
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 
@@ -32,7 +23,7 @@ class Testcases(unittest.TestCase):
             nobroadcast=True,
             # We want to bundle many operations into a single transaction
             bundle=True,
-            num_retries=10
+            num_retries=10,
             # Overwrite wallet to use this list of wifs only
         )
 

@@ -1,23 +1,15 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-from builtins import bytes
-from builtins import range
-from builtins import super
-import string
-import random
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import unittest
-import base64
-from pprint import pprint
+from builtins import super
+
 from beem.asciichart import AsciiChart
 
 
 class Testcases(unittest.TestCase):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.curve = [1.2, 4.3, 2.0, -1.3, 6.4, 0.]
+        self.curve = [1.2, 4.3, 2.0, -1.3, 6.4, 0.0]
 
     def test_plot(self):
         ac = AsciiChart(height=3, width=3)

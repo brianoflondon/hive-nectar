@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-from beemgraphenebase.py23 import py23_bytes, bytes_types
-from beemgraphenebase.base58 import base58encode, base58decode
-from beemgraphenebase.types import varintdecode
-import sys
 import hashlib
 from binascii import hexlify, unhexlify
+
+from beemgraphenebase.base58 import base58decode, base58encode
+from beemgraphenebase.py23 import py23_bytes
+from beemgraphenebase.types import varintdecode
+
 try:
     from Cryptodome.Cipher import AES
 except ImportError:
@@ -12,20 +13,23 @@ except ImportError:
         from Crypto.Cipher import AES
     except ImportError:
         raise ImportError("Missing dependency: pyCryptodome")
-from beemgraphenebase.account import PrivateKey, PublicKey
-from .objects import Memo
 import struct
+
+from beemgraphenebase.account import PublicKey
+
+from .objects import Memo
+
 default_prefix = "STM"
 
 
 def get_shared_secret(priv, pub):
-    """ Derive the share secret between ``priv`` and ``pub``
-        :param `Base58` priv: Private Key
-        :param `Base58` pub: Public Key
-        :return: Shared secret
-        :rtype: hex
-        The shared secret is generated such that::
-            Pub(Alice) * Priv(Bob) = Pub(Bob) * Priv(Alice)
+    """Derive the share secret between ``priv`` and ``pub``
+    :param `Base58` priv: Private Key
+    :param `Base58` pub: Public Key
+    :return: Shared secret
+    :rtype: hex
+    The shared secret is generated such that::
+        Pub(Alice) * Priv(Bob) = Pub(Bob) * Priv(Alice)
     """
     pub_point = pub.point()
     priv_point = int(repr(priv), 16)
@@ -37,11 +41,11 @@ def get_shared_secret(priv, pub):
 
 
 def init_aes(shared_secret, nonce):
-    """ Initialize AES instance
-        :param hex shared_secret: Shared Secret to use as encryption key
-        :param int nonce: Random nonce
-        :return: AES instance
-        :rtype: AES
+    """Initialize AES instance
+    :param hex shared_secret: Shared Secret to use as encryption key
+    :param int nonce: Random nonce
+    :return: AES instance
+    :rtype: AES
     """
     " Shared Secret "
     ss = hashlib.sha512(unhexlify(shared_secret)).digest()
@@ -55,17 +59,17 @@ def init_aes(shared_secret, nonce):
 
 
 def init_aes_bts(shared_secret, nonce):
-    """ Initialize AES instance
-        :param hex shared_secret: Shared Secret to use as encryption key
-        :param int nonce: Random nonce
-        :return: AES instance
-        :rtype: AES
+    """Initialize AES instance
+    :param hex shared_secret: Shared Secret to use as encryption key
+    :param int nonce: Random nonce
+    :return: AES instance
+    :rtype: AES
     """
     " Shared Secret "
     ss = hashlib.sha512(unhexlify(shared_secret)).digest()
     " Seed "
     seed = bytes(str(nonce), "ascii") + hexlify(ss)
-    seed_digest = hexlify(hashlib.sha512(seed).digest()).decode("ascii")  
+    seed_digest = hexlify(hashlib.sha512(seed).digest()).decode("ascii")
     " AES "
     key = unhexlify(seed_digest[0:64])
     iv = unhexlify(seed_digest[64:96])
@@ -73,9 +77,9 @@ def init_aes_bts(shared_secret, nonce):
 
 
 def init_aes(shared_secret, nonce):
-    """ Initialize AES instance
-        :param hex shared_secret: Shared Secret to use as encryption key
-        :param int nonce: Random nonce
+    """Initialize AES instance
+    :param hex shared_secret: Shared Secret to use as encryption key
+    :param int nonce: Random nonce
     """
     shared_secret = hashlib.sha512(unhexlify(shared_secret)).hexdigest()
     # Seed
@@ -104,14 +108,14 @@ def _unpad(s, BS):
 
 
 def encode_memo_bts(priv, pub, nonce, message):
-    """ Encode a message with a shared secret between Alice and Bob
+    """Encode a message with a shared secret between Alice and Bob
 
-        :param PrivateKey priv: Private Key (of Alice)
-        :param PublicKey pub: Public Key (of Bob)
-        :param int nonce: Random nonce
-        :param str message: Memo message
-        :return: Encrypted message
-        :rtype: hex
+    :param PrivateKey priv: Private Key (of Alice)
+    :param PublicKey pub: Public Key (of Bob)
+    :param int nonce: Random nonce
+    :param str message: Memo message
+    :return: Encrypted message
+    :rtype: hex
 
     """
     shared_secret = get_shared_secret(priv, pub)
@@ -127,16 +131,16 @@ def encode_memo_bts(priv, pub, nonce, message):
 
 
 def decode_memo_bts(priv, pub, nonce, message):
-    """ Decode a message with a shared secret between Alice and Bob
+    """Decode a message with a shared secret between Alice and Bob
 
-        :param PrivateKey priv: Private Key (of Bob)
-        :param PublicKey pub: Public Key (of Alice)
-        :param int nonce: Nonce used for Encryption
-        :param bytes message: Encrypted Memo message
-        :return: Decrypted message
-        :rtype: str
-        :raise ValueError: if message cannot be decoded as valid UTF-8
-               string
+    :param PrivateKey priv: Private Key (of Bob)
+    :param PublicKey pub: Public Key (of Alice)
+    :param int nonce: Nonce used for Encryption
+    :param bytes message: Encrypted Memo message
+    :return: Decrypted message
+    :rtype: str
+    :raise ValueError: if message cannot be decoded as valid UTF-8
+           string
 
     """
     shared_secret = get_shared_secret(priv, pub)
@@ -156,14 +160,14 @@ def decode_memo_bts(priv, pub, nonce, message):
 
 
 def encode_memo(priv, pub, nonce, message, **kwargs):
-    """ Encode a message with a shared secret between Alice and Bob
+    """Encode a message with a shared secret between Alice and Bob
 
-        :param PrivateKey priv: Private Key (of Alice)
-        :param PublicKey pub: Public Key (of Bob)
-        :param int nonce: Random nonce
-        :param str message: Memo message
-        :return: Encrypted message
-        :rtype: hex
+    :param PrivateKey priv: Private Key (of Alice)
+    :param PublicKey pub: Public Key (of Bob)
+    :param int nonce: Random nonce
+    :param str message: Memo message
+    :return: Encrypted message
+    :rtype: hex
     """
     shared_secret = get_shared_secret(priv, pub)
     aes, check = init_aes(shared_secret, nonce)
@@ -179,14 +183,14 @@ def encode_memo(priv, pub, nonce, message, **kwargs):
         "nonce": nonce,
         "check": check,
         "encrypted": cipher,
-        "prefix": prefix
+        "prefix": prefix,
     }
     tx = Memo(**s)
     return "#" + base58encode(hexlify(py23_bytes(tx)).decode("ascii"))
 
 
 def extract_memo_data(message):
-    """ Returns the stored pubkey keys, nonce, checksum and encrypted message of a memo"""
+    """Returns the stored pubkey keys, nonce, checksum and encrypted message of a memo"""
     raw = base58decode(message[1:])
     from_key = PublicKey(raw[:66])
     raw = raw[66:]
@@ -201,14 +205,14 @@ def extract_memo_data(message):
 
 
 def decode_memo(priv, message):
-    """ Decode a message with a shared secret between Alice and Bob
+    """Decode a message with a shared secret between Alice and Bob
 
-        :param PrivateKey priv: Private Key (of Bob)
-        :param base58encoded message: Encrypted Memo message
-        :return: Decrypted message
-        :rtype: str
-        :raise ValueError: if message cannot be decoded as valid UTF-8
-               string
+    :param PrivateKey priv: Private Key (of Bob)
+    :param base58encoded message: Encrypted Memo message
+    :return: Decrypted message
+    :rtype: str
+    :raise ValueError: if message cannot be decoded as valid UTF-8
+           string
     """
     # decode structure
     from_key, to_key, nonce, check, cipher = extract_memo_data(message)
@@ -224,16 +228,16 @@ def decode_memo(priv, message):
     aes, checksum = init_aes(shared_secret, nonce)
     # Check
     if not check == checksum:
-        raise AssertionError("Checksum failure")    
+        raise AssertionError("Checksum failure")
     # Encryption
     # remove the varint prefix (FIXME, long messages!)
     numBytes = 16 - len(cipher) % 16
     n = 16 - numBytes
     message = cipher[n:]
-    message = aes.decrypt(unhexlify(py23_bytes(message, 'ascii')))
+    message = aes.decrypt(unhexlify(py23_bytes(message, "ascii")))
     message = _unpad(message, 16)
     n = varintdecode(message)
     if (len(message) - n) > 0 and (len(message) - n) < 8:
-        return '#' + message[len(message) - n:].decode("utf8")
+        return "#" + message[len(message) - n :].decode("utf8")
     else:
-        return '#' + message.decode("utf8")
+        return "#" + message.decode("utf8")

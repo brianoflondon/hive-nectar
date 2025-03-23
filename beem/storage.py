@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
+
 from .nodelist import NodeList
+
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 log.addHandler(logging.StreamHandler())
@@ -21,7 +23,7 @@ def generate_config_store(config, blockchain="hive"):
         nodes = nodelist.get_steem_nodes(testnet=False)
     else:
         nodes = []
-    
+
     config.setdefault("node", nodes)
     config.setdefault("default_chain", blockchain)
     config.setdefault("password_storage", "environment")
@@ -41,6 +43,7 @@ def generate_config_store(config, blockchain="hive"):
     config.setdefault("use_condenser", True)
     config.setdefault("use_tor", False)
     return config
+
 
 def get_default_config_store(*args, **kwargs):
     return generate_config_store(SqliteConfigurationStore, blockchain="hive")(*args, **kwargs)

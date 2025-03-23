@@ -1,16 +1,11 @@
 #!/usr/bin/python
 import sys
-import datetime as dt
-from beem.amount import Amount
-from beem.utils import parse_time, formatTimeString, addTzInfo
-from beem.instance import set_shared_steem_instance
-from beem import Steem
-from beem.snapshot import AccountSnapshot
-import matplotlib as mpl
+
 # mpl.use('Agg')
 # mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 
+from beem.snapshot import AccountSnapshot
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -26,7 +21,7 @@ if __name__ == "__main__":
     timestamps = acc_snapshot.rep_timestamp
     rep = acc_snapshot.rep
     plt.figure(figsize=(12, 6))
-    opts = {'linestyle': '-', 'marker': '.'}
+    opts = {"linestyle": "-", "marker": "."}
     plt.plot_date(timestamps, rep, label="Reputation", **opts)
     plt.grid()
     plt.legend()

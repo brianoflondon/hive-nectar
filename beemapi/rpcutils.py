@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
-import time
 import json
 import logging
-from .exceptions import (
-    UnauthorizedError, RPCConnection, RPCError, NumRetriesReached, CallRetriesReached
-)
-from .node import Nodes
 
 log = logging.getLogger(__name__)
 
@@ -25,41 +20,61 @@ def is_network_appbase_ready(props):
 def get_query(appbase, request_id, api_name, name, args):
     query = []
     if not appbase or api_name == "condenser_api":
-        query = {"method": "call",
-                 "params": [api_name, name, list(args)],
-                 "jsonrpc": "2.0",
-                 "id": request_id}
+        query = {
+            "method": "call",
+            "params": [api_name, name, list(args)],
+            "jsonrpc": "2.0",
+            "id": request_id,
+        }
     else:
         args = json.loads(json.dumps(args))
         # print(args)
         if len(args) > 0 and isinstance(args, list) and isinstance(args[0], dict):
-            query = {"method": api_name + "." + name,
-                     "params": args[0],
-                     "jsonrpc": "2.0",
-                     "id": request_id}
-        elif len(args) > 0 and isinstance(args, list) and isinstance(args[0], list) and len(args[0]) > 0 and isinstance(args[0][0], dict):
+            query = {
+                "method": api_name + "." + name,
+                "params": args[0],
+                "jsonrpc": "2.0",
+                "id": request_id,
+            }
+        elif (
+            len(args) > 0
+            and isinstance(args, list)
+            and isinstance(args[0], list)
+            and len(args[0]) > 0
+            and isinstance(args[0][0], dict)
+        ):
             for a in args[0]:
-                query.append({"method": api_name + "." + name,
-                              "params": a,
-                              "jsonrpc": "2.0",
-                              "id": request_id})
+                query.append(
+                    {
+                        "method": api_name + "." + name,
+                        "params": a,
+                        "jsonrpc": "2.0",
+                        "id": request_id,
+                    }
+                )
                 request_id += 1
         elif args:
-            query = {"method": "call",
-                     "params": [api_name, name, list(args)],
-                     "jsonrpc": "2.0",
-                     "id": request_id}
+            query = {
+                "method": "call",
+                "params": [api_name, name, list(args)],
+                "jsonrpc": "2.0",
+                "id": request_id,
+            }
             request_id += 1
         elif api_name == "condenser_api":
-            query = {"method": api_name + "." + name,
-                     "jsonrpc": "2.0",
-                     "params": [],
-                     "id": request_id}
+            query = {
+                "method": api_name + "." + name,
+                "jsonrpc": "2.0",
+                "params": [],
+                "id": request_id,
+            }
         else:
-            query = {"method": api_name + "." + name,
-                     "jsonrpc": "2.0",
-                     "params": {},
-                     "id": request_id}
+            query = {
+                "method": api_name + "." + name,
+                "jsonrpc": "2.0",
+                "params": {},
+                "id": request_id,
+            }
     return query
 
 

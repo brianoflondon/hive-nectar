@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
-from collections import OrderedDict
 import json
-from beemgraphenebase.types import (
-    Uint8, Int16, Uint16, Uint32, Uint64,
-    Varint32, Int64, String, Bytes, Void,
-    Array, PointInTime, Signature, Bool,
-    Set, Fixed_array, Optional, Static_variant,
-    Map, Id, JsonObj
-)
-from .py23 import py23_bytes, bytes_types, integer_types, string_types
-from .objecttypes import object_type
+
+from beemgraphenebase.types import Id, JsonObj, Optional, String
+
 from .operationids import operations
+from .py23 import integer_types, py23_bytes, string_types
 
 
 class Operation(object):
@@ -55,8 +49,7 @@ class Operation(object):
         return operations
 
     def getOperationNameForId(self, i):
-        """ Convert an operation id into the corresponding string
-        """
+        """Convert an operation id into the corresponding string"""
         for key in self.operations():
             if int(self.operations()[key]) is int(i):
                 return key
@@ -75,15 +68,16 @@ class Operation(object):
 
 
 class GrapheneObject(object):
-    """ Core abstraction class
+    """Core abstraction class
 
-        This class is used for any JSON reflected object in Graphene.
+    This class is used for any JSON reflected object in Graphene.
 
-        * ``instance.__json__()``: encodes data into json format
-        * ``bytes(instance)``: encodes data into wire format
-        * ``str(instances)``: dumps json object as string
+    * ``instance.__json__()``: encodes data into json format
+    * ``bytes(instance)``: encodes data into wire format
+    * ``str(instances)``: dumps json object as string
 
     """
+
     def __init__(self, data=None):
         self.data = data
 
@@ -93,7 +87,7 @@ class GrapheneObject(object):
         b = b""
         for name, value in list(self.data.items()):
             if isinstance(value, string_types):
-                b += py23_bytes(value, 'utf-8')
+                b += py23_bytes(value, "utf-8")
             else:
                 b += py23_bytes(value)
         return b
@@ -126,4 +120,4 @@ class GrapheneObject(object):
 
 
 def isArgsThisClass(self, args):
-    return (len(args) == 1 and type(args[0]).__name__ == type(self).__name__)
+    return len(args) == 1 and type(args[0]).__name__ == type(self).__name__

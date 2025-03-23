@@ -1,27 +1,30 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-import sys
-from datetime import datetime, timedelta
-import time
-import io
-from timeit import default_timer as timer
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import logging
+from datetime import timedelta
+from timeit import default_timer as timer
+
 from prettytable import PrettyTable
-from beem.blockchain import Blockchain
+
 from beem.account import Account
 from beem.block import Block
-from beem.steem import Steem
-from beem.utils import parse_time, formatTimedelta, construct_authorperm, resolve_authorperm, resolve_authorpermvoter, construct_authorpermvoter, formatTimeString
+from beem.blockchain import Blockchain
 from beem.comment import Comment
 from beem.nodelist import NodeList
+from beem.steem import Steem
+from beem.utils import (
+    construct_authorperm,
+    parse_time,
+    resolve_authorpermvoter,
+)
 from beem.vote import Vote
 from beemapi.exceptions import NumRetriesReached
+
 FUTURES_MODULE = None
 if not FUTURES_MODULE:
     try:
-        from concurrent.futures import ThreadPoolExecutor, wait, as_completed
+        from concurrent.futures import ThreadPoolExecutor, as_completed, wait
+
         FUTURES_MODULE = "futures"
     except ImportError:
         FUTURES_MODULE = None
@@ -35,7 +38,7 @@ def benchmark_node(node, how_many_minutes=10, how_many_seconds=30):
     history_count = 0
     access_time = 0
     follow_time = 0
-    blockchain_version = u'0.0.0'
+    blockchain_version = "0.0.0"
     successful = True
     error_msg = None
     start_total = timer()
@@ -43,7 +46,7 @@ def benchmark_node(node, how_many_minutes=10, how_many_seconds=30):
     threading = False
     thread_num = 16
 
-    authorpermvoter = u"@gtg/steem-pressure-4-need-for-speed|gandalf"
+    authorpermvoter = "@gtg/steem-pressure-4-need-for-speed|gandalf"
     [author, permlink, voter] = resolve_authorpermvoter(authorpermvoter)
     authorperm = construct_authorperm(author, permlink)
     last_block_id = 19273700
@@ -58,7 +61,12 @@ def benchmark_node(node, how_many_minutes=10, how_many_seconds=30):
         total_transaction = 0
 
         start = timer()
-        for entry in blockchain.blocks(start=last_block_id, max_batch_size=max_batch_size, threading=threading, thread_num=thread_num):
+        for entry in blockchain.blocks(
+            start=last_block_id,
+            max_batch_size=max_batch_size,
+            threading=threading,
+            thread_num=thread_num,
+        ):
             block_no = entry.identifier
             block_count += 1
             if "block" in entry:
@@ -80,10 +88,10 @@ def benchmark_node(node, how_many_minutes=10, how_many_seconds=30):
             if timer() - start > how_many_seconds or quit_thread:
                 break
     except NumRetriesReached:
-        error_msg = 'NumRetriesReached'
+        error_msg = "NumRetriesReached"
         block_count = -1
     except KeyboardInterrupt:
-        error_msg = 'KeyboardInterrupt'
+        error_msg = "KeyboardInterrupt"
         # quit = True
     except Exception as e:
         error_msg = str(e)
@@ -100,11 +108,11 @@ def benchmark_node(node, how_many_minutes=10, how_many_seconds=30):
             if timer() - start > how_many_seconds or quit_thread:
                 break
     except NumRetriesReached:
-        error_msg = 'NumRetriesReached'
+        error_msg = "NumRetriesReached"
         history_count = -1
         successful = False
     except KeyboardInterrupt:
-        error_msg = 'KeyboardInterrupt'
+        error_msg = "KeyboardInterrupt"
         history_count = -1
         successful = False
         # quit = True
@@ -136,18 +144,25 @@ def benchmark_node(node, how_many_minutes=10, how_many_seconds=30):
         follow_time = stop - start
         access_time = (vote_time + comment_time + account_time + follow_time) / 4.0
     except NumRetriesReached:
-        error_msg = 'NumRetriesReached'
+        error_msg = "NumRetriesReached"
         access_time = -1
     except KeyboardInterrupt:
-        error_msg = 'KeyboardInterrupt'
+        error_msg = "KeyboardInterrupt"
         # quit = True
     except Exception as e:
         error_msg = str(e)
         access_time = -1
-    return {'successful': successful, 'node': node, 'error': error_msg,
-            'total_duration': timer() - start_total, 'block_count': block_count,
-            'history_count': history_count, 'access_time': access_time, 'follow_time': follow_time,
-            'version': blockchain_version}
+    return {
+        "successful": successful,
+        "node": node,
+        "error": error_msg,
+        "total_duration": timer() - start_total,
+        "block_count": block_count,
+        "history_count": history_count,
+        "access_time": access_time,
+        "follow_time": follow_time,
+        "version": blockchain_version,
+    }
 
 
 if __name__ == "__main__":
@@ -189,12 +204,14 @@ if __name__ == "__main__":
     sortedList = sorted(results, key=lambda self: self["history_count"], reverse=True)
     for result in sortedList:
         if result["successful"]:
-            t.add_row([
-                result["node"],
-                result["block_count"],
-                result["history_count"],
-                ("%.2f" % (result["access_time"]))
-            ])
+            t.add_row(
+                [
+                    result["node"],
+                    result["block_count"],
+                    result["history_count"],
+                    ("%.2f" % (result["access_time"])),
+                ]
+            )
             working_nodes.append(result["node"])
     print(t)
     print("\n")

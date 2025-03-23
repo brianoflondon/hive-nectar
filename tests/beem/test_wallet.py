@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 import unittest
-from parameterized import parameterized
-from pprint import pprint
+
 from beem import Steem, exceptions
 from beem.account import Account
-from beem.amount import Amount
-from beem.asset import Asset
-from beem.wallet import Wallet
 from beem.instance import set_shared_steem_instance, shared_steem_instance
-from .nodes import get_hive_nodes, get_steem_nodes
+from beem.wallet import Wallet
+
+from .nodes import get_hive_nodes
 
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 
@@ -24,7 +22,7 @@ class Testcases(unittest.TestCase):
             nobroadcast=True,
             # We want to bundle many operations into a single transaction
             bundle=True,
-            num_retries=10
+            num_retries=10,
             # Overwrite wallet to use this list of wifs only
         )
         cls.stm.set_default_account("test")
@@ -98,37 +96,22 @@ class Testcases(unittest.TestCase):
         stm = self.stm
         self.wallet.steem = stm
         self.wallet.unlock(pwd="TestingOneTwoThree")
-        with self.assertRaises(
-            exceptions.MissingKeyError
-        ):
+        with self.assertRaises(exceptions.MissingKeyError):
             self.wallet.getOwnerKeyForAccount("test")
-        with self.assertRaises(
-            exceptions.MissingKeyError
-        ):
+        with self.assertRaises(exceptions.MissingKeyError):
             self.wallet.getMemoKeyForAccount("test")
-        with self.assertRaises(
-            exceptions.MissingKeyError
-        ):
+        with self.assertRaises(exceptions.MissingKeyError):
             self.wallet.getActiveKeyForAccount("test")
-        with self.assertRaises(
-            exceptions.MissingKeyError
-        ):
+        with self.assertRaises(exceptions.MissingKeyError):
             self.wallet.getPostingKeyForAccount("test")
 
     def test_pub_lookup_keys(self):
         stm = self.stm
         self.wallet.steem = stm
         self.wallet.unlock(pwd="TestingOneTwoThree")
-        with self.assertRaises(
-            exceptions.MissingKeyError
-        ):
+        with self.assertRaises(exceptions.MissingKeyError):
             self.wallet.getOwnerKeysForAccount("test")
-        with self.assertRaises(
-            exceptions.MissingKeyError
-        ):
+        with self.assertRaises(exceptions.MissingKeyError):
             self.wallet.getActiveKeysForAccount("test")
-        with self.assertRaises(
-            exceptions.MissingKeyError
-        ):
+        with self.assertRaises(exceptions.MissingKeyError):
             self.wallet.getPostingKeysForAccount("test")
-

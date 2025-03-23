@@ -1,15 +1,11 @@
 # This Python file uses the following encoding: utf-8
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-import pytest
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import unittest
+
 from beemapi.node import Nodes
 from beemapi.rpcutils import (
-    is_network_appbase_ready,
-    get_api_name, get_query, UnauthorizedError,
-    RPCConnection, RPCError, NumRetriesReached
+    NumRetriesReached,
 )
 
 
@@ -20,9 +16,7 @@ class Testcases(unittest.TestCase):
         nodes = Nodes("test", 1, 5)
         nodes.increase_error_cnt()
         nodes.increase_error_cnt()
-        with self.assertRaises(
-            NumRetriesReached
-        ):
+        with self.assertRaises(NumRetriesReached):
             nodes.sleep_and_check_retries()
 
     def test_next(self):

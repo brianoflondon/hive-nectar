@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-import re
-import time
-import math
-from timeit import default_timer as timer
 import json
-from beem.instance import shared_blockchain_instance
-from beem.account import Account
 import logging
+from timeit import default_timer as timer
+
+from beem.account import Account
+from beem.instance import shared_blockchain_instance
 
 log = logging.getLogger(__name__)
 
@@ -15,9 +13,7 @@ def node_answer_time(node):
     try:
         from beem.blockchaininstance import BlockChainInstance
 
-        stm_local = BlockChainInstance(
-            node=node, num_retries=2, num_retries_call=2, timeout=10
-        )
+        stm_local = BlockChainInstance(node=node, num_retries=2, num_retries_call=2, timeout=10)
         start = timer()
         stm_local.get_network(use_stored_data=False)
         stop = timer()
@@ -287,9 +283,7 @@ class NodeList(list):
         sorted_nodes = []
         for i in sorted_arg:
             if ping_times[i] != float("inf"):
-                sorted_nodes.append(
-                    {"url": node_list[i], "delay_ms": ping_times[i] * 1000}
-                )
+                sorted_nodes.append({"url": node_list[i], "delay_ms": ping_times[i] * 1000})
         return sorted_nodes
 
     def update_nodes(self, weights=None, blockchain_instance=None, **kwargs):
@@ -350,9 +344,7 @@ class NodeList(list):
             weight_sum = sum(weights)
             for benchmark in benchmark_names:
                 if i < len(weights):
-                    weights_dict[benchmark] = (
-                        weights[i] / weight_sum if weight_sum > 0 else 0
-                    )
+                    weights_dict[benchmark] = weights[i] / weight_sum if weight_sum > 0 else 0
                 else:
                     weights_dict[benchmark] = 0.0
                 i += 1
@@ -382,9 +374,7 @@ class NodeList(list):
                     new_node["version"] = report_node.get(
                         "version", new_node.get("version", "0.0.0")
                     )
-                    new_node["hive"] = report_node.get(
-                        "hive", new_node.get("hive", False)
-                    )
+                    new_node["hive"] = report_node.get("hive", new_node.get("hive", False))
 
                     scores = []
                     for benchmark in benchmark_names:
@@ -464,8 +454,7 @@ class NodeList(list):
                 node_list.append(node)
 
         return [
-            node["url"]
-            for node in sorted(node_list, key=lambda self: self["score"], reverse=True)
+            node["url"] for node in sorted(node_list, key=lambda self: self["score"], reverse=True)
         ]
 
     def get_hive_nodes(self, testnet=False, not_working=False, wss=True, https=True):
@@ -493,8 +482,7 @@ class NodeList(list):
                 node_list.append(node)
 
         return [
-            node["url"]
-            for node in sorted(node_list, key=lambda self: self["score"], reverse=True)
+            node["url"] for node in sorted(node_list, key=lambda self: self["score"], reverse=True)
         ]
 
     def get_steem_nodes(self, testnet=False, not_working=False, wss=True, https=True):
@@ -522,12 +510,9 @@ class NodeList(list):
                 node_list.append(node)
 
         return [
-            node["url"]
-            for node in sorted(node_list, key=lambda self: self["score"], reverse=True)
+            node["url"] for node in sorted(node_list, key=lambda self: self["score"], reverse=True)
         ]
 
     def get_testnet(self, testnet=True, testnetdev=False):
         """Returns testnet nodes"""
-        return self.get_nodes(
-            normal=False, appbase=False, testnet=testnet, testnetdev=testnetdev
-        )
+        return self.get_nodes(normal=False, appbase=False, testnet=testnet, testnetdev=testnetdev)

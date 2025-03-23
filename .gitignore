@@ -68,3 +68,9 @@ target/
 
 # IDEs
 .vscode
+
+# uv and modern packaging
+.uv/
+__pypackages__/
+.ruff_cache/
+.mypy_cache/

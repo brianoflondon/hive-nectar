@@ -1,15 +1,31 @@
 # -*- coding: utf-8 -*-
-import re
-import sys
-from .graphenerpc import GrapheneRPC
-from . import exceptions
 import logging
+import re
+
+from . import exceptions
+from .graphenerpc import GrapheneRPC
+
 log = logging.getLogger(__name__)
 
 
 class NodeRPC(GrapheneRPC):
-    """ This class allows to call API methods exposed by the witness node via
-        websockets / rpc-json.
+    """This class allows to call API methods exposed by the witness node via
+    websockets / rpc-json.
+
+    :param str urls: Either a single Websocket/Http URL, or a list of URLs
+    :param str user: Username for Authentication
+    :param str password: Password for Authentication
+    :param int num_retries: Try x times to num_retries to a node on disconnect, -1 for indefinitely
+    :param int num_retries_call: Repeat num_retries_call times a rpc call on node error (default is 5)
+    :param int timeout: Timeout setting for https nodes (default is 60)
+    :param bool use_condenser: Use the old condenser_api rpc protocol on nodes with version
+        0.19.4 or higher. The settings has no effect on nodes with version of 0.19.3 or lower.
+    :param bool use_tor: When set to true, 'socks5h://localhost:9050' is set as proxy
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Init NodeRPC
 
         :param str urls: Either a single Websocket/Http URL, or a list of URLs
         :param str user: Username for Authentication
@@ -17,22 +33,7 @@ class NodeRPC(GrapheneRPC):
         :param int num_retries: Try x times to num_retries to a node on disconnect, -1 for indefinitely
         :param int num_retries_call: Repeat num_retries_call times a rpc call on node error (default is 5)
         :param int timeout: Timeout setting for https nodes (default is 60)
-        :param bool use_condenser: Use the old condenser_api rpc protocol on nodes with version
-            0.19.4 or higher. The settings has no effect on nodes with version of 0.19.3 or lower.
         :param bool use_tor: When set to true, 'socks5h://localhost:9050' is set as proxy
-
-    """
-
-    def __init__(self, *args, **kwargs):
-        """ Init NodeRPC
-
-            :param str urls: Either a single Websocket/Http URL, or a list of URLs
-            :param str user: Username for Authentication
-            :param str password: Password for Authentication
-            :param int num_retries: Try x times to num_retries to a node on disconnect, -1 for indefinitely
-            :param int num_retries_call: Repeat num_retries_call times a rpc call on node error (default is 5)
-            :param int timeout: Timeout setting for https nodes (default is 60)
-            :param bool use_tor: When set to true, 'socks5h://localhost:9050' is set as proxy
 
         """
         super(NodeRPC, self).__init__(*args, **kwargs)
@@ -43,13 +44,13 @@ class NodeRPC(GrapheneRPC):
         self.next_node_on_empty_reply = next_node_on_empty_reply
 
     def rpcexec(self, payload):
-        """ Execute a call by sending the payload.
-            It makes use of the GrapheneRPC library.
-            In here, we mostly deal with Steem specific error handling
+        """Execute a call by sending the payload.
+        It makes use of the GrapheneRPC library.
+        In here, we mostly deal with Steem specific error handling
 
-            :param json payload: Payload data
-            :raises ValueError: if the server does not respond in proper JSON format
-            :raises RPCError: if the server returns an error
+        :param json payload: Payload data
+        :raises ValueError: if the server does not respond in proper JSON format
+        :raises RPCError: if the server returns an error
         """
         if self.url is None:
             raise exceptions.RPCConnection("RPC is not connected!")
@@ -60,7 +61,11 @@ class NodeRPC(GrapheneRPC):
             try:
                 # Forward call to GrapheneWebsocketRPC and catch+evaluate errors
                 reply = super(NodeRPC, self).rpcexec(payload)
-                if self.next_node_on_empty_reply and not bool(reply) and self.nodes.working_nodes_count > 1:
+                if (
+                    self.next_node_on_empty_reply
+                    and not bool(reply)
+                    and self.nodes.working_nodes_count > 1
+                ):
                     self._retry_on_next_node("Empty Reply")
                     doRetry = True
                     self.next_node_on_empty_reply = True
@@ -156,13 +161,17 @@ class NodeRPC(GrapheneRPC):
             doRetry = True
         elif re.search("Server error", str(e)):
             self._switch_to_next_node(str(e))
-            doRetry = True            
+            doRetry = True
         elif re.search("Can only vote once every 3 seconds", msg):
             raise exceptions.VotedBeforeWaitTimeReached(msg)
-        elif re.search("out_of_rangeEEEE: unknown key", msg) or re.search("unknown key:unknown key", msg):
+        elif re.search("out_of_rangeEEEE: unknown key", msg) or re.search(
+            "unknown key:unknown key", msg
+        ):
             raise exceptions.UnkownKey(msg)
         elif re.search("Assert Exception:v.is_object(): Input data have to treated as object", msg):
-            raise exceptions.UnhandledRPCError("Use Operation(op, appbase=True) to prevent error: " + msg)
+            raise exceptions.UnhandledRPCError(
+                "Use Operation(op, appbase=True) to prevent error: " + msg
+            )
         elif re.search("Client returned invalid format. Expected JSON!", msg):
             if self.nodes.working_nodes_count > 1 and self.nodes.num_retries > -1:
                 self.nodes.disable_node()
@@ -188,12 +197,22 @@ class NodeRPC(GrapheneRPC):
 
     def _check_api_name(self, msg):
         error_start = "Could not find API"
-        known_apis = ['account_history_api', 'tags_api',
-                      'database_api', 'market_history_api',
-                      'block_api', 'account_by_key_api', 'chain_api',
-                      'follow_api', 'condenser_api', 'debug_node_api',
-                      'witness_api', 'test_api', 'bridge',
-                      'network_broadcast_api']
+        known_apis = [
+            "account_history_api",
+            "tags_api",
+            "database_api",
+            "market_history_api",
+            "block_api",
+            "account_by_key_api",
+            "chain_api",
+            "follow_api",
+            "condenser_api",
+            "debug_node_api",
+            "witness_api",
+            "test_api",
+            "bridge",
+            "network_broadcast_api",
+        ]
         for api in known_apis:
             if re.search(error_start + " " + api, msg):
                 return True
@@ -202,9 +221,9 @@ class NodeRPC(GrapheneRPC):
         return False
 
     def get_account(self, name, **kwargs):
-        """ Get full account details from account name
+        """Get full account details from account name
 
-            :param str name: Account name
+        :param str name: Account name
         """
         if isinstance(name, str):
             return self.get_accounts([name], **kwargs)

@@ -1,16 +1,11 @@
 #!/usr/bin/python
 import sys
-import datetime as dt
-from beem.amount import Amount
-from beem.utils import parse_time, formatTimeString, addTzInfo
-from beem.instance import set_shared_steem_instance
-from beem import Steem
-from beem.snapshot import AccountSnapshot
-import matplotlib as mpl
+
 # mpl.use('Agg')
 # mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 
+from beem.snapshot import AccountSnapshot
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -28,9 +23,9 @@ if __name__ == "__main__":
     downvote_timestamps = acc_snapshot.downvote_vp_timestamp
     downvote_vp = acc_snapshot.downvote_vp
     plt.figure(figsize=(12, 6))
-    opts = {'linestyle': '-', 'marker': ''}
-    plt.plot_date(timestamps, vp, label="Voting power", color='green', **opts)
-    plt.plot_date(downvote_timestamps, downvote_vp, label='Downvote Power', color='red', **opts)
+    opts = {"linestyle": "-", "marker": ""}
+    plt.plot_date(timestamps, vp, label="Voting power", color="green", **opts)
+    plt.plot_date(downvote_timestamps, downvote_vp, label="Downvote Power", color="red", **opts)
     plt.grid()
     plt.legend()
     plt.title("Voting power over time - @%s" % (account))

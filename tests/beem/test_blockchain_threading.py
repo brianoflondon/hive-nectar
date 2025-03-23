@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*-
 import unittest
-from parameterized import parameterized
-from datetime import datetime, timedelta
-import pytz
-import time
-from pprint import pprint
+
 from beem import Steem
 from beem.blockchain import Blockchain
-from beem.block import Block
 from beem.instance import set_shared_steem_instance
-from .nodes import get_hive_nodes, get_steem_nodes
 
+from .nodes import get_hive_nodes
 
 
 class Testcases(unittest.TestCase):
@@ -66,7 +61,9 @@ class Testcases(unittest.TestCase):
         for n in range(5):
             ops_stream = []
             block_num_list = []
-            for op in b.stream(opNames=opNames, start=self.start, stop=self.stop, threading=True, thread_num=8):
+            for op in b.stream(
+                opNames=opNames, start=self.start, stop=self.stop, threading=True, thread_num=8
+            ):
                 ops_stream.append(op)
                 if op["block_num"] not in block_num_list:
                     block_num_list.append(op["block_num"])
@@ -87,7 +84,13 @@ class Testcases(unittest.TestCase):
         start_block = 25097000
         stop_block = 25097100
         opNames = ["account_create", "custom_json"]
-        for op in b.stream(start=int(start_block), stop=int(stop_block), opNames=opNames, threading=True, thread_num=8):
+        for op in b.stream(
+            start=int(start_block),
+            stop=int(stop_block),
+            opNames=opNames,
+            threading=True,
+            thread_num=8,
+        ):
             ops_stream.append(op)
         self.assertTrue(ops_stream[0]["block_num"] >= start_block)
         self.assertTrue(ops_stream[-1]["block_num"] <= stop_block)

@@ -1,49 +1,47 @@
 # -*- coding: utf-8 -*-
-from beemgraphenebase.py23 import py23_bytes, bytes_types
-import ecdsa
 import hashlib
+import json
+import logging
 from binascii import hexlify, unhexlify
 from collections import OrderedDict
+
+import ecdsa
 from asn1crypto.core import OctetString
-import struct
-from collections import OrderedDict
-import json
 
-from .py23 import py23_bytes, bytes_types, integer_types, string_types, py23_chr
-from .objecttypes import object_type
+from beemgraphenebase.py23 import py23_bytes
+
 from .bip32 import parse_path
-
-from .account import PublicKey
+from .chains import known_chains
+from .objects import isArgsThisClass
+from .operations import Operation
+from .py23 import py23_bytes, py23_chr, string_types
 from .types import (
     Array,
+    JsonObj,
+    Optional,
+    PointInTime,
     Set,
     Signature,
-    PointInTime,
+    String,
     Uint16,
     Uint32,
-    JsonObj,
-    String,
     Varint32,
-    Optional
 )
-from .objects import GrapheneObject, isArgsThisClass
-from .operations import Operation
-from .chains import known_chains
-from .ecdsasig import sign_message, verify_message
-import logging
+
 log = logging.getLogger(__name__)
 
 
 class GrapheneObjectASN1(object):
-    """ Core abstraction class
+    """Core abstraction class
 
-        This class is used for any JSON reflected object in Graphene.
+    This class is used for any JSON reflected object in Graphene.
 
-        * ``instance.__json__()``: encodes data into json format
-        * ``bytes(instance)``: encodes data into wire format
-        * ``str(instances)``: dumps json object as string
+    * ``instance.__json__()``: encodes data into json format
+    * ``bytes(instance)``: encodes data into wire format
+    * ``str(instances)``: dumps json object as string
 
     """
+
     def __init__(self, data=None):
         self.data = data
 
@@ -56,13 +54,13 @@ class GrapheneObjectASN1(object):
             if name == "operations":
                 for operation in value:
                     if isinstance(value, string_types):
-                        b = py23_bytes(operation, 'utf-8')
+                        b = py23_bytes(operation, "utf-8")
                     else:
                         b = py23_bytes(operation)
                     output += OctetString(b).dump()
             elif name != "signatures":
                 if isinstance(value, string_types):
-                    b = py23_bytes(value, 'utf-8')
+                    b = py23_bytes(value, "utf-8")
                 else:
                     b = py23_bytes(value)
                 output += OctetString(b).dump()
@@ -96,13 +94,14 @@ class GrapheneObjectASN1(object):
 
 
 class Unsigned_Transaction(GrapheneObjectASN1):
-    """ Create an unsigned transaction with ASN1 encoder for using it with ledger
+    """Create an unsigned transaction with ASN1 encoder for using it with ledger
 
-        :param num ref_block_num:
-        :param num ref_block_prefix:
-        :param str expiration: expiration date
-        :param array operations:  array of operations
+    :param num ref_block_num:
+    :param num ref_block_prefix:
+    :param str expiration: expiration date
+    :param array operations:  array of operations
     """
+
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
             self.data = args[0].data
@@ -117,30 +116,35 @@ class Unsigned_Transaction(GrapheneObjectASN1):
             if "signatures" not in kwargs:
                 kwargs["signatures"] = Array([])
             else:
-                kwargs["signatures"] = Array([Signature(unhexlify(a)) for a in kwargs["signatures"]])
+                kwargs["signatures"] = Array(
+                    [Signature(unhexlify(a)) for a in kwargs["signatures"]]
+                )
             operations_count = 0
             if "operations" in kwargs:
                 operations_count = len(kwargs["operations"])
-                #opklass = self.getOperationKlass()
-                #if all([not isinstance(a, opklass) for a in kwargs["operations"]]):
+                # opklass = self.getOperationKlass()
+                # if all([not isinstance(a, opklass) for a in kwargs["operations"]]):
                 #    kwargs['operations'] = Array([opklass(a, prefix=prefix) for a in kwargs["operations"]])
-                #else:
+                # else:
                 #    kwargs['operations'] = (kwargs["operations"])
 
-            super(Unsigned_Transaction, self).__init__(OrderedDict([
-                ('ref_block_num', Uint16(kwargs['ref_block_num'])),
-                ('ref_block_prefix', Uint32(kwargs['ref_block_prefix'])),
-                ('expiration', PointInTime(kwargs['expiration'])),
-                ('operations_count', Varint32(operations_count)),
-                ('operations', kwargs['operations']),
-                ('extensions', kwargs['extensions']),
-                ('signatures', kwargs['signatures']),
-            ]))
+            super(Unsigned_Transaction, self).__init__(
+                OrderedDict(
+                    [
+                        ("ref_block_num", Uint16(kwargs["ref_block_num"])),
+                        ("ref_block_prefix", Uint32(kwargs["ref_block_prefix"])),
+                        ("expiration", PointInTime(kwargs["expiration"])),
+                        ("operations_count", Varint32(operations_count)),
+                        ("operations", kwargs["operations"]),
+                        ("extensions", kwargs["extensions"]),
+                        ("signatures", kwargs["signatures"]),
+                    ]
+                )
+            )
 
     @property
     def id(self):
-        """ The transaction id of this transaction
-        """
+        """The transaction id of this transaction"""
         # Store signatures temporarily since they are not part of
         # transaction id
         sigs = self.data["signatures"]
@@ -159,16 +163,15 @@ class Unsigned_Transaction(GrapheneObjectASN1):
         return Operation
 
     def derSigToHexSig(self, s):
-        """ Format DER to HEX signature
-        """
+        """Format DER to HEX signature"""
         s, junk = ecdsa.der.remove_sequence(unhexlify(s))
         if junk:
-            log.debug('JUNK: %s', hexlify(junk).decode('ascii'))
-        if not (junk == b''):
+            log.debug("JUNK: %s", hexlify(junk).decode("ascii"))
+        if not (junk == b""):
             raise AssertionError()
         x, s = ecdsa.der.remove_integer(s)
         y, s = ecdsa.der.remove_integer(s)
-        return '%064x%064x' % (x, y)
+        return "%064x%064x" % (x, y)
 
     def getKnownChains(self):
         return known_chains
@@ -203,13 +206,13 @@ class Unsigned_Transaction(GrapheneObjectASN1):
             if name == "operations":
                 for operation in value:
                     if isinstance(value, string_types):
-                        b = py23_bytes(operation, 'utf-8')
+                        b = py23_bytes(operation, "utf-8")
                     else:
                         b = py23_bytes(operation)
                     self.message += OctetString(b).dump()
             elif name != "signatures":
                 if isinstance(value, string_types):
-                    b = py23_bytes(value, 'utf-8')
+                    b = py23_bytes(value, "utf-8")
                 else:
                     b = py23_bytes(value)
                 self.message += OctetString(b).dump()
@@ -227,7 +230,7 @@ class Unsigned_Transaction(GrapheneObjectASN1):
         elif role == "posting":
             return "48'/13'/4'/%d'/%d'" % (account_index, key_index)
         elif role == "memo":
-            return "48'/13'/3'/%d'/%d'" % (account_index, key_index)        
+            return "48'/13'/3'/%d'/%d'" % (account_index, key_index)
 
     def build_apdu(self, path="48'/13'/0'/0'/0'", chain=None):
         self.deriveDigest(chain)
@@ -236,19 +239,25 @@ class Unsigned_Transaction(GrapheneObjectASN1):
         message = self.message
         path_size = int(len(path) / 4)
         message_size = len(message)
-        
+
         offset = 0
         first = True
         result = []
         while offset != message_size:
             if message_size - offset > 200:
-                chunk = message[offset: offset + 200]
+                chunk = message[offset : offset + 200]
             else:
                 chunk = message[offset:]
-    
+
             if first:
                 total_size = int(len(path)) + 1 + len(chunk)
-                apdu = unhexlify("d4040000") + py23_chr(total_size) + py23_chr(path_size) + path + chunk
+                apdu = (
+                    unhexlify("d4040000")
+                    + py23_chr(total_size)
+                    + py23_chr(path_size)
+                    + path
+                    + chunk
+                )
                 first = False
             else:
                 total_size = len(chunk)
@@ -260,6 +269,16 @@ class Unsigned_Transaction(GrapheneObjectASN1):
     def build_apdu_pubkey(self, path="48'/13'/0'/0'/0'", request_screen_approval=False):
         path = unhexlify(parse_path(path, as_bytes=True))
         if not request_screen_approval:
-            return unhexlify("d4020001") + py23_chr(int(len(path)) + 1) + py23_chr(int(len(path) / 4)) + path
+            return (
+                unhexlify("d4020001")
+                + py23_chr(int(len(path)) + 1)
+                + py23_chr(int(len(path) / 4))
+                + path
+            )
         else:
-            return unhexlify("d4020101") + py23_chr(int(len(path)) + 1) + py23_chr(int(len(path) / 4)) + path
+            return (
+                unhexlify("d4020101")
+                + py23_chr(int(len(path)) + 1)
+                + py23_chr(int(len(path) / 4))
+                + path
+            )

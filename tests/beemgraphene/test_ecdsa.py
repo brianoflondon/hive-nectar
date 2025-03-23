@@ -1,32 +1,23 @@
 # This Python file uses the following encoding: utf-8
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-import pytest
-from parameterized import parameterized
-import unittest
-import hashlib
-import ecdsa
-from binascii import hexlify, unhexlify
-from beemgraphenebase.account import PrivateKey, PublicKey, Address
-import beemgraphenebase.ecdsasig as ecda
-from beemgraphenebase.py23 import py23_bytes
+from __future__ import absolute_import, division, print_function, unicode_literals
 
+import unittest
+from binascii import hexlify
+
+from parameterized import parameterized
+
+import beemgraphenebase.ecdsasig as ecda
+from beemgraphenebase.account import PrivateKey
+from beemgraphenebase.py23 import py23_bytes
 
 wif = "5J4KCbg1G3my9b9hCaQXnHSm6vrwW9xQTJS6ZciW2Kek7cCkCEk"
 
 
 class Testcases(unittest.TestCase):
-
     # Ignore warning:
     # https://www.reddit.com/r/joinmarket/comments/5crhfh/userwarning_implicit_cast_from_char_to_a/
     # @pytest.mark.filterwarnings()
-    @parameterized.expand([
-        ("cryptography"),
-        ("secp256k1"),
-        ("ecdsa")
-    ])
+    @parameterized.expand([("cryptography"), ("secp256k1"), ("ecdsa")])
     def test_sign_message(self, module):
         if module == "cryptography":
             if not ecda.CRYPTOGRAPHY_AVAILABLE:
@@ -43,10 +34,12 @@ class Testcases(unittest.TestCase):
         pub_key_sig = ecda.verify_message("Foobar", signature)
         self.assertEqual(hexlify(pub_key_sig), pub_key)
 
-    @parameterized.expand([
-        ("cryptography"),
-        ("secp256k1"),
-    ])
+    @parameterized.expand(
+        [
+            ("cryptography"),
+            ("secp256k1"),
+        ]
+    )
     def test_sign_message_cross(self, module):
         if module == "cryptography":
             if not ecda.CRYPTOGRAPHY_AVAILABLE:
@@ -67,11 +60,13 @@ class Testcases(unittest.TestCase):
         pub_key_sig = ecda.verify_message("Foobar", signature)
         self.assertEqual(hexlify(pub_key_sig), pub_key)
 
-    @parameterized.expand([
-        ("cryptography"),
-        ("secp256k1"),
-        ("ecdsa"),
-    ])
+    @parameterized.expand(
+        [
+            ("cryptography"),
+            ("secp256k1"),
+            ("ecdsa"),
+        ]
+    )
     def test_wrong_signature(self, module):
         if module == "cryptography":
             if not ecda.CRYPTOGRAPHY_AVAILABLE:
@@ -90,5 +85,5 @@ class Testcases(unittest.TestCase):
         self.assertTrue(hexlify(pub_key_sig2) != pub_key)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

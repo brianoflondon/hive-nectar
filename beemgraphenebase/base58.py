@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-from binascii import hexlify, unhexlify
-from .py23 import py23_bytes, py23_chr, bytes_types, integer_types, string_types, text_type
-from .prefix import Prefix
 import hashlib
-import string
 import logging
+import string
+from binascii import hexlify, unhexlify
+
+from .prefix import Prefix
+from .py23 import integer_types, py23_bytes, py23_chr, string_types
+
 log = logging.getLogger(__name__)
 
 
@@ -33,6 +35,7 @@ class Base58(Prefix):
         * etc.
 
     """
+
     def __init__(self, data, prefix=None):
         self.set_prefix(prefix)
         if isinstance(data, Base58):
@@ -43,17 +46,17 @@ class Base58(Prefix):
             self._hex = base58CheckDecode(data)
         elif data[0] == "K" or data[0] == "L":
             self._hex = base58CheckDecode(data)[:-2]
-        elif data[:len(self.prefix)] == self.prefix:
-            self._hex = gphBase58CheckDecode(data[len(self.prefix):])
+        elif data[: len(self.prefix)] == self.prefix:
+            self._hex = gphBase58CheckDecode(data[len(self.prefix) :])
         else:
             raise ValueError("Error loading Base58 object")
 
     def __format__(self, _format):
-        """ Format output according to argument _format (wif,btc,...)
+        """Format output according to argument _format (wif,btc,...)
 
-            :param str _format: Format to use
-            :return: formatted data according to _format
-            :rtype: str
+        :param str _format: Format to use
+        :return: formatted data according to _format
+        :rtype: str
 
         """
         if _format.upper() == "WIF":
@@ -66,26 +69,26 @@ class Base58(Prefix):
             return _format.upper() + str(self)
 
     def __repr__(self):
-        """ Returns hex value of object
+        """Returns hex value of object
 
-            :return: Hex string of instance's data
-            :rtype: hex string
+        :return: Hex string of instance's data
+        :rtype: hex string
         """
         return self._hex
 
     def __str__(self):
-        """ Return graphene-base58CheckEncoded string of data
+        """Return graphene-base58CheckEncoded string of data
 
-            :return: Base58 encoded data
-            :rtype: str
+        :return: Base58 encoded data
+        :rtype: str
         """
         return gphBase58CheckEncode(self._hex)
 
     def __bytes__(self):
-        """ Return raw bytes
+        """Return raw bytes
 
-            :return: Raw bytes of instance
-            :rtype: bytes
+        :return: Raw bytes of instance
+        :rtype: bytes
 
         """
         return unhexlify(self._hex)
@@ -113,11 +116,11 @@ def base58decode(base58_str):
         n = div
     else:
         res.insert(0, n)
-    return hexlify(bytearray(1) * leading_zeroes_count + res).decode('ascii')
+    return hexlify(bytearray(1) * leading_zeroes_count + res).decode("ascii")
 
 
 def base58encode(hexstring):
-    byteseq = py23_bytes(unhexlify(py23_bytes(hexstring, 'ascii')))
+    byteseq = py23_bytes(unhexlify(py23_bytes(hexstring, "ascii")))
     n = 0
     leading_zeroes_count = 0
     for c in byteseq:
@@ -131,13 +134,14 @@ def base58encode(hexstring):
         n = div
     else:
         res.insert(0, BASE58_ALPHABET[n])
-    return (BASE58_ALPHABET[0:1] * leading_zeroes_count + res).decode('ascii')
+    return (BASE58_ALPHABET[0:1] * leading_zeroes_count + res).decode("ascii")
 
 
 def ripemd160(s):
-    ripemd160 = hashlib.new('ripemd160')
+    ripemd160 = hashlib.new("ripemd160")
     ripemd160.update(unhexlify(s))
     return ripemd160.digest()
+
 
 def doublesha256(s):
     return hashlib.sha256(hashlib.sha256(unhexlify(s)).digest()).digest()
@@ -155,15 +159,15 @@ def base58CheckEncode(version, payload):
     if isinstance(version, string_types):
         s = version + payload
     else:
-        s = ('%.2x' % version) + payload
+        s = ("%.2x" % version) + payload
     checksum = doublesha256(s)[:4]
-    result = s + hexlify(checksum).decode('ascii')
+    result = s + hexlify(checksum).decode("ascii")
     return base58encode(result)
 
 
 def base58CheckDecode(s, skip_first_bytes=True):
     s = unhexlify(base58decode(s))
-    dec = hexlify(s[:-4]).decode('ascii')
+    dec = hexlify(s[:-4]).decode("ascii")
     checksum = doublesha256(dec)[:4]
     if not (s[-4:] == checksum):
         raise AssertionError()
@@ -175,13 +179,13 @@ def base58CheckDecode(s, skip_first_bytes=True):
 
 def gphBase58CheckEncode(s):
     checksum = ripemd160(s)[:4]
-    result = s + hexlify(checksum).decode('ascii')
+    result = s + hexlify(checksum).decode("ascii")
     return base58encode(result)
 
 
 def gphBase58CheckDecode(s):
     s = unhexlify(base58decode(s))
-    dec = hexlify(s[:-4]).decode('ascii')
+    dec = hexlify(s[:-4]).decode("ascii")
     checksum = ripemd160(dec)[:4]
     if not (s[-4:] == checksum):
         raise AssertionError()

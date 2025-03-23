@@ -1,16 +1,14 @@
 from __future__ import print_function
-import sys
-from datetime import timedelta
-import time
-import io
-from beem import Steem
-from beem.account import Account
-from beem.amount import Amount
-from beem.utils import parse_time
+
+import logging
+
+from steem import Steem as steemSteem
 from steem.account import Account as steemAccount
 from steem.post import Post as steemPost
-from steem import Steem as steemSteem
-import logging
+
+from beem import Steem
+from beem.account import Account
+
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -49,8 +47,16 @@ if __name__ == "__main__":
     print("beem_acc.get_following()  {}".format(beem_acc.get_following()))
     print("steem_acc.get_following() {}".format(steem_acc.get_following()))
     # has_voted()
-    print("beem_acc.has_voted()  {}".format(beem_acc.has_voted("@holger80/api-methods-list-for-appbase")))
-    print("steem_acc.has_voted() {}".format(steem_acc.has_voted(steemPost("@holger80/api-methods-list-for-appbase"))))
+    print(
+        "beem_acc.has_voted()  {}".format(
+            beem_acc.has_voted("@holger80/api-methods-list-for-appbase")
+        )
+    )
+    print(
+        "steem_acc.has_voted() {}".format(
+            steem_acc.has_voted(steemPost("@holger80/api-methods-list-for-appbase"))
+        )
+    )
     # curation_stats()
     print("beem_acc.curation_stats()  {}".format(beem_acc.curation_stats()))
     print("steem_acc.curation_stats() {}".format(steem_acc.curation_stats()))

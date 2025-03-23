@@ -1,16 +1,11 @@
 #!/usr/bin/python
 import sys
-import datetime as dt
-from beem.amount import Amount
-from beem.utils import parse_time, formatTimeString, addTzInfo
-from beem.instance import set_shared_steem_instance
-from beem import Steem
-from beem.snapshot import AccountSnapshot
-import matplotlib as mpl
+
 # mpl.use('Agg')
 # mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 
+from beem.snapshot import AccountSnapshot
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -27,8 +22,10 @@ if __name__ == "__main__":
     curation_per_1000_SP = acc_snapshot.curation_per_1000_SP
 
     plt.figure(figsize=(12, 6))
-    opts = {'linestyle': '-', 'marker': '.'}
-    plt.plot_date(timestamps, curation_per_1000_SP, label="Curation reward per week and 1k SP", **opts)
+    opts = {"linestyle": "-", "marker": "."}
+    plt.plot_date(
+        timestamps, curation_per_1000_SP, label="Curation reward per week and 1k SP", **opts
+    )
     plt.grid()
     plt.legend()
     plt.title("Curation over time - @%s" % (account))

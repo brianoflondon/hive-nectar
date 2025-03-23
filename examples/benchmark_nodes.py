@@ -1,20 +1,19 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-import sys
-from datetime import datetime, timedelta
-import time
-import io
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import logging
+import time
+from datetime import datetime, timedelta
+
 from prettytable import PrettyTable
-from beem.blockchain import Blockchain
+
 from beem.account import Account
 from beem.block import Block
-from beem.steem import Steem
-from beem.utils import parse_time, formatTimedelta
+from beem.blockchain import Blockchain
 from beem.nodelist import NodeList
+from beem.steem import Steem
+from beem.utils import formatTimedelta, parse_time
 from beemapi.exceptions import NumRetriesReached
+
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -50,7 +49,12 @@ if __name__ == "__main__":
             start_time = time.time()
             last_node = blockchain.steem.rpc.url
 
-            for entry in blockchain.blocks(start=last_block_id, max_batch_size=max_batch_size, threading=threading, thread_num=thread_num):
+            for entry in blockchain.blocks(
+                start=last_block_id,
+                max_batch_size=max_batch_size,
+                threading=threading,
+                thread_num=thread_num,
+            ):
                 block_no = entry.identifier
                 if "block" in entry:
                     trxs = entry["block"]["transactions"]
@@ -81,12 +85,7 @@ if __name__ == "__main__":
             print("* Processed %d blockchain minutes in %s" % (how_many_minutes, total_duration))
             print("* Processed %d account ops in %s" % (i, total_duration_acc))
             print("* blockchain version: %s" % (blockchain_version))
-            t.add_row([
-                node,
-                total_duration,
-                total_duration_acc,
-                blockchain_version
-            ])
+            t.add_row([node, total_duration, total_duration_acc, blockchain_version])
         except NumRetriesReached:
             print("NumRetriesReached")
             continue

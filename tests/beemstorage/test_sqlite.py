@@ -1,13 +1,8 @@
-from builtins import chr
-from builtins import range
-from builtins import str
-import unittest
-import hashlib
-from binascii import hexlify, unhexlify
 import os
-import json
-from pprint import pprint
+import unittest
+
 from beemstorage.sqlite import SQLiteStore
+
 
 class MyStore(SQLiteStore):
     __tablename__ = "testing"

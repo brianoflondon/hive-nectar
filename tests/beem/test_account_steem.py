@@ -1,26 +1,21 @@
 # -*- coding: utf-8 -*-
 import unittest
-import pytz
-from datetime import datetime, timedelta
-from parameterized import parameterized
-from pprint import pprint
-from beem import Steem, exceptions, Hive
+
+from beem import Steem, exceptions
 from beem.account import Account, extract_account_name
-from beem.block import Block
 from beem.amount import Amount
-from beem.asset import Asset
-from beem.utils import formatTimeString
+from beem.block import Block
 from beem.instance import set_shared_blockchain_instance
-from .nodes import get_hive_nodes, get_steem_nodes
+from beem.utils import formatTimeString
+
+from .nodes import get_steem_nodes
 
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 
 
 class Testcases(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
-
         cls.bts = Steem(
             node=get_steem_nodes(),
             nobroadcast=True,
@@ -28,18 +23,16 @@ class Testcases(unittest.TestCase):
             unsigned=True,
             # Overwrite wallet to use this list of wifs only
             keys={"active": wif},
-            num_retries=10
+            num_retries=10,
         )
-        cls.account = Account("beembot", steem_instance=cls.bts)      
+        cls.account = Account("beembot", steem_instance=cls.bts)
         set_shared_blockchain_instance(cls.bts)
 
     def test_account(self):
         stm = self.bts
         account = self.account
         Account("beembot", steem_instance=stm)
-        with self.assertRaises(
-            exceptions.AccountDoesNotExistsException
-        ):
+        with self.assertRaises(exceptions.AccountDoesNotExistsException):
             Account("DoesNotExistsXXX", steem_instance=stm)
         # asset = Asset("1.3.0")
         # symbol = asset["symbol"]
@@ -74,123 +67,151 @@ class Testcases(unittest.TestCase):
             h_list.append(h)
         # self.assertEqual(h_list[0][0], zero_element)
         self.assertEqual(h_list[-1][0], 10)
-        self.assertEqual(h_list[0][1]['block'], h_all_raw[-1][1]['block'])
-        self.assertEqual(h_list[-1][1]['block'], h_all_raw[-11 + zero_element][1]['block'])
+        self.assertEqual(h_list[0][1]["block"], h_all_raw[-1][1]["block"])
+        self.assertEqual(h_list[-1][1]["block"], h_all_raw[-11 + zero_element][1]["block"])
         h_list = []
-        for h in account.history(start=1, stop=9, use_block_num=False, batch_size=10, raw_output=True):
+        for h in account.history(
+            start=1, stop=9, use_block_num=False, batch_size=10, raw_output=True
+        ):
             h_list.append(h)
         self.assertEqual(h_list[0][0], 1)
         self.assertEqual(h_list[-1][0], 9)
-        self.assertEqual(h_list[0][1]['block'], h_all_raw[-2 + zero_element][1]['block'])
-        self.assertEqual(h_list[-1][1]['block'], h_all_raw[-10 + zero_element][1]['block'])
+        self.assertEqual(h_list[0][1]["block"], h_all_raw[-2 + zero_element][1]["block"])
+        self.assertEqual(h_list[-1][1]["block"], h_all_raw[-10 + zero_element][1]["block"])
         start = formatTimeString(h_list[0][1]["timestamp"])
         stop = formatTimeString(h_list[-1][1]["timestamp"])
         h_list = []
-        for h in account.history(start=start, stop=stop, use_block_num=False, batch_size=10, raw_output=True):
+        for h in account.history(
+            start=start, stop=stop, use_block_num=False, batch_size=10, raw_output=True
+        ):
             h_list.append(h)
         self.assertEqual(h_list[0][0], 1)
         self.assertEqual(h_list[-1][0], 9)
-        self.assertEqual(h_list[0][1]['block'], h_all_raw[-2 + zero_element][1]['block'])
-        self.assertEqual(h_list[-1][1]['block'], h_all_raw[-10 + zero_element][1]['block'])
+        self.assertEqual(h_list[0][1]["block"], h_all_raw[-2 + zero_element][1]["block"])
+        self.assertEqual(h_list[-1][1]["block"], h_all_raw[-10 + zero_element][1]["block"])
         h_list = []
-        for h in account.history_reverse(start=10, stop=0, use_block_num=False, batch_size=10, raw_output=False):
+        for h in account.history_reverse(
+            start=10, stop=0, use_block_num=False, batch_size=10, raw_output=False
+        ):
             h_list.append(h)
         # zero_element = h_list[-1]['index']
-        self.assertEqual(h_list[0]['index'], 10)
+        self.assertEqual(h_list[0]["index"], 10)
         # self.assertEqual(h_list[-1]['index'], zero_element)
-        self.assertEqual(h_list[0]['block'], h_all_raw[-11 + zero_element][1]['block'])
-        self.assertEqual(h_list[-1]['block'], h_all_raw[-1][1]['block'])
+        self.assertEqual(h_list[0]["block"], h_all_raw[-11 + zero_element][1]["block"])
+        self.assertEqual(h_list[-1]["block"], h_all_raw[-1][1]["block"])
         h_list = []
-        for h in account.history_reverse(start=9, stop=1, use_block_num=False, batch_size=10, raw_output=True):
+        for h in account.history_reverse(
+            start=9, stop=1, use_block_num=False, batch_size=10, raw_output=True
+        ):
             h_list.append(h)
         self.assertEqual(h_list[0][0], 9)
         self.assertEqual(h_list[-1][0], 1)
-        self.assertEqual(h_list[0][1]['block'], h_all_raw[-10 + zero_element][1]['block'])
-        self.assertEqual(h_list[-1][1]['block'], h_all_raw[-2 + zero_element][1]['block'])
+        self.assertEqual(h_list[0][1]["block"], h_all_raw[-10 + zero_element][1]["block"])
+        self.assertEqual(h_list[-1][1]["block"], h_all_raw[-2 + zero_element][1]["block"])
         start = formatTimeString(h_list[0][1]["timestamp"])
         stop = formatTimeString(h_list[-1][1]["timestamp"])
         h_list = []
-        for h in account.history_reverse(start=start, stop=stop, use_block_num=False, batch_size=10, raw_output=True):
+        for h in account.history_reverse(
+            start=start, stop=stop, use_block_num=False, batch_size=10, raw_output=True
+        ):
             h_list.append(h)
         # self.assertEqual(h_list[0][0], 8)
         self.assertEqual(h_list[-1][0], 1)
-        self.assertEqual(h_list[0][1]['block'], h_all_raw[-10 + zero_element][1]['block'])
-        self.assertEqual(h_list[-1][1]['block'], h_all_raw[-2 + zero_element][1]['block'])
+        self.assertEqual(h_list[0][1]["block"], h_all_raw[-10 + zero_element][1]["block"])
+        self.assertEqual(h_list[-1][1]["block"], h_all_raw[-2 + zero_element][1]["block"])
         h_list = []
         for h in account.get_account_history(10, 10, use_block_num=False, order=1, raw_output=True):
             h_list.append(h)
         # self.assertEqual(h_list[0][0], zero_element)
         self.assertEqual(h_list[-1][0], 10)
-        self.assertEqual(h_list[0][1]['block'], h_all_raw[-1][1]['block'])
-        self.assertEqual(h_list[-1][1]['block'], h_all_raw[-11 + zero_element][1]['block'])
+        self.assertEqual(h_list[0][1]["block"], h_all_raw[-1][1]["block"])
+        self.assertEqual(h_list[-1][1]["block"], h_all_raw[-11 + zero_element][1]["block"])
         h_list = []
-        for h in account.get_account_history(10, 10, use_block_num=False, start=1, stop=9, order=1, raw_output=True):
+        for h in account.get_account_history(
+            10, 10, use_block_num=False, start=1, stop=9, order=1, raw_output=True
+        ):
             h_list.append(h)
         self.assertEqual(h_list[0][0], 1)
         self.assertEqual(h_list[-1][0], 9)
-        self.assertEqual(h_list[0][1]['block'], h_all_raw[-2 + zero_element][1]['block'])
-        self.assertEqual(h_list[-1][1]['block'], h_all_raw[-10 + zero_element][1]['block'])
+        self.assertEqual(h_list[0][1]["block"], h_all_raw[-2 + zero_element][1]["block"])
+        self.assertEqual(h_list[-1][1]["block"], h_all_raw[-10 + zero_element][1]["block"])
         start = formatTimeString(h_list[0][1]["timestamp"])
         stop = formatTimeString(h_list[-1][1]["timestamp"])
         h_list = []
-        for h in account.get_account_history(10, 10, use_block_num=False, start=start, stop=stop, order=1, raw_output=True):
+        for h in account.get_account_history(
+            10, 10, use_block_num=False, start=start, stop=stop, order=1, raw_output=True
+        ):
             h_list.append(h)
         self.assertEqual(h_list[0][0], 1)
         self.assertEqual(h_list[-1][0], 9)
-        self.assertEqual(h_list[0][1]['block'], h_all_raw[-2 + zero_element][1]['block'])
-        self.assertEqual(h_list[-1][1]['block'], h_all_raw[-10 + zero_element][1]['block'])
+        self.assertEqual(h_list[0][1]["block"], h_all_raw[-2 + zero_element][1]["block"])
+        self.assertEqual(h_list[-1][1]["block"], h_all_raw[-10 + zero_element][1]["block"])
         h_list = []
-        for h in account.get_account_history(10, 10, use_block_num=False, order=-1, raw_output=True):
+        for h in account.get_account_history(
+            10, 10, use_block_num=False, order=-1, raw_output=True
+        ):
             h_list.append(h)
         self.assertEqual(h_list[0][0], 10)
         # self.assertEqual(h_list[-1][0], zero_element)
-        self.assertEqual(h_list[0][1]['block'], h_all_raw[-11 + zero_element][1]['block'])
-        self.assertEqual(h_list[-1][1]['block'], h_all_raw[-1][1]['block'])
+        self.assertEqual(h_list[0][1]["block"], h_all_raw[-11 + zero_element][1]["block"])
+        self.assertEqual(h_list[-1][1]["block"], h_all_raw[-1][1]["block"])
         h_list = []
-        for h in account.get_account_history(10, 10, use_block_num=False, start=9, stop=1, order=-1, raw_output=True):
+        for h in account.get_account_history(
+            10, 10, use_block_num=False, start=9, stop=1, order=-1, raw_output=True
+        ):
             h_list.append(h)
         self.assertEqual(h_list[0][0], 9)
         self.assertEqual(h_list[-1][0], 1)
-        self.assertEqual(h_list[0][1]['block'], h_all_raw[-10 + zero_element][1]['block'])
-        self.assertEqual(h_list[-1][1]['block'], h_all_raw[-2 + zero_element][1]['block'])
+        self.assertEqual(h_list[0][1]["block"], h_all_raw[-10 + zero_element][1]["block"])
+        self.assertEqual(h_list[-1][1]["block"], h_all_raw[-2 + zero_element][1]["block"])
         start = formatTimeString(h_list[0][1]["timestamp"])
         stop = formatTimeString(h_list[-1][1]["timestamp"])
         h_list = []
-        for h in account.get_account_history(10, 10, start=start, stop=stop, order=-1, raw_output=True):
+        for h in account.get_account_history(
+            10, 10, start=start, stop=stop, order=-1, raw_output=True
+        ):
             h_list.append(h)
         for i in range(len(h_list)):
             self.assertEqual(h_list[i][0], 9 - i)
-        
-        self.assertEqual(h_list[0][1]['block'], h_all_raw[-10 + zero_element][1]['block'])
-        self.assertEqual(h_list[-1][1]['block'], h_all_raw[-2 + zero_element][1]['block'])
+
+        self.assertEqual(h_list[0][1]["block"], h_all_raw[-10 + zero_element][1]["block"])
+        self.assertEqual(h_list[-1][1]["block"], h_all_raw[-2 + zero_element][1]["block"])
 
     def test_history2(self):
         stm = self.bts
         account = Account("beembot", steem_instance=stm)
         h_list = []
         max_index = account.virtual_op_count()
-        for h in account.history(start=max_index - 4, stop=max_index, use_block_num=False, batch_size=2, raw_output=False):
+        for h in account.history(
+            start=max_index - 4, stop=max_index, use_block_num=False, batch_size=2, raw_output=False
+        ):
             h_list.append(h)
         self.assertEqual(len(h_list), 5)
         for i in range(1, 5):
             self.assertEqual(h_list[i]["index"] - h_list[i - 1]["index"], 1)
 
         h_list = []
-        for h in account.history(start=max_index - 4, stop=max_index, use_block_num=False, batch_size=6, raw_output=False):
+        for h in account.history(
+            start=max_index - 4, stop=max_index, use_block_num=False, batch_size=6, raw_output=False
+        ):
             h_list.append(h)
         self.assertEqual(len(h_list), 5)
         for i in range(1, 5):
             self.assertEqual(h_list[i]["index"] - h_list[i - 1]["index"], 1)
 
         h_list = []
-        for h in account.history(start=max_index - 4, stop=max_index, use_block_num=False, batch_size=2, raw_output=True):
+        for h in account.history(
+            start=max_index - 4, stop=max_index, use_block_num=False, batch_size=2, raw_output=True
+        ):
             h_list.append(h)
         self.assertEqual(len(h_list), 5)
         for i in range(1, 5):
             self.assertEqual(h_list[i][0] - h_list[i - 1][0], 1)
 
         h_list = []
-        for h in account.history(start=max_index - 4, stop=max_index, use_block_num=False, batch_size=6, raw_output=True):
+        for h in account.history(
+            start=max_index - 4, stop=max_index, use_block_num=False, batch_size=6, raw_output=True
+        ):
             h_list.append(h)
         self.assertEqual(len(h_list), 5)
         for i in range(1, 5):
@@ -200,13 +221,17 @@ class Testcases(unittest.TestCase):
         stm = self.bts
         account = Account("beembot", steem_instance=stm)
         h_list = []
-        for h in account.history(start=1, stop=10, use_block_num=False, batch_size=10, raw_output=True):
+        for h in account.history(
+            start=1, stop=10, use_block_num=False, batch_size=10, raw_output=True
+        ):
             h_list.append(h)
         for i in range(len(h_list)):
             self.assertEqual(h_list[i][0], i + 1)
 
         h_list = []
-        for h in account.history(start=1, stop=10, use_block_num=False, batch_size=2, raw_output=True):
+        for h in account.history(
+            start=1, stop=10, use_block_num=False, batch_size=2, raw_output=True
+        ):
             h_list.append(h)
         for i in range(len(h_list)):
             self.assertEqual(h_list[i][0], i + 1)
@@ -216,28 +241,36 @@ class Testcases(unittest.TestCase):
         account = Account("beembot", steem_instance=stm)
         h_list = []
         max_index = account.virtual_op_count()
-        for h in account.history_reverse(start=max_index, stop=max_index - 4, use_block_num=False, batch_size=2, raw_output=False):
+        for h in account.history_reverse(
+            start=max_index, stop=max_index - 4, use_block_num=False, batch_size=2, raw_output=False
+        ):
             h_list.append(h)
         self.assertEqual(len(h_list), 5)
         for i in range(1, 5):
             self.assertEqual(h_list[i]["index"] - h_list[i - 1]["index"], -1)
 
         h_list = []
-        for h in account.history_reverse(start=max_index, stop=max_index - 4, use_block_num=False, batch_size=6, raw_output=False):
+        for h in account.history_reverse(
+            start=max_index, stop=max_index - 4, use_block_num=False, batch_size=6, raw_output=False
+        ):
             h_list.append(h)
         self.assertEqual(len(h_list), 5)
         for i in range(1, 5):
             self.assertEqual(h_list[i]["index"] - h_list[i - 1]["index"], -1)
 
         h_list = []
-        for h in account.history_reverse(start=max_index, stop=max_index - 4, use_block_num=False, batch_size=6, raw_output=True):
+        for h in account.history_reverse(
+            start=max_index, stop=max_index - 4, use_block_num=False, batch_size=6, raw_output=True
+        ):
             h_list.append(h)
         self.assertEqual(len(h_list), 5)
         for i in range(1, 5):
             self.assertEqual(h_list[i][0] - h_list[i - 1][0], -1)
 
         h_list = []
-        for h in account.history_reverse(start=max_index, stop=max_index - 4, use_block_num=False, batch_size=2, raw_output=True):
+        for h in account.history_reverse(
+            start=max_index, stop=max_index - 4, use_block_num=False, batch_size=2, raw_output=True
+        ):
             h_list.append(h)
         self.assertEqual(len(h_list), 5)
         for i in range(1, 5):
@@ -254,20 +287,32 @@ class Testcases(unittest.TestCase):
         self.assertTrue(len(h_all_raw) > 0)
         self.assertTrue(len(h_all_raw[0]) > 1)
         self.assertTrue("block" in h_all_raw[0][1])
-        for h in account.history(start=h_all_raw[-1][1]["block"], stop=h_all_raw[0][1]["block"], use_block_num=True, batch_size=10, raw_output=True):
+        for h in account.history(
+            start=h_all_raw[-1][1]["block"],
+            stop=h_all_raw[0][1]["block"],
+            use_block_num=True,
+            batch_size=10,
+            raw_output=True,
+        ):
             h_list.append(h)
         # self.assertEqual(h_list[0][0], zero_element)
         self.assertEqual(h_list[-1][0], h_all_raw[0][0])
-        self.assertEqual(h_list[0][1]['block'], h_all_raw[-1][1]['block'])
-        self.assertEqual(h_list[-1][1]['block'], h_all_raw[0][1]['block'])
+        self.assertEqual(h_list[0][1]["block"], h_all_raw[-1][1]["block"])
+        self.assertEqual(h_list[-1][1]["block"], h_all_raw[0][1]["block"])
         h_list = []
-        for h in account.history_reverse(start=h_all_raw[0][1]["block"], stop=h_all_raw[-1][1]["block"], use_block_num=True, batch_size=10, raw_output=True):
+        for h in account.history_reverse(
+            start=h_all_raw[0][1]["block"],
+            stop=h_all_raw[-1][1]["block"],
+            use_block_num=True,
+            batch_size=10,
+            raw_output=True,
+        ):
             h_list.append(h)
         # self.assertEqual(h_list[0][0], 10)
-        
+
         self.assertEqual(h_list[0][0], h_all_raw[0][0])
-        self.assertEqual(h_list[0][1]['block'], h_all_raw[0][1]['block'])
-        self.assertEqual(h_list[-1][1]['block'], h_all_raw[-1][1]['block'])
+        self.assertEqual(h_list[0][1]["block"], h_all_raw[0][1]["block"])
+        self.assertEqual(h_list[-1][1]["block"], h_all_raw[-1][1]["block"])
 
     def test_account_props(self):
         account = self.account
@@ -287,190 +332,132 @@ class Testcases(unittest.TestCase):
         following = account.get_following()
         self.assertTrue(isinstance(following, list))
         count = account.get_follow_count()
-        self.assertEqual(count['follower_count'], len(followers))
-        self.assertEqual(count['following_count'], len(following))
-        
+        self.assertEqual(count["follower_count"], len(followers))
+        self.assertEqual(count["following_count"], len(following))
 
     def test_MissingKeyError(self):
         w = self.account
         w.blockchain.txbuffer.clear()
         tx = w.convert("1 SBD")
-        with self.assertRaises(
-            exceptions.MissingKeyError
-        ):
+        with self.assertRaises(exceptions.MissingKeyError):
             tx.sign()
 
     def test_withdraw_vesting(self):
         w = self.account
         w.blockchain.txbuffer.clear()
         tx = w.withdraw_vesting("100 VESTS")
-        self.assertEqual(
-            (tx["operations"][0][0]),
-            "withdraw_vesting"
-        )
+        self.assertEqual((tx["operations"][0][0]), "withdraw_vesting")
         op = tx["operations"][0][1]
-        self.assertIn(
-            "beembot",
-            op["account"])
+        self.assertIn("beembot", op["account"])
 
     def test_delegate_vesting_shares(self):
         w = self.account
         w.blockchain.txbuffer.clear()
         tx = w.delegate_vesting_shares("test1", "100 VESTS")
-        self.assertEqual(
-            (tx["operations"][0][0]),
-            "delegate_vesting_shares"
-        )
+        self.assertEqual((tx["operations"][0][0]), "delegate_vesting_shares")
         op = tx["operations"][0][1]
-        self.assertIn(
-            "beembot",
-            op["delegator"])
+        self.assertIn("beembot", op["delegator"])
 
     def test_claim_reward_balance(self):
         w = self.account
         w.blockchain.txbuffer.clear()
         tx = w.claim_reward_balance()
-        self.assertEqual(
-            (tx["operations"][0][0]),
-            "claim_reward_balance"
-        )
+        self.assertEqual((tx["operations"][0][0]), "claim_reward_balance")
         op = tx["operations"][0][1]
-        self.assertIn(
-            "beembot",
-            op["account"])
+        self.assertIn("beembot", op["account"])
 
     def test_cancel_transfer_from_savings(self):
         w = self.account
         w.blockchain.txbuffer.clear()
         tx = w.cancel_transfer_from_savings(0)
-        self.assertEqual(
-            (tx["operations"][0][0]),
-            "cancel_transfer_from_savings"
-        )
+        self.assertEqual((tx["operations"][0][0]), "cancel_transfer_from_savings")
         op = tx["operations"][0][1]
-        self.assertIn(
-            "beembot",
-            op["from"])
+        self.assertIn("beembot", op["from"])
 
     def test_transfer_from_savings(self):
         w = self.account
         w.blockchain.txbuffer.clear()
         tx = w.transfer_from_savings(1, "STEEM", "")
-        self.assertEqual(
-            (tx["operations"][0][0]),
-            "transfer_from_savings"
-        )
+        self.assertEqual((tx["operations"][0][0]), "transfer_from_savings")
         op = tx["operations"][0][1]
-        self.assertIn(
-            "beembot",
-            op["from"])
+        self.assertIn("beembot", op["from"])
 
     def test_transfer_to_savings(self):
         w = self.account
         w.blockchain.txbuffer.clear()
         tx = w.transfer_to_savings(1, "STEEM", "")
-        self.assertEqual(
-            (tx["operations"][0][0]),
-            "transfer_to_savings"
-        )
+        self.assertEqual((tx["operations"][0][0]), "transfer_to_savings")
         op = tx["operations"][0][1]
-        self.assertIn(
-            "beembot",
-            op["from"])
+        self.assertIn("beembot", op["from"])
 
     def test_convert(self):
         w = self.account
         w.blockchain.txbuffer.clear()
         tx = w.convert("1 SBD")
-        self.assertEqual(
-            (tx["operations"][0][0]),
-            "convert"
-        )
+        self.assertEqual((tx["operations"][0][0]), "convert")
         op = tx["operations"][0][1]
-        self.assertIn(
-            "beembot",
-            op["owner"])
+        self.assertIn("beembot", op["owner"])
 
     def test_proxy(self):
         w = self.account
         w.blockchain.txbuffer.clear()
         tx = w.setproxy(proxy="gtg")
-        self.assertEqual(
-            (tx["operations"][0][0]),
-            "account_witness_proxy"
-        )
+        self.assertEqual((tx["operations"][0][0]), "account_witness_proxy")
         op = tx["operations"][0][1]
-        self.assertIn(
-            "gtg",
-            op["proxy"])
+        self.assertIn("gtg", op["proxy"])
 
     def test_transfer_to_vesting(self):
         w = self.account
         w.blockchain.txbuffer.clear()
         tx = w.transfer_to_vesting("1 STEEM")
-        self.assertEqual(
-            (tx["operations"][0][0]),
-            "transfer_to_vesting"
-        )
+        self.assertEqual((tx["operations"][0][0]), "transfer_to_vesting")
         op = tx["operations"][0][1]
-        self.assertIn(
-            "beembot",
-            op["from"])
+        self.assertIn("beembot", op["from"])
 
         w.blockchain.txbuffer.clear()
         tx = w.transfer_to_vesting("1 STEEM", skip_account_check=True)
-        self.assertEqual(
-            (tx["operations"][0][0]),
-            "transfer_to_vesting"
-        )
+        self.assertEqual((tx["operations"][0][0]), "transfer_to_vesting")
         op = tx["operations"][0][1]
-        self.assertIn(
-            "beembot",
-            op["from"])
+        self.assertIn("beembot", op["from"])
 
     def test_transfer(self):
         w = self.account
         w.blockchain.txbuffer.clear()
         tx = w.transfer("beembot", "1", "STEEM")
-        self.assertEqual(
-            (tx["operations"][0][0]),
-            "transfer"
-        )
+        self.assertEqual((tx["operations"][0][0]), "transfer")
         op = tx["operations"][0][1]
-        self.assertIn(
-            "beembot",
-            op["from"])
-        self.assertIn(
-            "beembot",
-            op["to"])        
+        self.assertIn("beembot", op["from"])
+        self.assertIn("beembot", op["to"])
 
         w.blockchain.txbuffer.clear()
         tx = w.transfer("beembot", "1", "STEEM", skip_account_check=True)
-        self.assertEqual(
-            (tx["operations"][0][0]),
-            "transfer"
-        )
+        self.assertEqual((tx["operations"][0][0]), "transfer")
         op = tx["operations"][0][1]
-        self.assertIn(
-            "beembot",
-            op["from"])
-        self.assertIn(
-            "beembot",
-            op["to"])        
+        self.assertIn("beembot", op["from"])
+        self.assertIn("beembot", op["to"])
 
     def test_json_export(self):
         account = Account("beembot", steem_instance=self.bts)
         if account.blockchain.rpc.get_use_appbase():
-            content = self.bts.rpc.find_accounts({'accounts': [account["name"]]}, api="database")["accounts"][0]
+            content = self.bts.rpc.find_accounts({"accounts": [account["name"]]}, api="database")[
+                "accounts"
+            ][0]
         else:
             content = self.bts.rpc.get_accounts([account["name"]])[0]
         keys = list(content.keys())
         json_content = account.json()
-        exclude_list = ['owner_challenged', 'average_bandwidth']  # ['json_metadata', 'reputation', 'active_votes', 'savings_sbd_seconds']
+        exclude_list = [
+            "owner_challenged",
+            "average_bandwidth",
+        ]  # ['json_metadata', 'reputation', 'active_votes', 'savings_sbd_seconds']
         for k in keys:
             if k not in exclude_list:
                 if isinstance(content[k], dict) and isinstance(json_content[k], list):
-                    content_list = [content[k]["amount"], content[k]["precision"], content[k]["nai"]]
+                    content_list = [
+                        content[k]["amount"],
+                        content[k]["precision"],
+                        content[k]["nai"],
+                    ]
                     self.assertEqual(content_list, json_content[k])
                 else:
                     self.assertEqual(content[k], json_content[k])
@@ -490,9 +477,9 @@ class Testcases(unittest.TestCase):
         block_diff1 = 0
         block_diff2 = 0
         for h in account.get_account_history(op_num4 - 1, 0):
-            block_diff1 = (block_num - h["block"])
+            block_diff1 = block_num - h["block"]
         for h in account.get_account_history(op_num4 + 1, 0):
-            block_diff2 = (block_num - h["block"])
+            block_diff2 = block_num - h["block"]
         self.assertTrue(block_diff1 > 0)
         self.assertTrue(block_diff2 <= 0)
 
@@ -540,7 +527,7 @@ class Testcases(unittest.TestCase):
         replies = []
         for r in account.reply_history(limit=1):
             replies.append(r)
-        #self.assertEqual(len(replies), 1)
+        # self.assertEqual(len(replies), 1)
         if len(replies) > 0:
             self.assertTrue(replies[0].is_comment())
             self.assertTrue(replies[0].depth > 0)
@@ -548,7 +535,13 @@ class Testcases(unittest.TestCase):
     def test_get_vote_pct_for_vote_value(self):
         account = self.account
         for vote_pwr in range(5, 100, 5):
-            self.assertTrue(9900 <= account.get_vote_pct_for_vote_value(account.get_voting_value(voting_power=vote_pwr), voting_power=vote_pwr) <= 11000)
+            self.assertTrue(
+                9900
+                <= account.get_vote_pct_for_vote_value(
+                    account.get_voting_value(voting_power=vote_pwr), voting_power=vote_pwr
+                )
+                <= 11000
+            )
 
     def test_extract_account_name(self):
         stm = self.bts

@@ -1,16 +1,15 @@
 from __future__ import print_function
-from memory_profiler import profile
-import sys
-from datetime import datetime, timedelta
-import time
-import io
-from beem.steem import Steem
-from beem.account import Account
-from beem.amount import Amount
-from beem.blockchain import Blockchain
-from beem.utils import parse_time
-from beem.instance import set_shared_steem_instance
+
 import logging
+from datetime import datetime
+
+from memory_profiler import profile
+
+from beem.account import Account
+from beem.blockchain import Blockchain
+from beem.instance import set_shared_steem_instance
+from beem.steem import Steem
+
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -44,8 +43,34 @@ def profiling(name_list):
 
 
 if __name__ == "__main__":
-
-    account_list = ["utopian-io", "busy.org", "minnowsupport", "qurator", "thesteemengine", "ethandsmith", "make-a-whale", "feedyourminnows", "steembasicincome",
-                    "sbi2", "sbi3", "sbi4", "sbi5", "sbi6", "steemdunk", "thehumanbot", "resteemable", "kobusu", "mariachan", "qustodian", "randowhale",
-                    "bumper", "minnowbooster", "smartsteem", "steemlike", "parosai", "koinbot", "steemfunding"]
+    account_list = [
+        "utopian-io",
+        "busy.org",
+        "minnowsupport",
+        "qurator",
+        "thesteemengine",
+        "ethandsmith",
+        "make-a-whale",
+        "feedyourminnows",
+        "steembasicincome",
+        "sbi2",
+        "sbi3",
+        "sbi4",
+        "sbi5",
+        "sbi6",
+        "steemdunk",
+        "thehumanbot",
+        "resteemable",
+        "kobusu",
+        "mariachan",
+        "qustodian",
+        "randowhale",
+        "bumper",
+        "minnowbooster",
+        "smartsteem",
+        "steemlike",
+        "parosai",
+        "koinbot",
+        "steemfunding",
+    ]
     profiling(account_list)

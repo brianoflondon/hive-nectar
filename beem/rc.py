@@ -1,25 +1,21 @@
 # -*- coding: utf-8 -*-
-import logging
-import json
-from .instance import shared_blockchain_instance
-from beem.constants import state_object_size_info, resource_execution_time, EXEC_FOLLOW_CUSTOM_OP_SCALE
-import hashlib
-from binascii import hexlify, unhexlify
-import os
-from pprint import pprint
-from beem.amount import Amount
+from binascii import hexlify
+
+from beem.constants import (
+    EXEC_FOLLOW_CUSTOM_OP_SCALE,
+    resource_execution_time,
+    state_object_size_info,
+)
 from beembase import operations
 from beembase.objects import Operation
 from beembase.signedtransactions import Signed_Transaction
-from beemgraphenebase.py23 import py23_bytes, bytes_types
+from beemgraphenebase.py23 import py23_bytes
+
+from .instance import shared_blockchain_instance
 
 
 class RC(object):
-    def __init__(
-        self,
-        blockchain_instance=None,
-        **kwargs
-    ):
+    def __init__(self, blockchain_instance=None, **kwargs):
         if blockchain_instance is None:
             if kwargs.get("steem_instance"):
                 blockchain_instance = kwargs["steem_instance"]
@@ -30,25 +26,38 @@ class RC(object):
     def get_tx_size(self, op):
         """Returns the tx size of an operation"""
         ops = [Operation(op)]
-        prefix = u"STEEM"
+        prefix = "STEEM"
         wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
         ref_block_num = 34294
         ref_block_prefix = 3707022213
         expiration = "2016-04-06T08:29:27"
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
+        tx = Signed_Transaction(
+            ref_block_num=ref_block_num,
+            ref_block_prefix=ref_block_prefix,
+            expiration=expiration,
+            operations=ops,
+        )
         tx = tx.sign([wif], chain=prefix)
         txWire = hexlify(py23_bytes(tx)).decode("ascii")
         tx_size = len(txWire)
         return tx_size
 
-    def get_resource_count(self, tx_size, execution_time_count, state_bytes_count=0, new_account_op_count=0, market_op_count=0):
+    def get_resource_count(
+        self,
+        tx_size,
+        execution_time_count,
+        state_bytes_count=0,
+        new_account_op_count=0,
+        market_op_count=0,
+    ):
         """Creates the resource_count dictionary based on tx_size, state_bytes_count, new_account_op_count and market_op_count"""
         resource_count = {"resource_history_bytes": tx_size}
-        resource_count["resource_state_bytes"] = state_object_size_info["transaction_object_base_size"]
-        resource_count["resource_state_bytes"] += state_object_size_info["transaction_object_byte_size"] * tx_size
+        resource_count["resource_state_bytes"] = state_object_size_info[
+            "transaction_object_base_size"
+        ]
+        resource_count["resource_state_bytes"] += (
+            state_object_size_info["transaction_object_byte_size"] * tx_size
+        )
         resource_count["resource_state_bytes"] += state_bytes_count
         resource_count["resource_new_accounts"] = new_account_op_count
         resource_count["resource_execution_time"] = execution_time_count
@@ -79,13 +88,22 @@ class RC(object):
         tx_size = self.get_tx_size(op)
         permlink_length = len(comment_dict["permlink"])
         parent_permlink_length = len(comment_dict["parent_permlink"])
-        return self.comment(tx_size=tx_size, permlink_length=permlink_length, parent_permlink_length=parent_permlink_length)
+        return self.comment(
+            tx_size=tx_size,
+            permlink_length=permlink_length,
+            parent_permlink_length=parent_permlink_length,
+        )
 
     def comment(self, tx_size=1000, permlink_length=10, parent_permlink_length=10):
         """Calc RC for a comment"""
         state_bytes_count = state_object_size_info["comment_object_base_size"]
-        state_bytes_count += state_object_size_info["comment_object_permlink_char_size"] * permlink_length
-        state_bytes_count += state_object_size_info["comment_object_parent_permlink_char_size"] * parent_permlink_length
+        state_bytes_count += (
+            state_object_size_info["comment_object_permlink_char_size"] * permlink_length
+        )
+        state_bytes_count += (
+            state_object_size_info["comment_object_parent_permlink_char_size"]
+            * parent_permlink_length
+        )
         execution_time_count = resource_execution_time["comment_operation_exec_time"]
         resource_count = self.get_resource_count(tx_size, execution_time_count, state_bytes_count)
         return self.blockchain.get_rc_cost(resource_count)
@@ -145,7 +163,9 @@ class RC(object):
     def transfer(self, tx_size=290, market_op_count=1):
         """Calc RC of a transfer"""
         execution_time_count = resource_execution_time["transfer_operation_exec_time"]
-        resource_count = self.get_resource_count(tx_size, execution_time_count, market_op_count=market_op_count)
+        resource_count = self.get_resource_count(
+            tx_size, execution_time_count, market_op_count=market_op_count
+        )
         return self.blockchain.get_rc_cost(resource_count)
 
     def custom_json_dict(self, custom_json_dict):
@@ -195,13 +215,17 @@ class RC(object):
     def claim_account(self, tx_size=300):
         """Claim account"""
         execution_time_count = resource_execution_time["claim_account_operation_exec_time"]
-        resource_count = self.get_resource_count(tx_size, execution_time_count, new_account_op_count=1)
+        resource_count = self.get_resource_count(
+            tx_size, execution_time_count, new_account_op_count=1
+        )
         return self.blockchain.get_rc_cost(resource_count)
 
     def get_authority_byte_count(self, auth):
-        return (state_object_size_info["authority_base_size"]
-                + state_object_size_info["authority_account_member_size"] * len(auth["account_auths"])
-                + state_object_size_info["authority_key_member_size"] * len(auth["key_auths"]))
+        return (
+            state_object_size_info["authority_base_size"]
+            + state_object_size_info["authority_account_member_size"] * len(auth["account_auths"])
+            + state_object_size_info["authority_key_member_size"] * len(auth["key_auths"])
+        )
 
     def account_create_dict(self, account_create_dict):
         """Calc RC costs for account create"""
@@ -230,55 +254,55 @@ class RC(object):
         return self.blockchain.get_rc_cost(resource_count)
 
     def set_slot_delegator(self, from_pool, to_account, to_slot, signer):
-        """ Set a slot to receive RC from a pool
+        """Set a slot to receive RC from a pool
 
-            :param str from_pool: Pool to set the slot to
-            :param str to_account: Account on which we want to update the slot
-            :param int to_slot: slot we want to set
-            :param str signer: Account who broadcast this
+        :param str from_pool: Pool to set the slot to
+        :param str to_account: Account on which we want to update the slot
+        :param int to_slot: slot we want to set
+        :param str signer: Account who broadcast this
         """
         json_body = [
-            'set_slot_delegator', {
-                'from_pool': from_pool,
-                'to_account': to_account,
-                'to_slot': to_slot,
-                'signer': signer,
-            }
+            "set_slot_delegator",
+            {
+                "from_pool": from_pool,
+                "to_account": to_account,
+                "to_slot": to_slot,
+                "signer": signer,
+            },
         ]
-        return self.blockchain.custom_json(
-            "rc", json_body, required_auths=[signer])
+        return self.blockchain.custom_json("rc", json_body, required_auths=[signer])
 
     def delegate_from_pool(self, from_pool, to_account, max_rc):
-        """ Set a slot to receive RC from a pool
+        """Set a slot to receive RC from a pool
 
-            :param str from_pool: Pool to set the slot to
-            :param str to_account: Account on which we want to update the slot
-            :param int max_rc: max rc to delegate
+        :param str from_pool: Pool to set the slot to
+        :param str to_account: Account on which we want to update the slot
+        :param int max_rc: max rc to delegate
         """
         json_body = [
-            'delegate_drc_from_pool', {
-                'from_pool': from_pool,
-                'to_account': to_account,
-                'asset_symbol': {'nai': "@@000000037", 'decimals': 6},
+            "delegate_drc_from_pool",
+            {
+                "from_pool": from_pool,
+                "to_account": to_account,
+                "asset_symbol": {"nai": "@@000000037", "decimals": 6},
                 "drc_max_mana": max_rc,
-            }
+            },
         ]
-        return self.blockchain.custom_json(
-            "rc", json_body, required_auths=[from_pool])
+        return self.blockchain.custom_json("rc", json_body, required_auths=[from_pool])
 
     def delegate_to_pool(self, username, to_pool, rc):
-        """ Set a slot to receive RC from a pool
+        """Set a slot to receive RC from a pool
 
-            :param str username: user delegating rc to the pool
-            :param str to_pool: Pool to delegate to
-            :param str rc: rc to delegate
+        :param str username: user delegating rc to the pool
+        :param str to_pool: Pool to delegate to
+        :param str rc: rc to delegate
         """
         json_body = [
-            'delegate_to_pool', {
-                'from_account': username,
-                'to_pool': to_pool,
-                'amount':  {'symbol': "VESTS", 'amount': rc, 'precision': 6, 'nai': '@@000000037'},
-            }
+            "delegate_to_pool",
+            {
+                "from_account": username,
+                "to_pool": to_pool,
+                "amount": {"symbol": "VESTS", "amount": rc, "precision": 6, "nai": "@@000000037"},
+            },
         ]
-        return self.blockchain.custom_json(
-            "rc", json_body, required_auths=[username])
+        return self.blockchain.custom_json("rc", json_body, required_auths=[username])

@@ -1,8 +1,9 @@
 #!/usr/bin/python
 import sys
+from time import sleep
+
 from beem import Steem
 from beem.witness import Witness, WitnessesRankedByVote
-from time import sleep
 
 
 def convert_block_diff_to_time_string(block_diff_est):
@@ -39,13 +40,17 @@ if __name__ == "__main__":
     witnesses = WitnessesRankedByVote(limit=250, steem_instance=stm)
     vote_sum = witnesses.get_votes_sum()
 
-    virtual_time_to_block_num = int(witness_schedule["num_scheduled_witnesses"]) / (lap_length / (vote_sum + 1))
+    virtual_time_to_block_num = int(witness_schedule["num_scheduled_witnesses"]) / (
+        lap_length / (vote_sum + 1)
+    )
     while True:
         witness.refresh()
         witness_schedule = stm.get_witness_schedule(use_stored_data=False)
 
         witness_json = witness.json()
-        virtual_diff = int(witness_json["virtual_scheduled_time"]) - int(witness_schedule['current_virtual_time'])
+        virtual_diff = int(witness_json["virtual_scheduled_time"]) - int(
+            witness_schedule["current_virtual_time"]
+        )
         block_diff_est = virtual_diff * virtual_time_to_block_num
 
         time_diff_est = convert_block_diff_to_time_string(block_diff_est)

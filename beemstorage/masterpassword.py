@@ -1,29 +1,30 @@
 # -*- coding: utf-8 -*-
 # Inspired by https://raw.githubusercontent.com/xeroc/python-graphenelib/master/graphenestorage/masterpassword.py
-import os
 import hashlib
 import logging
+import os
 import warnings
-
 from binascii import hexlify
-from beemgraphenebase.py23 import py23_bytes
+
 from beemgraphenebase import bip38
 from beemgraphenebase.aes import AESCipher
-from .exceptions import WrongMasterPasswordException, WalletLocked
+from beemgraphenebase.py23 import py23_bytes
+
+from .exceptions import WalletLocked, WrongMasterPasswordException
 
 log = logging.getLogger(__name__)
 
 
 class MasterPassword(object):
-    """ The keys are encrypted with a Masterpassword that is stored in
-        the configurationStore. It has a checksum to verify correctness
-        of the password
-        The encrypted private keys in `keys` are encrypted with a random
-        **masterkey/masterpassword** that is stored in the configuration
-        encrypted by the user-provided password.
+    """The keys are encrypted with a Masterpassword that is stored in
+    the configurationStore. It has a checksum to verify correctness
+    of the password
+    The encrypted private keys in `keys` are encrypted with a random
+    **masterkey/masterpassword** that is stored in the configuration
+    encrypted by the user-provided password.
 
-        :param ConfigStore config: Configuration store to get access to the
-            encrypted master password
+    :param ConfigStore config: Configuration store to get access to the
+        encrypted master password
     """
 
     def __init__(self, config=None, **kwargs):
@@ -36,24 +37,21 @@ class MasterPassword(object):
 
     @property
     def masterkey(self):
-        """ Contains the **decrypted** master key
-        """
+        """Contains the **decrypted** master key"""
         return self.decrypted_master
 
     def has_masterpassword(self):
-        """ Tells us if the config store knows an encrypted masterpassword
-        """
+        """Tells us if the config store knows an encrypted masterpassword"""
         return self.config_key in self.config
 
     def locked(self):
-        """ Is the store locked. E.g. Is a valid password known that can be
-            used to decrypt the master key?
+        """Is the store locked. E.g. Is a valid password known that can be
+        used to decrypt the master key?
         """
         return not self.unlocked()
 
     def unlocked(self):
-        """ Is the store unlocked so that I can decrypt the content?
-        """
+        """Is the store unlocked so that I can decrypt the content?"""
         if self.password is not None:
             return bool(self.password)
         else:
@@ -62,6 +60,7 @@ class MasterPassword(object):
             if password_storage == "keyring":
                 try:
                     import keyring
+
                     if not isinstance(keyring.get_keyring(), keyring.backends.fail.Keyring):
                         KEYRING_AVAILABLE = True
                     else:
@@ -75,14 +74,14 @@ class MasterPassword(object):
                 and self.config[self.config_key]
                 and password_storage == "environment"
             ):
-                log.debug("Trying to use environmental " "variable to unlock wallet")
+                log.debug("Trying to use environmental variable to unlock wallet")
                 self.unlock(os.environ.get("UNLOCK"))
                 return bool(self.password)
             elif (
                 password_storage == "keyring"
                 and KEYRING_AVAILABLE
                 and self.config_key in self.config
-                and self.config[self.config_key]                
+                and self.config[self.config_key]
             ):
                 log.debug("Trying to use keyring to unlock wallet")
                 pwd = keyring.get_password("beem", "wallet")
@@ -91,21 +90,21 @@ class MasterPassword(object):
         return False
 
     def lock(self):
-        """ Lock the store so that we can no longer decrypt the content of the
-            store
+        """Lock the store so that we can no longer decrypt the content of the
+        store
         """
         self.password = None
         self.decrypted_master = None
 
     def unlock(self, password):
-        """ The password is used to encrypt this masterpassword. To
-            decrypt the keys stored in the keys database, one must use
-            BIP38, decrypt the masterpassword from the configuration
-            store with the user password, and use the decrypted
-            masterpassword to decrypt the BIP38 encrypted private keys
-            from the keys storage!
+        """The password is used to encrypt this masterpassword. To
+        decrypt the keys stored in the keys database, one must use
+        BIP38, decrypt the masterpassword from the configuration
+        store with the user password, and use the decrypted
+        masterpassword to decrypt the BIP38 encrypted private keys
+        from the keys storage!
 
-            :param str password: Password to use for en-/de-cryption
+        :param str password: Password to use for en-/de-cryption
         """
         self.password = password
         if self.config_key in self.config and self.config[self.config_key]:
@@ -115,13 +114,12 @@ class MasterPassword(object):
             self._save_encrypted_masterpassword()
 
     def wipe_masterpassword(self):
-        """ Removes the encrypted masterpassword from config storage"""
+        """Removes the encrypted masterpassword from config storage"""
         if self.config_key in self.config and self.config[self.config_key]:
             self.config[self.config_key] = None
 
     def _decrypt_masterpassword(self):
-        """ Decrypt the encrypted masterkey
-        """
+        """Decrypt the encrypted masterkey"""
         aes = AESCipher(self.password)
         checksum, encrypted_master = self.config[self.config_key].split("$")
         try:
@@ -140,10 +138,10 @@ class MasterPassword(object):
         self.config[self.config_key] = self._get_encrypted_masterpassword()
 
     def _new_masterpassword(self, password):
-        """ Generate a new random masterkey, encrypt it with the password and
-            store it in the store.
+        """Generate a new random masterkey, encrypt it with the password and
+        store it in the store.
 
-            :param str password: Password to use for en-/de-cryption
+        :param str password: Password to use for en-/de-cryption
         """
         # make sure to not overwrite an existing key
         if self.config_key in self.config and self.config[self.config_key]:
@@ -157,54 +155,50 @@ class MasterPassword(object):
         return self.masterkey
 
     def _derive_checksum(self, s):
-        """ Derive the checksum
+        """Derive the checksum
 
-            :param str s: Random string for which to derive the checksum
+        :param str s: Random string for which to derive the checksum
         """
         checksum = hashlib.sha256(bytes(s, "ascii")).hexdigest()
         return checksum[:4]
 
     def _get_encrypted_masterpassword(self):
-        """ Obtain the encrypted masterkey
+        """Obtain the encrypted masterkey
 
-            .. note:: The encrypted masterkey is checksummed, so that we can
-                figure out that a provided password is correct or not. The
-                checksum is only 4 bytes long!
+        .. note:: The encrypted masterkey is checksummed, so that we can
+            figure out that a provided password is correct or not. The
+            checksum is only 4 bytes long!
         """
         if not self.unlocked():
             raise WalletLocked
         aes = AESCipher(self.password)
-        return "{}${}".format(
-            self._derive_checksum(self.masterkey), aes.encrypt(self.masterkey)
-        )
+        return "{}${}".format(self._derive_checksum(self.masterkey), aes.encrypt(self.masterkey))
 
     def change_password(self, newpassword):
-        """ Change the password that allows to decrypt the master key
-        """
+        """Change the password that allows to decrypt the master key"""
         if not self.unlocked():
             raise WalletLocked
         self.password = newpassword
         self._save_encrypted_masterpassword()
 
     def decrypt(self, wif):
-        """ Decrypt the content according to BIP38
+        """Decrypt the content according to BIP38
 
-            :param str wif: Encrypted key
+        :param str wif: Encrypted key
         """
         if not self.unlocked():
             raise WalletLocked
         return format(bip38.decrypt(wif, self.masterkey), "wif")
 
     def deriveChecksum(self, s):
-        """ Derive the checksum
-        """
+        """Derive the checksum"""
         checksum = hashlib.sha256(py23_bytes(s, "ascii")).hexdigest()
         return checksum[:4]
 
     def encrypt_text(self, txt):
-        """ Encrypt the content according to BIP38
+        """Encrypt the content according to BIP38
 
-            :param str wif: Unencrypted key
+        :param str wif: Unencrypted key
         """
         if not self.unlocked():
             raise WalletLocked
@@ -212,9 +206,9 @@ class MasterPassword(object):
         return "{}${}".format(self.deriveChecksum(txt), aes.encrypt(txt))
 
     def decrypt_text(self, enctxt):
-        """ Decrypt the content according to BIP38
+        """Decrypt the content according to BIP38
 
-            :param str wif: Encrypted key
+        :param str wif: Encrypted key
         """
         if not self.unlocked():
             raise WalletLocked
@@ -229,9 +223,9 @@ class MasterPassword(object):
         return decrypted_text
 
     def encrypt(self, wif):
-        """ Encrypt the content according to BIP38
+        """Encrypt the content according to BIP38
 
-            :param str wif: Unencrypted key
+        :param str wif: Unencrypted key
         """
         if not self.unlocked():
             raise WalletLocked

@@ -1,22 +1,10 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-import sys
-from datetime import datetime, timedelta
-import time
-import io
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import logging
 
-from beem.blockchain import Blockchain
-from beem.block import Block
 from beem.account import Account
-from beem.amount import Amount
-from beemgraphenebase.account import PasswordKey, PrivateKey, PublicKey
 from beem.steem import Steem
-from beem.utils import parse_time, formatTimedelta
-from beemapi.exceptions import NumRetriesReached
-from beem.nodelist import NodeList
+
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 

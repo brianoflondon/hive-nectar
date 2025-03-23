@@ -1,18 +1,13 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-import sys
-from datetime import datetime, timedelta
-import time
-import io
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import logging
+import sys
+import time
 
 from beem.blockchain import Blockchain
-from beem.block import Block
-from beem.steem import Steem
-from beem.utils import parse_time, formatTimedelta
 from beem.nodelist import NodeList
+from beem.steem import Steem
+
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -21,9 +16,10 @@ def stream_votes(stm, threading, thread_num):
     b = Blockchain(steem_instance=stm)
     opcount = 0
     start_time = time.time()
-    for op in b.stream(start=23483000, stop=23485000, threading=threading, thread_num=thread_num,
-                       opNames=['vote']):
-        sys.stdout.write("\r%s" % op['block_num'])
+    for op in b.stream(
+        start=23483000, stop=23485000, threading=threading, thread_num=thread_num, opNames=["vote"]
+    ):
+        sys.stdout.write("\r%s" % op["block_num"])
         opcount += 1
     now = time.time()
     total_duration = now - start_time
@@ -60,5 +56,10 @@ if __name__ == "__main__":
     print(str(block._cache))
     clear_duration2 = time.time() - start_time
     print("Results:")
-    print("%d Threads with https duration: %.2f s - votes: %d" % (thread_num, total_duration, opcount))
-    print("Clear %d items in %.3f s (%.3f s) (%d remaining)" % (cache_len, clear_duration, clear_duration2, cache_len_after))
+    print(
+        "%d Threads with https duration: %.2f s - votes: %d" % (thread_num, total_duration, opcount)
+    )
+    print(
+        "Clear %d items in %.3f s (%.3f s) (%d remaining)"
+        % (cache_len, clear_duration, clear_duration2, cache_len_after)
+    )

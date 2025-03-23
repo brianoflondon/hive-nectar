@@ -1,22 +1,13 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-import sys
-from datetime import datetime, timedelta
-import time
-import io
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import logging
 
-from beem.blockchain import Blockchain
-from beem.block import Block
 from beem.account import Account
-from beem.amount import Amount
-from beemgraphenebase.account import PasswordKey, PrivateKey, PublicKey
+from beem.block import Block
+from beem.blockchain import Blockchain
 from beem.steem import Steem
-from beem.utils import parse_time, formatTimedelta
-from beemapi.exceptions import NumRetriesReached
-from beem.nodelist import NodeList
+from beemgraphenebase.account import PasswordKey
+
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -52,17 +43,21 @@ if __name__ == "__main__":
         stm.wallet.addPrivateKey(memo_privkey)
         stm.wallet.addPrivateKey(posting_privkey)
     else:
-        stm = Steem(node=testnet_node,
-                    wif={'active': str(active_privkey),
-                         'posting': str(posting_privkey),
-                         'memo': str(memo_privkey)})
+        stm = Steem(
+            node=testnet_node,
+            wif={
+                "active": str(active_privkey),
+                "posting": str(posting_privkey),
+                "memo": str(memo_privkey),
+            },
+        )
     account = Account(username, steem_instance=stm)
     if account["name"] == "beem":
-        account.disallow("beem1", permission='posting')
-        account.allow('beem1', weight=1, permission='posting', account=None)
+        account.disallow("beem1", permission="posting")
+        account.allow("beem1", weight=1, permission="posting", account=None)
         account.follow("beem1")
     elif account["name"] == "beem5":
-        account.allow('beem4', weight=2, permission='active', account=None)
+        account.allow("beem4", weight=2, permission="active", account=None)
     if useWallet:
         stm.wallet.getAccountFromPrivateKey(str(active_privkey))
 

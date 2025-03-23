@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+"""Generate version files for beem packages."""
+
+import re
+
+
+def get_version():
+    """Get version from pyproject.toml."""
+    try:
+        import tomli
+
+        with open("pyproject.toml", "rb") as f:
+            data = tomli.load(f)
+            return data["project"]["version"]
+    except ImportError:
+        # Fall back to regex if tomli is not available
+        with open("pyproject.toml", "r") as f:
+            content = f.read()
+            version_match = re.search(r'version\s*=\s*"([^"]+)"', content)
+            if version_match:
+                return version_match.group(1)
+            raise ValueError("Could not find version in pyproject.toml")
+
+
+def write_version_py(filename, version):
+    """Write version."""
+    content = f'''"""THIS FILE IS GENERATED FROM beem PYPROJECT.TOML."""
+version = '{version}'
+'''
+    with open(filename, "w") as file:
+        file.write(content)
+
+
+def main():
+    """Main function."""
+    version = get_version()
+    print(f"Generating version files for version {version}")
+
+    # Write version files for all packages
+    write_version_py("beem/version.py", version)
+    write_version_py("beembase/version.py", version)
+    write_version_py("beemapi/version.py", version)
+    write_version_py("beemgraphenebase/version.py", version)
+
+    print("Version files generated successfully!")
+
+
+if __name__ == "__main__":
+    main()

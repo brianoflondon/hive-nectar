@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
-import unittest
-from parameterized import parameterized
-from datetime import datetime, timedelta
-import pytz
 import time
-from pprint import pprint
+import unittest
+
 from beem import Steem
+from beem.block import Block
 from beem.blockchain import Blockchain
 from beem.exceptions import BlockWaitTimeExceeded
-from beem.block import Block
 from beem.instance import set_shared_blockchain_instance
 from beembase.signedtransactions import Signed_Transaction
-from .nodes import get_hive_nodes, get_steem_nodes
+
+from .nodes import get_hive_nodes
 
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 
@@ -20,10 +18,7 @@ class Testcases(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.bts = Steem(
-            node=get_hive_nodes(),
-            nobroadcast=True,
-            keys={"active": wif},
-            num_retries=10
+            node=get_hive_nodes(), nobroadcast=True, keys={"active": wif}, num_retries=10
         )
         b = Blockchain(blockchain_instance=cls.bts)
         num = b.get_current_block_num()
@@ -82,14 +77,18 @@ class Testcases(unittest.TestCase):
     def test_awaitTX(self):
         bts = self.bts
         b = Blockchain(blockchain_instance=bts)
-        trans = {'ref_block_num': 3855, 'ref_block_prefix': 1730859721,
-                 'expiration': '2018-03-09T06:21:06', 'operations': [],
-                 'extensions': [], 'signatures':
-                 ['2033a872a8ad33c7d5b946871e4c9cc8f08a5809258355fc909058eac83'
-                  '20ac2a872517a52b51522930d93dd2c1d5eb9f90b070f75f838c881ff29b11af98d6a1b']}
-        with self.assertRaises(
-            Exception
-        ):
+        trans = {
+            "ref_block_num": 3855,
+            "ref_block_prefix": 1730859721,
+            "expiration": "2018-03-09T06:21:06",
+            "operations": [],
+            "extensions": [],
+            "signatures": [
+                "2033a872a8ad33c7d5b946871e4c9cc8f08a5809258355fc909058eac83"
+                "20ac2a872517a52b51522930d93dd2c1d5eb9f90b070f75f838c881ff29b11af98d6a1b"
+            ],
+        }
+        with self.assertRaises(Exception):
             b.awaitTxConfirmation(trans)
 
     def test_stream(self):
@@ -165,12 +164,12 @@ class Testcases(unittest.TestCase):
         self.assertTrue(len(ops_blocks) > 0)
         for block in ops_blocks:
             for tran in block["transactions"]:
-                for op in tran['operations']:
+                for op in tran["operations"]:
                     if isinstance(op, list) and op[0] in opNames:
                         op_stat4[op[0]] += 1
                     elif isinstance(op, dict):
                         op_type = op["type"]
-                        if len(op_type) > 10 and op_type[len(op_type) - 10:] == "_operation":
+                        if len(op_type) > 10 and op_type[len(op_type) - 10 :] == "_operation":
                             op_type = op_type[:-10]
                         if op_type in opNames:
                             op_stat4[op_type] += 1
@@ -208,9 +207,7 @@ class Testcases(unittest.TestCase):
         self.assertEqual(last_fetched_block_num, start_num + 2)
 
         b2 = Blockchain(blockchain_instance=bts, max_block_wait_repetition=1)
-        with self.assertRaises(
-            BlockWaitTimeExceeded
-        ):
+        with self.assertRaises(BlockWaitTimeExceeded):
             for i in range(300):
                 block = b2.wait_for_and_get_block(blocknum)
                 last_fetched_block_num = block.block_num
@@ -219,8 +216,24 @@ class Testcases(unittest.TestCase):
     def test_hash_op(self):
         bts = self.bts
         b = Blockchain(blockchain_instance=bts)
-        op1 = {'type': 'vote_operation', 'value': {'voter': 'ubg', 'author': 'yesslife', 'permlink': 'steemit-sandwich-contest-week-25-2da-entry', 'weight': 100}}
-        op2 = ['vote', {'voter': 'ubg', 'author': 'yesslife', 'permlink': 'steemit-sandwich-contest-week-25-2da-entry', 'weight': 100}]
+        op1 = {
+            "type": "vote_operation",
+            "value": {
+                "voter": "ubg",
+                "author": "yesslife",
+                "permlink": "steemit-sandwich-contest-week-25-2da-entry",
+                "weight": 100,
+            },
+        }
+        op2 = [
+            "vote",
+            {
+                "voter": "ubg",
+                "author": "yesslife",
+                "permlink": "steemit-sandwich-contest-week-25-2da-entry",
+                "weight": 100,
+            },
+        ]
         hash1 = b.hash_op(op1)
         hash2 = b.hash_op(op2)
         self.assertEqual(hash1, hash2)
@@ -240,12 +253,12 @@ class Testcases(unittest.TestCase):
         self.assertTrue(len(reps_limit) == limit)
         for rep in reps_limit:  # expect format {'name': [str], 'reputation': [int]}
             self.assertTrue(isinstance(rep, dict))
-            self.assertTrue('name' in rep and 'reputation' in rep)
-            self.assertTrue(isinstance(rep['name'], str))
-            self.assertTrue(isinstance(rep['reputation'], int))
+            self.assertTrue("name" in rep and "reputation" in rep)
+            self.assertTrue(isinstance(rep["name"], str))
+            self.assertTrue(isinstance(rep["reputation"], int))
 
-        first = reps_limit[0]['name']
-        last = reps_limit[-1]['name']
+        first = reps_limit[0]["name"]
+        last = reps_limit[-1]["name"]
         # get the same account reputations via start/stop constraints
         reps_constr = list(b.get_account_reputations(start=first, stop=last))
         self.assertTrue(len(reps_constr) >= limit)
@@ -253,6 +266,6 @@ class Testcases(unittest.TestCase):
         # reputation values may be different between the two API
         # calls, but each account of the first call should be
         # contained in the second as well
-        accounts = [rep['name'] for rep in reps_constr]
+        accounts = [rep["name"] for rep in reps_constr]
         for rep in reps_limit:
-            self.assertTrue(rep['name'] in accounts)
+            self.assertTrue(rep["name"] in accounts)

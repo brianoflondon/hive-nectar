@@ -1,6 +1,8 @@
-from win10toast import ToastNotifier
-from beem.account import Account
 import time
+
+from win10toast import ToastNotifier
+
+from beem.account import Account
 
 if __name__ == "__main__":
     toaster = ToastNotifier()
@@ -16,11 +18,13 @@ if __name__ == "__main__":
                 # print(randowhale)
                 print("still sleeping, awake in " + randowhale.get_recharge_time_str(99))
             else:
-                toaster.show_toast(randowhale.profile["name"],
-                                   randowhale.profile["about"],
-                                   icon_path=None,
-                                   duration=5,
-                                   threaded=True)
+                toaster.show_toast(
+                    randowhale.profile["name"],
+                    randowhale.profile["about"],
+                    icon_path=None,
+                    duration=5,
+                    threaded=True,
+                )
                 # Wait for threaded notification to finish
                 while toaster.notification_active():
                     time.sleep(0.1)

@@ -1,19 +1,15 @@
 # -*- coding: utf-8 -*-
-import json
+import logging
 import re
 import time
-import logging
-from .exceptions import (
-    UnauthorizedError, RPCConnection, RPCError, NumRetriesReached, CallRetriesReached
-)
+
+from .exceptions import CallRetriesReached, NumRetriesReached
+
 log = logging.getLogger(__name__)
 
 
 class Node(object):
-    def __init__(
-        self,
-        url
-    ):
+    def __init__(self, url):
         self.url = url
         self.error_cnt = 0
         self.error_cnt_call = 0
@@ -24,6 +20,7 @@ class Node(object):
 
 class Nodes(list):
     """Stores Node URLs and error counts"""
+
     def __init__(self, urls, num_retries, num_retries_call):
         self.set_node_urls(urls)
         self.num_retries = num_retries
@@ -41,10 +38,10 @@ class Nodes(list):
         elif urls is not None:
             url_list = [urls]
         else:
-            url_list = []        
+            url_list = []
         super(Nodes, self).__init__([Node(x) for x in url_list])
         self.current_node_index = -1
-        self.freeze_current_node = False        
+        self.freeze_current_node = False
 
     def __iter__(self):
         return self
@@ -53,7 +50,9 @@ class Nodes(list):
         next_node_count = 0
         if self.freeze_current_node:
             return self.url
-        while next_node_count == 0 and (self.num_retries < 0 or self.node.error_cnt < self.num_retries):
+        while next_node_count == 0 and (
+            self.num_retries < 0 or self.node.error_cnt < self.num_retries
+        ):
             self.current_node_index += 1
             if self.current_node_index >= self.working_nodes_count:
                 self.current_node_index = 0
@@ -93,7 +92,7 @@ class Nodes(list):
     @property
     def url(self):
         if self.node is None:
-            return ''
+            return ""
         return self.node.url
 
     @property
@@ -149,18 +148,23 @@ class Nodes(list):
             log.warning("Error: {}".format(errorMsg))
         if call_retry:
             cnt = self.error_cnt_call
-            if (self.num_retries_call >= 0 and self.error_cnt_call > self.num_retries_call):
+            if self.num_retries_call >= 0 and self.error_cnt_call > self.num_retries_call:
                 raise CallRetriesReached()
         else:
             cnt = self.error_cnt
-            if (self.num_retries >= 0 and self.error_cnt > self.num_retries):
+            if self.num_retries >= 0 and self.error_cnt > self.num_retries:
                 raise NumRetriesReached()
 
         if showMsg:
             if call_retry:
-                log.warning("Retry RPC Call on node: %s (%d/%d) \n" % (self.url, cnt, self.num_retries_call))
+                log.warning(
+                    "Retry RPC Call on node: %s (%d/%d) \n" % (self.url, cnt, self.num_retries_call)
+                )
             else:
-                log.warning("Lost connection or internal error on node: %s (%d/%d) \n" % (self.url, cnt, self.num_retries))
+                log.warning(
+                    "Lost connection or internal error on node: %s (%d/%d) \n"
+                    % (self.url, cnt, self.num_retries)
+                )
         if not sleep:
             return
         if cnt < 1:

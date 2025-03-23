@@ -1,22 +1,27 @@
 # -*- coding: utf-8 -*-
-import re
 import json
 import logging
+import re
 from binascii import hexlify, unhexlify
 from datetime import datetime
-from beemgraphenebase.ecdsasig import verify_message, sign_message
-from beemgraphenebase.account import PublicKey
-from beem.instance import shared_blockchain_instance
-from beem.account import Account
-from .exceptions import InvalidMessageSignature, WrongMemoKey, AccountDoesNotExistsException, InvalidMemoKeyException
 
+from beem.account import Account
+from beem.instance import shared_blockchain_instance
+from beemgraphenebase.account import PublicKey
+from beemgraphenebase.ecdsasig import sign_message, verify_message
+
+from .exceptions import (
+    AccountDoesNotExistsException,
+    InvalidMemoKeyException,
+    InvalidMessageSignature,
+    WrongMemoKey,
+)
 
 log = logging.getLogger(__name__)
 
 
 class MessageV1(object):
-    """ Allow to sign and verify Messages that are sigend with a private key
-    """
+    """Allow to sign and verify Messages that are sigend with a private key"""
 
     MESSAGE_SPLIT = (
         "-----BEGIN HIVE SIGNED MESSAGE-----",
@@ -58,11 +63,11 @@ timestamp={meta[timestamp]}
         self.plain_message = None
 
     def sign(self, account=None, **kwargs):
-        """ Sign a message with an account's memo key
-            :param str account: (optional) the account that owns the bet
-                (defaults to ``default_account``)
-            :raises ValueError: If not account for signing is provided
-            :returns: the signed message encapsulated in a known format
+        """Sign a message with an account's memo key
+        :param str account: (optional) the account that owns the bet
+            (defaults to ``default_account``)
+        :raises ValueError: If not account for signing is provided
+        :returns: the signed message encapsulated in a known format
         """
         if not account:
             if "default_account" in self.blockchain.config:
@@ -81,9 +86,7 @@ timestamp={meta[timestamp]}
         )
 
         # wif key
-        wif = self.blockchain.wallet.getPrivateKeyForPublicKey(
-            account["memo_key"]
-        )
+        wif = self.blockchain.wallet.getPrivateKeyForPublicKey(account["memo_key"])
 
         # We strip the message here so we know for sure there are no trailing
         # whitespaces or returns
@@ -99,16 +102,14 @@ timestamp={meta[timestamp]}
         self.meta = meta
         self.plain_message = message
 
-        return self.SIGNED_MESSAGE_ENCAPSULATED.format(
-            MESSAGE_SPLIT=self.MESSAGE_SPLIT, **locals()
-        )
+        return self.SIGNED_MESSAGE_ENCAPSULATED.format(MESSAGE_SPLIT=self.MESSAGE_SPLIT, **locals())
 
     def verify(self, **kwargs):
-        """ Verify a message with an account's memo key
-            :param str account: (optional) the account that owns the bet
-                (defaults to ``default_account``)
-            :returns: True if the message is verified successfully
-            :raises InvalidMessageSignature if the signature is not ok
+        """Verify a message with an account's memo key
+        :param str account: (optional) the account that owns the bet
+            (defaults to ``default_account``)
+        :returns: True if the message is verified successfully
+        :raises InvalidMessageSignature if the signature is not ok
         """
         # Split message into its parts
         parts = re.split("|".join(self.MESSAGE_SPLIT), self.message)
@@ -142,9 +143,7 @@ timestamp={meta[timestamp]}
 
         # Load account from blockchain
         try:
-            account = Account(
-                account_name, blockchain_instance=self.blockchain
-            )
+            account = Account(account_name, blockchain_instance=self.blockchain)
         except AccountDoesNotExistsException:
             raise AccountDoesNotExistsException(
                 "Could not find account {}. Are you connected to the right chain?".format(
@@ -168,9 +167,7 @@ timestamp={meta[timestamp]}
         pubkey = verify_message(enc_message, unhexlify(signature))
 
         # Verify pubky
-        pk = PublicKey(
-            hexlify(pubkey).decode("ascii"), prefix=self.blockchain.prefix
-        )
+        pk = PublicKey(hexlify(pubkey).decode("ascii"), prefix=self.blockchain.prefix)
         if format(pk, self.blockchain.prefix) != memo_key:
             raise InvalidMessageSignature("The signature doesn't match the memo key")
 
@@ -183,8 +180,7 @@ timestamp={meta[timestamp]}
 
 
 class MessageV2(object):
-    """ Allow to sign and verify Messages that are sigend with a private key
-    """
+    """Allow to sign and verify Messages that are sigend with a private key"""
 
     def __init__(self, message, blockchain_instance=None, *args, **kwargs):
         if blockchain_instance is None:
@@ -201,11 +197,11 @@ class MessageV2(object):
         self.plain_message = None
 
     def sign(self, account=None, **kwargs):
-        """ Sign a message with an account's memo key
-            :param str account: (optional) the account that owns the bet
-                (defaults to ``default_account``)
-            :raises ValueError: If not account for signing is provided
-            :returns: the signed message encapsulated in a known format
+        """Sign a message with an account's memo key
+        :param str account: (optional) the account that owns the bet
+            (defaults to ``default_account``)
+        :raises ValueError: If not account for signing is provided
+        :returns: the signed message encapsulated in a known format
         """
         if not account:
             if "default_account" in self.blockchain.config:
@@ -217,9 +213,7 @@ class MessageV2(object):
         account = Account(account, blockchain_instance=self.blockchain)
 
         # wif key
-        wif = self.blockchain.wallet.getPrivateKeyForPublicKey(
-            account["memo_key"]
-        )
+        wif = self.blockchain.wallet.getPrivateKeyForPublicKey(account["memo_key"])
 
         payload = [
             "from",
@@ -239,11 +233,11 @@ class MessageV2(object):
         return dict(signed=enc_message, payload=payload, signature=signature)
 
     def verify(self, **kwargs):
-        """ Verify a message with an account's memo key
-            :param str account: (optional) the account that owns the bet
-                (defaults to ``default_account``)
-            :returns: True if the message is verified successfully
-            :raises InvalidMessageSignature if the signature is not ok
+        """Verify a message with an account's memo key
+        :param str account: (optional) the account that owns the bet
+            (defaults to ``default_account``)
+        :returns: True if the message is verified successfully
+        :raises InvalidMessageSignature if the signature is not ok
         """
         if not isinstance(self.message, dict):
             try:
@@ -269,9 +263,7 @@ class MessageV2(object):
 
         # Load account from blockchain
         try:
-            account = Account(
-                account_name, blockchain_instance=self.blockchain
-            )
+            account = Account(account_name, blockchain_instance=self.blockchain)
         except AccountDoesNotExistsException:
             raise AccountDoesNotExistsException(
                 "Could not find account {}. Are you connected to the right chain?".format(
@@ -291,10 +283,8 @@ class MessageV2(object):
         # Ensure payload and signed match
         signed_target = json.dumps(self.message.get("payload"), separators=(",", ":"))
         signed_actual = self.message.get("signed")
-        assert (
-            signed_target == signed_actual
-        ), "payload doesn't match signed message: \n{}\n{}".format(
-            signed_target, signed_actual
+        assert signed_target == signed_actual, (
+            "payload doesn't match signed message: \n{}\n{}".format(signed_target, signed_actual)
         )
 
         # Reformat message
@@ -304,9 +294,7 @@ class MessageV2(object):
         pubkey = verify_message(enc_message, unhexlify(signature))
 
         # Verify pubky
-        pk = PublicKey(
-            hexlify(pubkey).decode("ascii"), prefix=self.blockchain.prefix
-        )
+        pk = PublicKey(hexlify(pubkey).decode("ascii"), prefix=self.blockchain.prefix)
         if format(pk, self.blockchain.prefix) != memo_key:
             raise InvalidMessageSignature("The signature doesn't match the memo key")
 

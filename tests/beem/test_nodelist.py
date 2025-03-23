@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import unittest
-from beem import Steem, exceptions, Hive
+
+from beem import Hive, Steem
 from beem.instance import set_shared_blockchain_instance
-from beem.account import Account
 from beem.nodelist import NodeList
 
 
@@ -10,19 +10,17 @@ class Testcases(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         nodelist = NodeList()
-        cls.bts = Hive(
-            node=nodelist.get_hive_nodes(),
-            nobroadcast=True,
-            num_retries=10
-        )
+        cls.bts = Hive(node=nodelist.get_hive_nodes(), nobroadcast=True, num_retries=10)
         set_shared_blockchain_instance(cls.bts)
 
     def test_get_nodes(self):
         nodelist = NodeList()
-        all_nodes = nodelist.get_nodes(exclude_limited=False, dev=True, testnet=True, testnetdev=True)
+        all_nodes = nodelist.get_nodes(
+            exclude_limited=False, dev=True, testnet=True, testnetdev=True
+        )
         self.assertEqual(len(nodelist) - 16, len(all_nodes))
         https_nodes = nodelist.get_nodes(wss=False)
-        self.assertEqual(https_nodes[0][:5], 'https')
+        self.assertEqual(https_nodes[0][:5], "https")
 
     def test_hive_nodes(self):
         nodelist = NodeList()
@@ -50,4 +48,4 @@ class Testcases(unittest.TestCase):
         all_nodes = nodelist.get_steem_nodes()
         nodelist.update_nodes(blockchain_instance=self.bts)
         nodes = nodelist.get_steem_nodes()
-        self.assertIn(nodes[0], all_nodes)        
+        self.assertIn(nodes[0], all_nodes)

@@ -1,12 +1,10 @@
 from __future__ import print_function
-import sys
-from datetime import timedelta
-import time
-import io
+
+import logging
+
 from beem.blockchain import Blockchain
 from beem.instance import shared_blockchain_instance
-from beem.utils import parse_time
-import logging
+
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 

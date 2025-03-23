@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
-from beem import Steem
-from beem.instance import set_shared_steem_instance
-from beem.amount import Amount
-from beem.price import Price, Order, FilledOrder
-from beem.asset import Asset
 import unittest
-from .nodes import get_hive_nodes, get_steem_nodes
+
+from beem import Steem
+from beem.amount import Amount
+from beem.asset import Asset
+from beem.instance import set_shared_steem_instance
+from beem.price import FilledOrder, Order, Price
+
+from .nodes import get_hive_nodes
 
 
 class Testcases(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        steem = Steem(
-            node=get_hive_nodes(),
-            nobroadcast=True,
-            num_retries=10
-        )
+        steem = Steem(node=get_hive_nodes(), nobroadcast=True, num_retries=10)
         set_shared_steem_instance(steem)
 
     def test_init(self):
@@ -25,9 +23,9 @@ class Testcases(unittest.TestCase):
         Price(1.0, "HIVE/HBD")
         Price(0.315, base="HIVE", quote="HBD")
         Price(0.315, base=Asset("HIVE"), quote=Asset("HBD"))
-        Price({
-            "base": {"amount": 1, "asset_id": "HBD"},
-            "quote": {"amount": 10, "asset_id": "HIVE"}})
+        Price(
+            {"base": {"amount": 1, "asset_id": "HBD"}, "quote": {"amount": 10, "asset_id": "HIVE"}}
+        )
         Price("", quote="10 HBD", base="1 HIVE")
         Price("10 HBD", "1 HIVE")
         Price(Amount("10 HBD"), Amount("1 HIVE"))

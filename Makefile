@@ -1,4 +1,4 @@
-.PHONY: clean-pyc clean-build docs
+.PHONY: clean-pyc clean-build docs generate-versions
 
 clean: clean-build clean-pyc
 
@@ -13,31 +13,40 @@ clean-pyc:
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
 
+generate-versions:
+	python3 generate_versions.py
+
 lint:
-	flake8 beemapi/ beembase/ beem/
+	uv run ruff check beem beemapi beembase beemgraphenebase beemstorage
+
+format:
+	uv run ruff format beem beemapi beembase beemgraphenebase beemstorage
 
 test:
-	python3 setup.py test
+	python -m pytest
 
-build:
-	python3 setup.py build
+build: generate-versions
+	python -m build
 
 install: build
-	python3 setup.py install
+	uv pip install -e .
 
 install-user: build
-	python3 setup.py install --user
+	uv pip install --user -e .
 
 git:
 	git push --all
 	git push --tags
 
 check:
-	python3 setup.py check
+	uv pip check
 
-dist:
-	python3 setup.py sdist upload -r pypi
-	python3 setup.py bdist_wheel upload
+dev-setup:
+	uv pip install --python-dev-deps -e .
+
+dist: generate-versions
+	python -m build
+	python -m twine upload dist/*
 
 docs:
 	sphinx-apidoc -d 6 -e -f -o docs . *.py tests

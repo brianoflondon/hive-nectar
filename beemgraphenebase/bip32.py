@@ -4,18 +4,20 @@
 # See LICENSE.txt for distribution terms
 # https://github.com/namuyan/bip32nem/blob/master/bip32nem/BIP32Key.py
 
-import os
-import hmac
-import hashlib
-import struct
 import codecs
-from beemgraphenebase.base58 import base58CheckDecode, base58CheckEncode
-from beemgraphenebase.py23 import py23_bytes
-from hashlib import sha256
+import hashlib
+import hmac
+import os
+import struct
 from binascii import hexlify, unhexlify
+from hashlib import sha256
+
 import ecdsa
 from ecdsa.curves import SECP256k1
 from ecdsa.numbertheory import square_root_mod_prime as sqrt_mod
+
+from beemgraphenebase.base58 import base58CheckDecode, base58CheckEncode
+from beemgraphenebase.py23 import py23_bytes
 
 VerifyKey = ecdsa.VerifyingKey.from_public_point
 SigningKey = ecdsa.SigningKey.from_string
@@ -27,11 +29,19 @@ INFINITY = ecdsa.ellipticcurve.INFINITY  # Point
 
 MIN_ENTROPY_LEN = 128  # bits
 BIP32_HARDEN = 0x80000000  # choose from hardened set of child keys
-EX_MAIN_PRIVATE = [codecs.decode('0488ade4', 'hex')]  # Version strings for mainnet extended private keys
-EX_MAIN_PUBLIC = [codecs.decode('0488b21e', 'hex'),
-                  codecs.decode('049d7cb2', 'hex')]  # Version strings for mainnet extended public keys
-EX_TEST_PRIVATE = [codecs.decode('04358394', 'hex')]  # Version strings for testnet extended private keys
-EX_TEST_PUBLIC = [codecs.decode('043587CF', 'hex')]  # Version strings for testnet extended public keys
+EX_MAIN_PRIVATE = [
+    codecs.decode("0488ade4", "hex")
+]  # Version strings for mainnet extended private keys
+EX_MAIN_PUBLIC = [
+    codecs.decode("0488b21e", "hex"),
+    codecs.decode("049d7cb2", "hex"),
+]  # Version strings for mainnet extended public keys
+EX_TEST_PRIVATE = [
+    codecs.decode("04358394", "hex")
+]  # Version strings for testnet extended private keys
+EX_TEST_PUBLIC = [
+    codecs.decode("043587CF", "hex")
+]  # Version strings for testnet extended public keys
 
 
 def int_to_hex(x):
@@ -41,10 +51,10 @@ def int_to_hex(x):
 def parse_path(nstr, as_bytes=False):
     """"""
     r = list()
-    for s in nstr.split('/'):
-        if s == 'm':
+    for s in nstr.split("/"):
+        if s == "m":
             continue
-        elif s.endswith("'") or s.endswith('h'):
+        elif s.endswith("'") or s.endswith("h"):
             r.append(int(s[:-1]) + BIP32_HARDEN)
         else:
             r.append(int(s))
@@ -60,7 +70,6 @@ def parse_path(nstr, as_bytes=False):
 
 
 class BIP32Key(object):
-
     # Static initializers to create from entropy or external formats
     #
     @staticmethod
@@ -69,12 +78,15 @@ class BIP32Key(object):
         if entropy is None:
             entropy = os.urandom(MIN_ENTROPY_LEN // 8)  # Python doesn't have os.random()
         if not len(entropy) >= MIN_ENTROPY_LEN // 8:
-            raise ValueError("Initial entropy %i must be at least %i bits" %
-                             (len(entropy), MIN_ENTROPY_LEN))
+            raise ValueError(
+                "Initial entropy %i must be at least %i bits" % (len(entropy), MIN_ENTROPY_LEN)
+            )
         i64 = hmac.new(b"Bitcoin seed", entropy, hashlib.sha512).digest()
         il, ir = i64[:32], i64[32:]
         # FIXME test Il for 0 or less than SECP256k1 prime field order
-        key = BIP32Key(secret=il, chain=ir, depth=0, index=0, fpr=b'\0\0\0\0', public=False, testnet=testnet)
+        key = BIP32Key(
+            secret=il, chain=ir, depth=0, index=0, fpr=b"\0\0\0\0", public=False, testnet=testnet
+        )
         if public:
             key.SetPublic()
         return key
@@ -89,7 +101,7 @@ class BIP32Key(object):
         # Sanity checks
         # raw = check_decode(xkey)
         raw = unhexlify(base58CheckDecode(xkey, skip_first_bytes=False))
-        
+
         if len(raw) != 78:
             raise ValueError("extended key format wrong length")
 
@@ -128,16 +140,23 @@ class BIP32Key(object):
             # Recover public curve point from compressed key
             # Python3 FIX
             lsb = secret[0] & 1 if type(secret[0]) == int else ord(secret[0]) & 1
-            x = int.from_bytes(secret[1:], 'big')
-            ys = (x ** 3 + 7) % FIELD_ORDER  # y^2 = x^3 + 7 mod p
+            x = int.from_bytes(secret[1:], "big")
+            ys = (x**3 + 7) % FIELD_ORDER  # y^2 = x^3 + 7 mod p
             y = sqrt_mod(ys, FIELD_ORDER)
             if y & 1 != lsb:
                 y = FIELD_ORDER - y
             point = PointObject(SECP256k1.curve, x, y)
             secret = VerifyKey(point, curve=SECP256k1)
 
-        key = BIP32Key(secret=secret, chain=chain, depth=depth, index=child, fpr=fpr, public=is_pubkey,
-                       testnet=is_testnet)
+        key = BIP32Key(
+            secret=secret,
+            chain=chain,
+            depth=depth,
+            index=child,
+            fpr=fpr,
+            public=is_pubkey,
+            testnet=is_testnet,
+        )
         if not is_pubkey and public:
             key.SetPublic()
         return key
@@ -203,25 +222,32 @@ class BIP32Key(object):
 
         # Data to HMAC
         if i & BIP32_HARDEN:
-            data = b'\0' + self.k.to_string() + i_str
+            data = b"\0" + self.k.to_string() + i_str
         else:
             data = self.PublicKey() + i_str
         # Get HMAC of data
         (Il, Ir) = self.hmac(data)
 
         # Construct new key material from Il and current private key
-        Il_int = int.from_bytes(Il, 'big')
+        Il_int = int.from_bytes(Il, "big")
         if Il_int > CURVE_ORDER:
             return None
-        pvt_int = int.from_bytes(self.k.to_string(), 'big')
+        pvt_int = int.from_bytes(self.k.to_string(), "big")
         k_int = (Il_int + pvt_int) % CURVE_ORDER
-        if (k_int == 0):
+        if k_int == 0:
             return None
-        secret = k_int.to_bytes(32, 'big')
+        secret = k_int.to_bytes(32, "big")
 
         # Construct and return a new BIP32Key
-        return BIP32Key(secret=secret, chain=Ir, depth=self.depth + 1, index=i, fpr=self.Fingerprint(), public=False,
-                        testnet=self.testnet)
+        return BIP32Key(
+            secret=secret,
+            chain=Ir,
+            depth=self.depth + 1,
+            index=i,
+            fpr=self.Fingerprint(),
+            public=False,
+            testnet=self.testnet,
+        )
 
     def CKDpub(self, i):
         """
@@ -244,7 +270,7 @@ class BIP32Key(object):
         (Il, Ir) = self.hmac(data)
 
         # Construct curve point Il*G+K
-        Il_int = int.from_bytes(Il, 'big')
+        Il_int = int.from_bytes(Il, "big")
         if Il_int >= CURVE_ORDER:
             return None
         point = Il_int * CURVE_GEN + self.K.pubkey.point
@@ -255,8 +281,15 @@ class BIP32Key(object):
         K_i = VerifyKey(point, curve=SECP256k1)
 
         # Construct and return a new BIP32Key
-        return BIP32Key(secret=K_i, chain=Ir, depth=self.depth + 1, index=i, fpr=self.Fingerprint(), public=True,
-                        testnet=self.testnet)
+        return BIP32Key(
+            secret=K_i,
+            chain=Ir,
+            depth=self.depth + 1,
+            index=i,
+            fpr=self.Fingerprint(),
+            public=True,
+            testnet=self.testnet,
+        )
 
     # Public methods
     #
@@ -286,11 +319,11 @@ class BIP32Key(object):
 
     def PublicKey(self):
         """Return compressed public key encoding"""
-        padx = self.K.pubkey.point.x().to_bytes(32, 'big')
+        padx = self.K.pubkey.point.x().to_bytes(32, "big")
         if self.K.pubkey.point.y() & 1:
-            ck = b'\3' + padx
+            ck = b"\3" + padx
         else:
-            ck = b'\2' + padx
+            ck = b"\2" + padx
         return ck
 
     def ChainCode(self):
@@ -300,7 +333,7 @@ class BIP32Key(object):
     def Identifier(self):
         """Return key identifier as string"""
         cK = self.PublicKey()
-        return hashlib.new('ripemd160', sha256(cK).digest()).digest()
+        return hashlib.new("ripemd160", sha256(cK).digest()).digest()
 
     def Fingerprint(self):
         """Return key fingerprint as string"""
@@ -308,61 +341,67 @@ class BIP32Key(object):
 
     def Address(self):
         """Return compressed public key address"""
-        addressversion = b'\x00' if not self.testnet else b'\x6f'
+        addressversion = b"\x00" if not self.testnet else b"\x6f"
         # vh160 = addressversion + self.Identifier()
-        # return check_encode(vh160)   
-        payload = hexlify(self.Identifier()).decode('ascii')
-        return base58CheckEncode(hexlify(addressversion).decode('ascii'), payload)
-     
+        # return check_encode(vh160)
+        payload = hexlify(self.Identifier()).decode("ascii")
+        return base58CheckEncode(hexlify(addressversion).decode("ascii"), payload)
 
     def P2WPKHoP2SHAddress(self):
         """Return P2WPKH over P2SH segwit address"""
         pk_bytes = self.PublicKey()
-        assert len(pk_bytes) == 33 and (pk_bytes.startswith(b"\x02") or pk_bytes.startswith(b"\x03")), \
-            "Only compressed public keys are compatible with p2sh-p2wpkh addresses. " \
+        assert len(pk_bytes) == 33 and (
+            pk_bytes.startswith(b"\x02") or pk_bytes.startswith(b"\x03")
+        ), (
+            "Only compressed public keys are compatible with p2sh-p2wpkh addresses. "
             "See https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki."
-        pk_hash = hashlib.new('ripemd160', sha256(pk_bytes).digest()).digest()
-        push_20 = bytes.fromhex('0014')
+        )
+        pk_hash = hashlib.new("ripemd160", sha256(pk_bytes).digest()).digest()
+        push_20 = bytes.fromhex("0014")
         script_sig = push_20 + pk_hash
-        address_bytes = hashlib.new('ripemd160', sha256(script_sig).digest()).digest()
+        address_bytes = hashlib.new("ripemd160", sha256(script_sig).digest()).digest()
         prefix = b"\xc4" if self.testnet else b"\x05"
         # return check_encode(prefix + address_bytes)
-        payload = hexlify(address_bytes).decode('ascii')
-        return base58CheckEncode(hexlify(prefix).decode('ascii'), payload)
+        payload = hexlify(address_bytes).decode("ascii")
+        return base58CheckEncode(hexlify(prefix).decode("ascii"), payload)
 
     def WalletImportFormat(self):
         """Returns private key encoded for wallet import"""
         if self.public:
             raise Exception("Publicly derived deterministic keys have no private half")
-        addressversion = b'\x80' if not self.testnet else b'\xef'
-        raw =  self.k.to_string() + b'\x01'  # Always compressed
+        addressversion = b"\x80" if not self.testnet else b"\xef"
+        raw = self.k.to_string() + b"\x01"  # Always compressed
         # return check_encode(addressversion + raw)
-        payload = hexlify(raw).decode('ascii')
-        return base58CheckEncode(hexlify(addressversion).decode('ascii'), payload)
+        payload = hexlify(raw).decode("ascii")
+        return base58CheckEncode(hexlify(addressversion).decode("ascii"), payload)
 
     def ExtendedKey(self, private=True, encoded=True):
         """Return extended private or public key as string, optionally base58 encoded"""
         if self.public is True and private is True:
-            raise Exception("Cannot export an extended private key from a public-only deterministic key")
+            raise Exception(
+                "Cannot export an extended private key from a public-only deterministic key"
+            )
         if not self.testnet:
             version = EX_MAIN_PRIVATE[0] if private else EX_MAIN_PUBLIC[0]
         else:
             version = EX_TEST_PRIVATE[0] if private else EX_TEST_PUBLIC[0]
         depth = bytes(bytearray([self.depth]))
         fpr = self.parent_fpr
-        child = struct.pack('>L', self.index)
+        child = struct.pack(">L", self.index)
         chain = self.C
         if self.public is True or private is False:
             data = self.PublicKey()
         else:
-            data = b'\x00' + self.PrivateKey()
+            data = b"\x00" + self.PrivateKey()
         raw = version + depth + fpr + child + chain + data
         if not encoded:
             return raw
         else:
             # return check_encode(raw)
-            payload = hexlify(chain + data).decode('ascii')
-            return base58CheckEncode(hexlify(version + depth + fpr + child).decode('ascii'), payload)
+            payload = hexlify(chain + data).decode("ascii")
+            return base58CheckEncode(
+                hexlify(version + depth + fpr + child).decode("ascii"), payload
+            )
 
     # Debugging methods
     #
@@ -392,7 +431,7 @@ def test():
     from binascii import a2b_hex
 
     # BIP0032 Test vector 1
-    entropy = a2b_hex('000102030405060708090A0B0C0D0E0F')
+    entropy = a2b_hex("000102030405060708090A0B0C0D0E0F")
     m = BIP32Key.fromEntropy(entropy)
     print("Test vector 1:")
     print("Master (hex):", entropy.hex())
@@ -420,8 +459,10 @@ def test():
     m.dump()
 
     # BIP0032 Test vector 2
-    entropy = a2b_hex('fffcf9f6f3f0edeae7e4e1dedbd8d5d2cfccc9c6c3c0bdbab7b4b1aeaba8a5a29f9c999693908d8a878481'
-                      '7e7b7875726f6c696663605d5a5754514e4b484542')
+    entropy = a2b_hex(
+        "fffcf9f6f3f0edeae7e4e1dedbd8d5d2cfccc9c6c3c0bdbab7b4b1aeaba8a5a29f9c999693908d8a878481"
+        "7e7b7875726f6c696663605d5a5754514e4b484542"
+    )
     m = BIP32Key.fromEntropy(entropy)
     print("Test vector 2:")
     print("Master (hex):", entropy.hex())

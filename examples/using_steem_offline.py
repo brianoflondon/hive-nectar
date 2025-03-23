@@ -1,25 +1,11 @@
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-import sys
-from datetime import datetime, timedelta
-import time
-import io
+from __future__ import division, print_function, unicode_literals
+
 import logging
 
-from beem.blockchain import Blockchain
-from beem.block import Block
-from beem.account import Account
-from beem.amount import Amount
-from beem.witness import Witness
-from beembase import operations
-from beem.transactionbuilder import TransactionBuilder
-from beemgraphenebase.account import PasswordKey, PrivateKey, PublicKey
 from beem.steem import Steem
-from beem.utils import parse_time, formatTimedelta
-from beemapi.exceptions import NumRetriesReached
-from beem.nodelist import NodeList
 from beem.transactionbuilder import TransactionBuilder
+from beembase import operations
+
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -35,10 +21,9 @@ if __name__ == "__main__":
 
     stm = Steem(offline=True)
 
-    op = operations.Transfer({'from': 'beembot',
-                              'to': 'holger80',
-                              'amount': "0.001 SBD",
-                              'memo': ""})
+    op = operations.Transfer(
+        {"from": "beembot", "to": "holger80", "amount": "0.001 SBD", "memo": ""}
+    )
     tb = TransactionBuilder(steem_instance=stm)
 
     tb.appendOps([op])

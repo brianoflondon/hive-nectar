@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-from beemgraphenebase.py23 import bytes_types, integer_types, string_types, text_type
-from beem.instance import shared_blockchain_instance
-from datetime import datetime, timedelta
 import json
 import threading
+from datetime import datetime, timedelta
+
+from beem.instance import shared_blockchain_instance
+from beemgraphenebase.py23 import integer_types, string_types
 
 
 class ObjectCache(dict):
-
     def __init__(self, initial_data={}, default_expiration=10, auto_clean=True):
         super(ObjectCache, self).__init__(initial_data)
         self.set_expiration(default_expiration)
@@ -16,9 +16,8 @@ class ObjectCache(dict):
 
     def __setitem__(self, key, value):
         data = {
-            "expires": datetime.utcnow() + timedelta(
-                seconds=self.default_expiration),
-            "data": value
+            "expires": datetime.utcnow() + timedelta(seconds=self.default_expiration),
+            "data": value,
         }
         with self.lock:
             if key in self:
@@ -76,17 +75,14 @@ class ObjectCache(dict):
         n = 0
         with self.lock:
             n = len(list(self.keys()))
-        return "ObjectCache(n={}, default_expiration={})".format(
-            n, self.default_expiration)
+        return "ObjectCache(n={}, default_expiration={})".format(n, self.default_expiration)
 
     def set_expiration(self, expiration):
-        """ Set new default expiration time in seconds (default: 10s)
-        """
+        """Set new default expiration time in seconds (default: 10s)"""
         self.default_expiration = expiration
 
 
 class BlockchainObject(dict):
-
     space_id = 1
     type_id = None
     type_ids = []
@@ -104,21 +100,20 @@ class BlockchainObject(dict):
         id_item=None,
         blockchain_instance=None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         if blockchain_instance is None:
             if kwargs.get("steem_instance"):
                 blockchain_instance = kwargs["steem_instance"]
             elif kwargs.get("hive_instance"):
-                blockchain_instance = kwargs["hive_instance"]      
+                blockchain_instance = kwargs["hive_instance"]
         self.blockchain = blockchain_instance or shared_blockchain_instance()
         self.cached = False
         self.identifier = None
 
         # We don't read lists, sets, or tuples
         if isinstance(data, (list, set, tuple)):
-            raise ValueError(
-                "Cannot interpret lists! Please load elements individually!")
+            raise ValueError("Cannot interpret lists! Please load elements individually!")
 
         if id_item and isinstance(id_item, string_types):
             self.id_item = id_item
@@ -136,7 +131,7 @@ class BlockchainObject(dict):
             if not lazy and not self.cached:
                 self.refresh()
             # make sure to store the blocknumber for caching
-            self[self.id_item] = (data)
+            self[self.id_item] = data
             # Set identifier again as it is overwritten in super() in refresh()
             self.identifier = data
         elif isinstance(data, string_types):
@@ -220,8 +215,7 @@ class BlockchainObject(dict):
         return super(BlockchainObject, self).__contains__(key)
 
     def __repr__(self):
-        return "<%s %s>" % (
-            self.__class__.__name__, str(self.identifier))
+        return "<%s %s>" % (self.__class__.__name__, str(self.identifier))
 
     def json(self):
         return json.loads(str(json.dumps(self)))

@@ -1,20 +1,17 @@
-from beem import Steem
-import numpy as np
-from beem.utils import reputation_to_score
-from beem.amount import Amount
-from beem.constants import STEEM_100_PERCENT
-import matplotlib as mpl
 # mpl.use('Agg')
 # mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 
+from beem import Steem
+from beem.amount import Amount
+from beem.utils import reputation_to_score
 
 if __name__ == "__main__":
     stm = Steem()
     price = Amount(stm.get_current_median_history()["base"])
     reps = [0]
     for i in range(26, 91):
-        reps.append(int(10**((i - 25) / 9 + 9)))
+        reps.append(int(10 ** ((i - 25) / 9 + 9)))
     # reps = np.logspace(9, 16, 60)
     used_power = stm._calc_resulting_vote()
     last_sp = 0
@@ -31,7 +28,7 @@ if __name__ == "__main__":
         last_sp = needed_sp
 
     plt.figure(figsize=(12, 6))
-    opts = {'linestyle': '-', 'marker': '.'}
+    opts = {"linestyle": "-", "marker": "."}
     plt.semilogx(sp_list, rep_score_list, label="Reputation", **opts)
     plt.grid()
     plt.legend()
