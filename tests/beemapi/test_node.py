@@ -3,10 +3,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import unittest
 
-from beemapi.node import Nodes
-from beemapi.rpcutils import (
+from beemapi.exceptions import (
     NumRetriesReached,
 )
+from beemapi.node import Nodes
 
 
 class Testcases(unittest.TestCase):

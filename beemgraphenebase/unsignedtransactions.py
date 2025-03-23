@@ -12,9 +12,8 @@ from beemgraphenebase.py23 import py23_bytes
 
 from .bip32 import parse_path
 from .chains import known_chains
-from .objects import isArgsThisClass
-from .operations import Operation
-from .py23 import py23_bytes, py23_chr, string_types
+from .objects import Operation, isArgsThisClass
+from .py23 import py23_chr, string_types
 from .types import (
     Array,
     JsonObj,

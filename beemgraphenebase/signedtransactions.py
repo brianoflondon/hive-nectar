@@ -11,8 +11,7 @@ from beemgraphenebase.py23 import py23_bytes
 from .account import PublicKey
 from .chains import known_chains
 from .ecdsasig import sign_message, verify_message
-from .objects import GrapheneObject, isArgsThisClass
-from .operations import Operation
+from .objects import GrapheneObject, Operation, isArgsThisClass
 from .types import (
     Array,
     PointInTime,
