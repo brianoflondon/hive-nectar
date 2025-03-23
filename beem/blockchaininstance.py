@@ -5,7 +5,7 @@ import logging
 import math
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 
 from beem.constants import (
     CURVE_CONSTANT,
@@ -303,11 +303,12 @@ class BlockChainInstance(object):
                     and self.data["last_node"] == self.rpc.url
                 ):
                     if (
-                        datetime.utcnow() - self.data["last_refresh_dynamic_global_properties"]
+                        datetime.now(timezone.utc)
+                        - self.data["last_refresh_dynamic_global_properties"]
                     ).total_seconds() < self.data_refresh_time_seconds:
                         return
-                self.data["last_refresh_dynamic_global_properties"] = datetime.utcnow()
-                self.data["last_refresh"] = datetime.utcnow()
+                self.data["last_refresh_dynamic_global_properties"] = datetime.now(timezone.utc)
+                self.data["last_refresh"] = datetime.now(timezone.utc)
                 self.data["last_node"] = self.rpc.url
             self.data["dynamic_global_properties"] = self.get_dynamic_global_properties(False)
         elif chain_property == "feed_history":
@@ -318,12 +319,12 @@ class BlockChainInstance(object):
                     and self.data["last_node"] == self.rpc.url
                 ):
                     if (
-                        datetime.utcnow() - self.data["last_refresh_feed_history"]
+                        datetime.now(timezone.utc) - self.data["last_refresh_feed_history"]
                     ).total_seconds() < self.data_refresh_time_seconds:
                         return
 
-                self.data["last_refresh_feed_history"] = datetime.utcnow()
-                self.data["last_refresh"] = datetime.utcnow()
+                self.data["last_refresh_feed_history"] = datetime.now(timezone.utc)
+                self.data["last_refresh"] = datetime.now(timezone.utc)
                 self.data["last_node"] = self.rpc.url
             try:
                 self.data["feed_history"] = self.get_feed_history(False)
@@ -338,12 +339,12 @@ class BlockChainInstance(object):
                     and self.data["last_node"] == self.rpc.url
                 ):
                     if (
-                        datetime.utcnow() - self.data["last_refresh_hardfork_properties"]
+                        datetime.now(timezone.utc) - self.data["last_refresh_hardfork_properties"]
                     ).total_seconds() < self.data_refresh_time_seconds:
                         return
 
-                self.data["last_refresh_hardfork_properties"] = datetime.utcnow()
-                self.data["last_refresh"] = datetime.utcnow()
+                self.data["last_refresh_hardfork_properties"] = datetime.now(timezone.utc)
+                self.data["last_refresh"] = datetime.now(timezone.utc)
                 self.data["last_node"] = self.rpc.url
             try:
                 self.data["hardfork_properties"] = self.get_hardfork_properties(False)
@@ -357,11 +358,11 @@ class BlockChainInstance(object):
                     and self.data["last_node"] == self.rpc.url
                 ):
                     if (
-                        datetime.utcnow() - self.data["last_refresh_witness_schedule"]
+                        datetime.now(timezone.utc) - self.data["last_refresh_witness_schedule"]
                     ).total_seconds() < 3:
                         return
-                self.data["last_refresh_witness_schedule"] = datetime.utcnow()
-                self.data["last_refresh"] = datetime.utcnow()
+                self.data["last_refresh_witness_schedule"] = datetime.now(timezone.utc)
+                self.data["last_refresh"] = datetime.now(timezone.utc)
                 self.data["last_node"] = self.rpc.url
             self.data["witness_schedule"] = self.get_witness_schedule(False)
         elif chain_property == "config":
@@ -372,11 +373,11 @@ class BlockChainInstance(object):
                     and self.data["last_node"] == self.rpc.url
                 ):
                     if (
-                        datetime.utcnow() - self.data["last_refresh_config"]
+                        datetime.now(timezone.utc) - self.data["last_refresh_config"]
                     ).total_seconds() < self.data_refresh_time_seconds:
                         return
-                self.data["last_refresh_config"] = datetime.utcnow()
-                self.data["last_refresh"] = datetime.utcnow()
+                self.data["last_refresh_config"] = datetime.now(timezone.utc)
+                self.data["last_refresh"] = datetime.now(timezone.utc)
                 self.data["last_node"] = self.rpc.url
             self.data["config"] = self.get_config(False)
             self.data["network"] = self.get_network(False, config=self.data["config"])
@@ -388,12 +389,12 @@ class BlockChainInstance(object):
                     and self.data["last_node"] == self.rpc.url
                 ):
                     if (
-                        datetime.utcnow() - self.data["last_refresh_reward_funds"]
+                        datetime.now(timezone.utc) - self.data["last_refresh_reward_funds"]
                     ).total_seconds() < self.data_refresh_time_seconds:
                         return
 
-                self.data["last_refresh_reward_funds"] = datetime.utcnow()
-                self.data["last_refresh"] = datetime.utcnow()
+                self.data["last_refresh_reward_funds"] = datetime.now(timezone.utc)
+                self.data["last_refresh"] = datetime.now(timezone.utc)
                 self.data["last_node"] = self.rpc.url
             self.data["reward_funds"] = self.get_reward_funds(False)
         else:

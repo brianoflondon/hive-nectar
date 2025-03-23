@@ -5,7 +5,7 @@ import json
 import random
 import struct
 from binascii import hexlify
-from datetime import datetime
+from datetime import datetime, timezone
 
 import requests
 
@@ -93,7 +93,7 @@ class Conveyor(object):
         """
         params_bytes = py23_bytes(json.dumps(params), self.ENCODING)
         params_enc = base64.b64encode(params_bytes).decode(self.ENCODING)
-        timestamp = datetime.utcnow().strftime(self.TIMEFORMAT)[:-3] + "Z"
+        timestamp = datetime.now(timezone.utc).strftime(self.TIMEFORMAT)[:-3] + "Z"
         nonce_int = random.getrandbits(64)
         nonce_bytes = struct.pack(">Q", nonce_int)  # 64bit ULL, big endian
         nonce_str = "%016x" % (nonce_int)

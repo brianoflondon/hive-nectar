@@ -65,13 +65,22 @@ if __name__ == "__main__":
         own_mvest.append(f.balances["available"][2].amount / 1e6)
         eff_hp.append(f.get_token_power())
         last_votes.append(
-            (addTzInfo(datetime.utcnow()) - (f["last_vote_time"])).total_seconds() / 60 / 60 / 24
+            (addTzInfo(datetime.now(timezone.utc)) - (f["last_vote_time"])).total_seconds()
+            / 60
+            / 60
+            / 24
         )
         last_posts.append(
-            (addTzInfo(datetime.utcnow()) - (f["last_root_post"])).total_seconds() / 60 / 60 / 24
+            (addTzInfo(datetime.now(timezone.utc)) - (f["last_root_post"])).total_seconds()
+            / 60
+            / 60
+            / 24
         )
         last_comments.append(
-            (addTzInfo(datetime.utcnow()) - (f["last_post"])).total_seconds() / 60 / 60 / 24
+            (addTzInfo(datetime.now(timezone.utc)) - (f["last_post"])).total_seconds()
+            / 60
+            / 60
+            / 24
         )
         returned_vote = 0
         returned_rshare = 0

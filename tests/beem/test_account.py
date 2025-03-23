@@ -517,7 +517,7 @@ class Testcases(unittest.TestCase):
         stm = self.bts
         account = Account("gtg", steem_instance=stm)
         utc = pytz.timezone("UTC")
-        limit_time = utc.localize(datetime.utcnow()) - timedelta(days=2)
+        limit_time = utc.localize(datetime.now(timezone.utc)) - timedelta(days=2)
         votes_list = []
         for v in account.history(start=limit_time, only_ops=["vote"]):
             votes_list.append(v)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 import pytz
 from prettytable import PrettyTable
@@ -249,7 +249,7 @@ class WitnessesObject(list):
             sortedList = sorted(
                 self,
                 key=lambda self: (
-                    utc.localize(datetime.utcnow()) - self[last_bd_exchange_update]
+                    utc.localize(datetime.now(timezone.utc)) - self[last_bd_exchange_update]
                 ).total_seconds(),
                 reverse=reverse,
             )
@@ -287,7 +287,7 @@ class WitnessesObject(list):
                     ]
                 )
             else:
-                td = utc.localize(datetime.utcnow()) - witness[last_bd_exchange_update]
+                td = utc.localize(datetime.now(timezone.utc)) - witness[last_bd_exchange_update]
                 t.add_row(
                     [
                         witness["owner"],

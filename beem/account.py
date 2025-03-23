@@ -2,7 +2,7 @@
 import json
 import logging
 import random
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 
 from prettytable import PrettyTable
 
@@ -321,8 +321,8 @@ class Account(BlockchainObject):
         max_mana = int(rc_param["max_rc"])
         last_mana = int(rc_param["rc_manabar"]["current_mana"])
         last_update_time = rc_param["rc_manabar"]["last_update_time"]
-        last_update = datetime.utcfromtimestamp(last_update_time)
-        diff_in_seconds = (datetime.utcnow() - last_update).total_seconds()
+        last_update = timezone.utcfromtimestamp(last_update_time)
+        diff_in_seconds = (datetime.now(timezone.utc) - last_update).total_seconds()
         current_mana = int(
             last_mana + diff_in_seconds * max_mana / STEEM_VOTING_MANA_REGENERATION_SECONDS
         )
@@ -420,7 +420,9 @@ class Account(BlockchainObject):
             remaining = 100 - bandwidth["used"] / bandwidth["allocated"] * 100
             used_kb = bandwidth["used"] / 1024
             allocated_mb = bandwidth["allocated"] / 1024 / 1024
-        last_vote_time_str = formatTimedelta(addTzInfo(datetime.utcnow()) - self["last_vote_time"])
+        last_vote_time_str = formatTimedelta(
+            addTzInfo(datetime.now(timezone.utc)) - self["last_vote_time"]
+        )
         try:
             rc_mana = self.get_rc_manabar()
             rc = self.get_rc()
@@ -583,8 +585,10 @@ class Account(BlockchainObject):
 
         last_mana = int(self["voting_manabar"]["current_mana"])
         last_update_time = self["voting_manabar"]["last_update_time"]
-        last_update = datetime.utcfromtimestamp(last_update_time)
-        diff_in_seconds = (addTzInfo(datetime.utcnow()) - addTzInfo(last_update)).total_seconds()
+        last_update = timezone.utcfromtimestamp(last_update_time)
+        diff_in_seconds = (
+            addTzInfo(datetime.now(timezone.utc)) - addTzInfo(last_update)
+        ).total_seconds()
         current_mana = int(
             last_mana + diff_in_seconds * max_mana / STEEM_VOTING_MANA_REGENERATION_SECONDS
         )
@@ -616,8 +620,10 @@ class Account(BlockchainObject):
 
         last_mana = int(self["downvote_manabar"]["current_mana"])
         last_update_time = self["downvote_manabar"]["last_update_time"]
-        last_update = datetime.utcfromtimestamp(last_update_time)
-        diff_in_seconds = (addTzInfo(datetime.utcnow()) - addTzInfo(last_update)).total_seconds()
+        last_update = timezone.utcfromtimestamp(last_update_time)
+        diff_in_seconds = (
+            addTzInfo(datetime.now(timezone.utc)) - addTzInfo(last_update)
+        ).total_seconds()
         current_mana = int(
             last_mana + diff_in_seconds * max_mana / STEEM_VOTING_MANA_REGENERATION_SECONDS
         )
@@ -653,7 +659,9 @@ class Account(BlockchainObject):
         elif "voting_power" in self:
             if with_regeneration:
                 last_vote_time = self["last_vote_time"]
-                diff_in_seconds = (addTzInfo(datetime.utcnow()) - (last_vote_time)).total_seconds()
+                diff_in_seconds = (
+                    addTzInfo(datetime.now(timezone.utc)) - (last_vote_time)
+                ).total_seconds()
                 regenerated_vp = (
                     diff_in_seconds * STEEM_100_PERCENT / STEEM_VOTE_REGENERATION_SECONDS / 100
                 )
@@ -916,7 +924,7 @@ class Account(BlockchainObject):
             the provided value.
 
         """
-        return addTzInfo(datetime.utcnow()) + self.get_recharge_timedelta(
+        return addTzInfo(datetime.now(timezone.utc)) + self.get_recharge_timedelta(
             voting_power_goal, starting_voting_power
         )
 
@@ -957,7 +965,7 @@ class Account(BlockchainObject):
         :param float recharge_pct_goal: mana recovery goal in percentage (default is 100)
 
         """
-        return addTzInfo(datetime.utcnow()) + self.get_manabar_recharge_timedelta(
+        return addTzInfo(datetime.now(timezone.utc)) + self.get_manabar_recharge_timedelta(
             manabar, recharge_pct_goal
         )
 
@@ -1617,7 +1625,7 @@ class Account(BlockchainObject):
             "interest": interest_amount,
             "last_payment": last_payment,
             "next_payment": next_payment,
-            "next_payment_duration": next_payment - addTzInfo(datetime.utcnow()),
+            "next_payment_duration": next_payment - addTzInfo(datetime.now(timezone.utc)),
             "interest_rate": interest_rate,
         }
 
@@ -1698,7 +1706,7 @@ class Account(BlockchainObject):
             average_bandwidth = float(self["average_bandwidth"])
         total_seconds = 604800
 
-        seconds_since_last_update = addTzInfo(datetime.utcnow()) - last_bandwidth_update
+        seconds_since_last_update = addTzInfo(datetime.now(timezone.utc)) - last_bandwidth_update
         seconds_since_last_update = seconds_since_last_update.total_seconds()
         used_bandwidth = 0
         if seconds_since_last_update < total_seconds:
@@ -2040,7 +2048,7 @@ class Account(BlockchainObject):
             raise OfflineHasNoRPCException("No RPC available in offline mode!")
         self.blockchain.rpc.set_next_node_on_empty_reply(False)
         if after is None:
-            after = addTzInfo(datetime.utcnow()) - timedelta(days=8)
+            after = addTzInfo(datetime.now(timezone.utc)) - timedelta(days=8)
         if self.blockchain.rpc.get_use_appbase():
             return self.blockchain.rpc.find_vesting_delegation_expirations(
                 {"account": account}, api="database"
@@ -2264,7 +2272,7 @@ class Account(BlockchainObject):
         .. testcode::
 
             utc = pytz.timezone('UTC')
-            start_time = utc.localize(datetime.utcnow()) - timedelta(days=7)
+            start_time = utc.localize(datetime.now(timezone.utc)) - timedelta(days=7)
             acc = Account("gtg")
             start_op = acc.estimate_virtual_op_num(start_time)
 
@@ -2376,7 +2384,7 @@ class Account(BlockchainObject):
 
         :param int days: limit number of days to be included int the return value
         """
-        stop = addTzInfo(datetime.utcnow()) - timedelta(days=days)
+        stop = addTzInfo(datetime.now(timezone.utc)) - timedelta(days=days)
         reward_vests = Amount(
             0, self.blockchain.vest_token_symbol, blockchain_instance=self.blockchain
         )
@@ -4286,12 +4294,12 @@ class AccountsObject(list):
             rep.append(f.rep)
             own_mvest.append(float(f.balances["available"][2]) / 1e6)
             eff_sp.append(f.get_token_power())
-            last_vote = addTzInfo(datetime.utcnow()) - (f["last_vote_time"])
+            last_vote = addTzInfo(datetime.now(timezone.utc)) - (f["last_vote_time"])
             if last_vote.days >= 365:
                 no_vote += 1
             else:
                 last_vote_h.append(last_vote.total_seconds() / 60 / 60)
-            last_post = addTzInfo(datetime.utcnow()) - (f["last_root_post"])
+            last_post = addTzInfo(datetime.now(timezone.utc)) - (f["last_root_post"])
             if last_post.days >= 365:
                 no_post += 1
             else:

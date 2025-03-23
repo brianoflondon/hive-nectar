@@ -199,7 +199,7 @@ dev = [
     { name = "codecov" },
     { name = "coverage" },
     { name = "doc8" },
-    { name = "mock", specifier = ">=2.0.0" },
+    { name = "mock" },
     { name = "mypy" },
     { name = "parameterized" },
     { name = "pytest" },

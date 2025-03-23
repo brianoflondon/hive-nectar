@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import threading
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from beem.instance import shared_blockchain_instance
 from beemgraphenebase.py23 import integer_types, string_types
@@ -16,7 +16,7 @@ class ObjectCache(dict):
 
     def __setitem__(self, key, value):
         data = {
-            "expires": datetime.utcnow() + timedelta(seconds=self.default_expiration),
+            "expires": datetime.now(timezone.utc) + timedelta(seconds=self.default_expiration),
             "data": value,
         }
         with self.lock:
@@ -46,7 +46,7 @@ class ObjectCache(dict):
     def clear_expired_items(self):
         with self.lock:
             del_list = []
-            utc_now = datetime.utcnow()
+            utc_now = datetime.now(timezone.utc)
             for key in self:
                 value = dict.__getitem__(self, key)
                 if value is None:
@@ -63,7 +63,7 @@ class ObjectCache(dict):
                 value = dict.__getitem__(self, key)
                 if value is None:
                     return False
-                if datetime.utcnow() < value["expires"]:
+                if datetime.now(timezone.utc) < value["expires"]:
                     return True
                 else:
                     value["data"] = None

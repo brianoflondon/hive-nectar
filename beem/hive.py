@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import math
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 from beem.blockchaininstance import BlockChainInstance
 from beem.constants import STEEM_100_PERCENT
@@ -167,7 +167,7 @@ class Hive(BlockChainInstance):
             current ratio is returned (default). (can also be a datetime object)
         """
         if self.offline and time_stamp is None:
-            time_stamp = datetime.utcnow()
+            time_stamp = datetime.now(timezone.utc)
 
         if time_stamp is not None:
             if isinstance(time_stamp, (datetime, date)):

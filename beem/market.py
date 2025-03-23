@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytz
 
@@ -384,7 +384,7 @@ class Market(dict):
         """
         utc = pytz.timezone("UTC")
         if not stop:
-            stop = utc.localize(datetime.utcnow())
+            stop = utc.localize(datetime.now(timezone.utc))
         if not start:
             start = stop - timedelta(hours=1)
         start = addTzInfo(start)
@@ -424,7 +424,7 @@ class Market(dict):
         # sell
         utc = pytz.timezone("UTC")
         if not stop:
-            stop = utc.localize(datetime.utcnow())
+            stop = utc.localize(datetime.now(timezone.utc))
         if not start:
             start = stop - timedelta(hours=24)
         start = addTzInfo(start)

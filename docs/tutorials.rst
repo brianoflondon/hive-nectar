@@ -237,7 +237,7 @@ Lets calculate the curation reward from the last 7 days:
     from beem.amount import Amount
 
     acc = Account("gtg")
-    stop = datetime.utcnow() - timedelta(days=7)
+    stop = datetime.now(timezone.utc) - timedelta(days=7)
     reward_vests = Amount("0 VESTS")
     for reward in acc.history_reverse(stop=stop, only_ops=["curation_reward"]):
                 reward_vests += Amount(reward['reward'])

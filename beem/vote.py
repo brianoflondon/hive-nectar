@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 import pytz
 from prettytable import PrettyTable
@@ -278,7 +278,9 @@ class VotesObject(list):
         elif sort_key == "time":
             sortedList = sorted(
                 self,
-                key=lambda self: (utc.localize(datetime.utcnow()) - self.time).total_seconds(),
+                key=lambda self: (
+                    utc.localize(datetime.now(timezone.utc)) - self.time
+                ).total_seconds(),
                 reverse=reverse,
             )
         elif sort_key == "votee":
@@ -315,7 +317,7 @@ class VotesObject(list):
 
             d_time = vote.time
             if d_time != formatTimeString("1970-01-01T00:00:00"):
-                td = utc.localize(datetime.utcnow()) - d_time
+                td = utc.localize(datetime.now(timezone.utc)) - d_time
                 timestr = (
                     str(td.days)
                     + " days "

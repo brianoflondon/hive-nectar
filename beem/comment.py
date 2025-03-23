@@ -2,7 +2,7 @@
 import json
 import logging
 import math
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 import pytz
 
@@ -391,7 +391,7 @@ class Comment(BlockchainObject):
     def time_elapsed(self):
         """Returns a timedelta on how old the post is."""
         utc = pytz.timezone("UTC")
-        return utc.localize(datetime.utcnow()) - self["created"]
+        return utc.localize(datetime.now(timezone.utc)) - self["created"]
 
     def curation_penalty_compensation_SBD(self):
         """Returns The required post payout amount after 15 minutes

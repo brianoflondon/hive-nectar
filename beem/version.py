@@ -1,2 +1,3 @@
 """THIS FILE IS GENERATED FROM beem PYPROJECT.TOML."""
-version = '0.25.00'
+
+version = "0.25.00"

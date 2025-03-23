@@ -65,7 +65,8 @@ class SQLiteFile:
             os.mkdir(backupdir)
         backup_file = os.path.join(
             backupdir,
-            os.path.basename(self.storageDatabase) + datetime.utcnow().strftime("-" + timeformat),
+            os.path.basename(self.storageDatabase)
+            + datetime.now(timezone.utc).strftime("-" + timeformat),
         )
         self.sqlite3_copy(self.sqlite_file, backup_file)
 

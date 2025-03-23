@@ -7,7 +7,7 @@ import re
 import secrets
 import string
 import time as timenow
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 
 import pytz
 from ruamel.yaml import YAML
@@ -25,7 +25,7 @@ RE_HUNK_HEADER = re.compile(
 def formatTime(t):
     """Properly Format Time for permlinks"""
     if isinstance(t, float):
-        return datetime.utcfromtimestamp(t).strftime("%Y%m%dt%H%M%S%Z")
+        return timezone.utcfromtimestamp(t).strftime("%Y%m%dt%H%M%S%Z")
     if isinstance(t, (datetime, date, time)):
         return t.strftime("%Y%m%dt%H%M%S%Z")
 
@@ -68,7 +68,7 @@ def formatTimeFromNow(secs=0):
     :rtype: str
 
     """
-    return datetime.utcfromtimestamp(timenow.time() + int(secs)).strftime(timeFormat)
+    return timezone.utcfromtimestamp(timenow.time() + int(secs)).strftime(timeFormat)
 
 
 def formatTimedelta(td):
@@ -116,7 +116,7 @@ def derive_permlink(
     author (for replies).
 
     """
-    suffix = "-" + formatTime(datetime.utcnow()) + "z"
+    suffix = "-" + formatTime(datetime.now(timezone.utc)) + "z"
     if parent_permlink and parent_author:
         prefix = "re-" + sanitize_permlink(parent_author) + "-"
         if with_suffix:

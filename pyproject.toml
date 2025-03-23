@@ -58,9 +58,9 @@ beempy = "beem.cli:cli"
 packages = ["beem", "beemapi", "beembase", "beemgraphenebase", "beemgrapheneapi", "beemstorage"]
 
 [tool.uv]
-default-groups = []
+default-groups = [ ]
 
-[tool.pytest.ini_options]
+[tool.pytest]
 testpaths = ["tests"]
 python_files = "test_*.py"
 
@@ -71,13 +71,10 @@ line-length = 100
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
-line-ending = "auto"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
-ignore = [
-  
-]
+ignore = ["E501"]
 exclude = [
     ".tox",
     ".git",
@@ -91,6 +88,12 @@ exclude = [
     ".cache",
     ".eggs",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
+"**/{tests,docs,tools}/*" = ["E402"]
+
+
 [tool.mypy]
 python_version = ">3.12"
 warn_return_any = true
@@ -100,7 +103,7 @@ disallow_incomplete_defs = false
 
 [dependency-groups]
 dev = [
-    "mock>=2.0.0",
+    "mock",
     "pytest",
     "pytest-mock",
     "pytest-cov",

@@ -127,7 +127,7 @@ class Testcases(unittest.TestCase):
     def test_accountvotes(self):
         bts = self.bts
         utc = pytz.timezone("UTC")
-        limit_time = utc.localize(datetime.utcnow()) - timedelta(days=7)
+        limit_time = utc.localize(datetime.now(timezone.utc)) - timedelta(days=7)
         votes = AccountVotes(self.voter, start=limit_time, blockchain_instance=bts)
         self.assertTrue(len(votes) > 0)
         self.assertTrue(isinstance(votes[0], Vote))

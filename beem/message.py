@@ -3,7 +3,7 @@ import json
 import logging
 import re
 from binascii import hexlify, unhexlify
-from datetime import datetime
+from datetime import datetime, timezone
 
 from beem.account import Account
 from beem.instance import shared_blockchain_instance
@@ -221,7 +221,7 @@ class MessageV2(object):
             "key",
             account["memo_key"],
             "time",
-            str(datetime.utcnow()),
+            str(datetime.now(timezone.utc)),
             "text",
             self.message,
         ]

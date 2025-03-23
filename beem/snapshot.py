@@ -3,7 +3,7 @@ import json
 import logging
 import re
 from bisect import bisect_left
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 
 import pytz
 
@@ -142,7 +142,7 @@ class AccountSnapshot(list):
     def get_data(self, timestamp=None, index=0):
         """Returns snapshot for given timestamp"""
         if timestamp is None:
-            timestamp = datetime.utcnow()
+            timestamp = datetime.now(timezone.utc)
         timestamp = addTzInfo(timestamp)
         # Find rightmost value less than x
         i = bisect_left(self.timestamps, timestamp)
@@ -686,8 +686,8 @@ class AccountSnapshot(list):
 
         self.vp.append(self.account.get_voting_power() * 100)
         self.downvote_vp.append(self.account.get_downvoting_power() * 100)
-        self.downvote_vp_timestamp.append(datetime.utcnow())
-        self.vp_timestamp.append(datetime.utcnow())
+        self.downvote_vp_timestamp.append(datetime.now(timezone.utc))
+        self.vp_timestamp.append(datetime.now(timezone.utc))
 
     def build_curation_arrays(self, end_date=None, sum_days=7):
         """Build curation arrays"""
