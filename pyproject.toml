@@ -37,7 +37,6 @@ dependencies = [
     "appdirs",
     "scrypt",
     "pycryptodomex",
-    "pytz",
     "Click",
     "click_shell",
     "prettytable",

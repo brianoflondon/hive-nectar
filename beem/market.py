@@ -3,11 +3,8 @@ import logging
 import random
 from datetime import datetime, timedelta, timezone
 
-import pytz
-
 from beem.instance import shared_blockchain_instance
 from beembase import operations
-from beemgraphenebase.py23 import string_types
 
 from .account import Account
 from .amount import Amount
@@ -382,9 +379,9 @@ class Market(dict):
         :param int limit: Defines how many trades are fetched at each intervall point
         :param bool raw_data: when True, the raw data are returned
         """
-        utc = pytz.timezone("UTC")
+        utc = timezone.utc
         if not stop:
-            stop = utc.localize(datetime.now(timezone.utc))
+            stop = utc.localize(datetime.now())
         if not start:
             start = stop - timedelta(hours=1)
         start = addTzInfo(start)
@@ -422,9 +419,9 @@ class Market(dict):
         """
         # FIXME, this call should also return whether it was a buy or
         # sell
-        utc = pytz.timezone("UTC")
+        utc = timezone.utc
         if not stop:
-            stop = utc.localize(datetime.now(timezone.utc))
+            stop = utc.localize(datetime.now())
         if not start:
             start = stop - timedelta(hours=24)
         start = addTzInfo(start)
@@ -511,7 +508,7 @@ class Market(dict):
             return history
         new_history = []
         for h in history:
-            if "open" in h and isinstance(h.get("open"), string_types):
+            if "open" in h and isinstance(h.get("open"), str):
                 h["open"] = formatTimeString(h.get("open", "1970-01-01T00:00:00"))
             new_history.append(h)
         return new_history

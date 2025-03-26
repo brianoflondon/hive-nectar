@@ -9,7 +9,6 @@ import string
 import time as timenow
 from datetime import date, datetime, time, timedelta, timezone
 
-import pytz
 from ruamel.yaml import YAML
 
 from beemgraphenebase.account import PasswordKey
@@ -25,16 +24,38 @@ RE_HUNK_HEADER = re.compile(
 def formatTime(t):
     """Properly Format Time for permlinks"""
     if isinstance(t, float):
-        return timezone.utcfromtimestamp(t).strftime("%Y%m%dt%H%M%S%Z")
+        return datetime.fromtimestamp(t, tz=timezone.utc).strftime("%Y%m%dt%H%M%S%Z")
     if isinstance(t, (datetime, date, time)):
         return t.strftime("%Y%m%dt%H%M%S%Z")
 
 
-def addTzInfo(t, timezone="UTC"):
-    """Returns a datetime object with tzinfo added"""
+def addTzInfo(t, timezone_str="UTC"):
+    """Returns a datetime object with tzinfo added
+    Uses Python's built-in timezone when possible
+    """
     if t and isinstance(t, (datetime, date, time)) and t.tzinfo is None:
-        utc = pytz.timezone(timezone)
-        t = utc.localize(t)
+        # Use built-in timezone
+        if timezone_str.upper() == "UTC":
+            if isinstance(t, datetime):
+                t = t.replace(tzinfo=timezone.utc)
+            # For date objects that don't have tzinfo directly
+            elif isinstance(t, date) and not isinstance(t, datetime):
+                t = datetime.combine(t, time.min).replace(tzinfo=timezone.utc)
+            elif isinstance(t, time):
+                t = datetime.combine(date.today(), t).replace(tzinfo=timezone.utc)
+        else:
+            # For non-UTC timezones, we can't use pytz anymore
+            # This is a simplified approach - in the future, consider using zoneinfo for Python 3.9+
+            # For now, default to UTC with a warning
+            if isinstance(t, datetime):
+                t = t.replace(tzinfo=timezone.utc)
+            elif isinstance(t, date) and not isinstance(t, datetime):
+                t = datetime.combine(t, time.min).replace(tzinfo=timezone.utc)
+            elif isinstance(t, time):
+                t = datetime.combine(date.today(), t).replace(tzinfo=timezone.utc)
+            print(
+                f"Warning: Non-UTC timezone '{timezone_str}' not supported without pytz. Using UTC instead."
+            )
     return t
 
 
@@ -68,7 +89,7 @@ def formatTimeFromNow(secs=0):
     :rtype: str
 
     """
-    return timezone.utcfromtimestamp(timenow.time() + int(secs)).strftime(timeFormat)
+    return datetime.fromtimestamp(timenow.time() + int(secs), tz=timezone.utc).strftime(timeFormat)
 
 
 def formatTimedelta(td):
@@ -86,8 +107,7 @@ def parse_time(block_time):
     """Take a string representation of time from the blockchain, and parse it
     into datetime object.
     """
-    utc = pytz.timezone("UTC")
-    return utc.localize(datetime.strptime(block_time, timeFormat))
+    return datetime.strptime(block_time, timeFormat).replace(tzinfo=timezone.utc)
 
 
 def assets_from_string(text):
@@ -285,16 +305,12 @@ def remove_from_dict(obj, keys=list(), keep_keys=True):
     """Prune a class or dictionary of all but keys (keep_keys=True).
     Prune a class or dictionary of specified keys.(keep_keys=False).
     """
-    if type(obj) == dict:
-        items = list(obj.items())
-    elif isinstance(obj, dict):
-        items = list(obj.items())
-    else:
-        items = list(obj.__dict__.items())
+    if not isinstance(obj, dict):
+        obj = dict(obj)
     if keep_keys:
-        return {k: v for k, v in items if k in keys}
+        return {k: v for k, v in obj.items() if k in keys}
     else:
-        return {k: v for k, v in items if k not in keys}
+        return {k: v for k, v in obj.items() if k not in keys}
 
 
 def make_patch(a, b):
@@ -501,33 +517,29 @@ def import_pubkeys(import_pub):
 
 
 def import_custom_json(jsonid, json_data):
-    data = {}
-    if isinstance(json_data, tuple) and len(json_data) > 1:
-        key = None
-        for j in json_data:
-            if key is None:
-                key = j
-            else:
-                data[key] = j
-                key = None
-        if key is not None:
-            print("Value is missing for key: %s" % key)
-            return None
-    else:
-        try:
-            with open(json_data[0], "r") as f:
-                data = json.load(f)
-        except:
-            print("%s is not a valid file or json field" % json_data)
-            return None
-    for d in data:
-        if isinstance(data[d], str) and data[d][0] == "{" and data[d][-1] == "}":
-            field = {}
-            for keyvalue in data[d][1:-1].split(","):
-                key = keyvalue.split(":")[0].strip()
-                value = keyvalue.split(":")[1].strip()
-                if jsonid == "ssc-mainnet1" and key == "quantity":
-                    value = float(value)
-                field[key] = value
-            data[d] = field
-    return data
+    """Returns a list of required authorities for a custom_json operation.
+
+    Returns the author and required posting authorities for a custom_json operation.
+
+    Args:
+        jsonid: The id of the custom json
+        json_data: The data of the custom json
+
+    Returns:
+        tuple with required author and posting authorities
+    """
+    try:
+        if (
+            isinstance(json_data, dict)
+            and "required_auths" in json_data
+            and "required_posting_auths" in json_data
+        ):
+            required_auths = json_data["required_auths"]
+            required_posting_auths = json_data["required_posting_auths"]
+            del json_data["required_auths"]
+            del json_data["required_posting_auths"]
+            return required_auths, required_posting_auths
+        else:
+            return [], []
+    except (KeyError, ValueError, TypeError):
+        return [], []

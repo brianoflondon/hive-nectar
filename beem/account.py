@@ -321,7 +321,7 @@ class Account(BlockchainObject):
         max_mana = int(rc_param["max_rc"])
         last_mana = int(rc_param["rc_manabar"]["current_mana"])
         last_update_time = rc_param["rc_manabar"]["last_update_time"]
-        last_update = timezone.utcfromtimestamp(last_update_time)
+        last_update = datetime.fromtimestamp(last_update_time, tz=timezone.utc)
         diff_in_seconds = (datetime.now(timezone.utc) - last_update).total_seconds()
         current_mana = int(
             last_mana + diff_in_seconds * max_mana / STEEM_VOTING_MANA_REGENERATION_SECONDS
@@ -585,7 +585,7 @@ class Account(BlockchainObject):
 
         last_mana = int(self["voting_manabar"]["current_mana"])
         last_update_time = self["voting_manabar"]["last_update_time"]
-        last_update = timezone.utcfromtimestamp(last_update_time)
+        last_update = datetime.fromtimestamp(last_update_time, tz=timezone.utc)
         diff_in_seconds = (
             addTzInfo(datetime.now(timezone.utc)) - addTzInfo(last_update)
         ).total_seconds()
@@ -620,7 +620,7 @@ class Account(BlockchainObject):
 
         last_mana = int(self["downvote_manabar"]["current_mana"])
         last_update_time = self["downvote_manabar"]["last_update_time"]
-        last_update = timezone.utcfromtimestamp(last_update_time)
+        last_update = datetime.fromtimestamp(last_update_time, tz=timezone.utc)
         diff_in_seconds = (
             addTzInfo(datetime.now(timezone.utc)) - addTzInfo(last_update)
         ).total_seconds()
@@ -2263,16 +2263,13 @@ class Account(BlockchainObject):
 
         .. testsetup::
 
-            import pytz
             from beem.account import Account
             from beem.blockchain import Blockchain
             from datetime import datetime, timedelta
             from timeit import time as t
-
         .. testcode::
 
-            utc = pytz.timezone('UTC')
-            start_time = utc.localize(datetime.now(timezone.utc)) - timedelta(days=7)
+            start_time = datetime.now() - timedelta(days=7)
             acc = Account("gtg")
             start_op = acc.estimate_virtual_op_num(start_time)
 

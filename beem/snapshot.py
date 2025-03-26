@@ -5,8 +5,6 @@ import re
 from bisect import bisect_left
 from datetime import date, datetime, time, timedelta, timezone
 
-import pytz
-
 from beem.account import Account
 from beem.amount import Amount
 from beem.constants import STEEM_100_PERCENT, STEEM_VOTE_REGENERATION_SECONDS
@@ -55,10 +53,8 @@ class AccountSnapshot(list):
         self.delegated_vests_in = [{}]
         self.delegated_vests_out = [{}]
         self.timestamps = [addTzInfo(datetime(1970, 1, 1, 0, 0, 0, 0))]
-        import beembase.operationids
-
-        self.ops_statistics = beembase.operationids.operations.copy()
-        for key in self.ops_statistics:
+        self.ops_statistics = {}
+        for key in self.blockchain.get_operation_names():
             self.ops_statistics[key] = 0
         self.reward_timestamps = []
         self.author_rewards = []
@@ -217,7 +213,7 @@ class AccountSnapshot(list):
             self.in_vote_weight.append(weight)
             self.in_vote_rep.append(int(v["reputation"]))
             self.in_vote_rshares.append(int(v["rshares"]))
-        except:
+        except Exception:
             print("Could not find: %s" % v)
             return
 
@@ -565,7 +561,7 @@ class AccountSnapshot(list):
         """Build vote power arrays"""
         self.vp_timestamp = [self.timestamps[1]]
         self.vp = [STEEM_100_PERCENT]
-        HF_21 = datetime(2019, 8, 27, 15, tzinfo=pytz.utc)
+        HF_21 = datetime(2019, 8, 27, 15, tzinfo=timezone.utc)
         if self.timestamps[1] > HF_21:
             self.downvote_vp_timestamp = [self.timestamps[1]]
         else:

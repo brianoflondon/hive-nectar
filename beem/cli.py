@@ -14,7 +14,6 @@ import time
 from datetime import datetime, timedelta, timezone
 
 import click
-import pytz
 from click_shell import shell
 from prettytable import PrettyTable
 
@@ -3717,8 +3716,8 @@ def tradehistory(days, hours, sbd_to_steem, hbd_to_hive, limit, width, height, a
     if stm.rpc is not None:
         stm.rpc.rpcconnect()
     m = Market(blockchain_instance=stm)
-    utc = pytz.timezone("UTC")
-    stop = utc.localize(datetime.now(timezone.utc))
+    # Using built-in timezone support
+    stop = datetime.now(timezone.utc)
     start = stop - timedelta(days=days)
     intervall = timedelta(hours=hours)
     trades = m.trade_history(start=start, stop=stop, limit=limit, intervall=intervall)
@@ -4563,8 +4562,8 @@ def votes(account, direction, outgoing, incoming, days, export):
         account = stm.config["default_account"]
     if direction is None and not incoming and not outgoing:
         direction = "in"
-    utc = pytz.timezone("UTC")
-    limit_time = utc.localize(datetime.now(timezone.utc)) - timedelta(days=days)
+    # Using built-in timezone support
+    limit_time = datetime.now(timezone.utc) - timedelta(days=days)
     out_votes_str = ""
     in_votes_str = ""
     if direction == "out" or outgoing:
@@ -4661,8 +4660,8 @@ def curation(
     if authorperm == "all" or authorperm.isdigit():
         if not account:
             account = stm.config["default_account"]
-        utc = pytz.timezone("UTC")
-        limit_time = utc.localize(datetime.now(timezone.utc)) - timedelta(days=7)
+        # Using built-in timezone support
+        limit_time = datetime.now(timezone.utc) - timedelta(days=7)
         votes = AccountVotes(account, start=limit_time, blockchain_instance=stm)
         authorperm_list = [vote.authorperm for vote in votes]
         if authorperm.isdigit():
@@ -4930,8 +4929,8 @@ def rewards(accounts, only_sum, post, comment, curation, length, author, permlin
     if days < 0:
         days = 1
 
-    utc = pytz.timezone("UTC")
-    now = utc.localize(datetime.now(timezone.utc))
+    # Using built-in timezone support
+    now = datetime.now(timezone.utc)
     limit_time = now - timedelta(days=days)
     for account in accounts:
         sum_reward = [0, 0, 0, 0, 0]
@@ -5267,10 +5266,10 @@ def pending(
     if stm.is_hive:
         sp_symbol = "HP"
 
-    utc = pytz.timezone("UTC")
-    max_limit_time = utc.localize(datetime.now(timezone.utc)) - timedelta(days=7)
-    limit_time = utc.localize(datetime.now(timezone.utc)) - timedelta(days=_from + days)
-    start_time = utc.localize(datetime.now(timezone.utc)) - timedelta(days=_from)
+    # Using built-in timezone support
+    max_limit_time = datetime.now(timezone.utc) - timedelta(days=7)
+    limit_time = datetime.now(timezone.utc) - timedelta(days=_from + days)
+    start_time = datetime.now(timezone.utc) - timedelta(days=_from)
     for account in accounts:
         sum_reward = [0, 0, 0, 0]
         account = Account(account, blockchain_instance=stm)

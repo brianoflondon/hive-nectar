@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
+#!/usr/bin/python
 import unittest
-from datetime import datetime, timedelta
-
-import pytz
+from datetime import datetime, timedelta, timezone
 
 from beem import Hive, exceptions
 from beem.account import Account
@@ -126,8 +125,7 @@ class Testcases(unittest.TestCase):
     @unittest.skip
     def test_accountvotes(self):
         bts = self.bts
-        utc = pytz.timezone("UTC")
-        limit_time = utc.localize(datetime.now(timezone.utc)) - timedelta(days=7)
+        limit_time = datetime.now(timezone.utc) - timedelta(days=7)
         votes = AccountVotes(self.voter, start=limit_time, blockchain_instance=bts)
         self.assertTrue(len(votes) > 0)
         self.assertTrue(isinstance(votes[0], Vote))

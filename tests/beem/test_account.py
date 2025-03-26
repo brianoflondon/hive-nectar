@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
-from datetime import datetime, timedelta
-
-import pytz
+from datetime import datetime, timedelta, timezone
 
 from beem import Hive, exceptions
 from beem.account import Account, extract_account_name
@@ -285,7 +283,6 @@ class Testcases(unittest.TestCase):
 
     def test_history_block_num(self):
         stm = self.bts
-        zero_element = 0
         account = Account("beembot", steem_instance=stm)
         h_all_raw = []
         for h in account.history_reverse(use_block_num=False, stop=-15, raw_output=True):
@@ -302,7 +299,6 @@ class Testcases(unittest.TestCase):
             raw_output=True,
         ):
             h_list.append(h)
-        # self.assertEqual(h_list[0][0], zero_element)
         self.assertEqual(h_list[-1][0], h_all_raw[0][0])
         self.assertEqual(h_list[0][1]["block"], h_all_raw[-1][1]["block"])
         self.assertEqual(h_list[-1][1]["block"], h_all_raw[0][1]["block"])
@@ -332,7 +328,7 @@ class Testcases(unittest.TestCase):
         self.assertTrue(sp >= 0)
         vv = account.get_voting_value_SBD()
         self.assertTrue(vv >= 0)
-        bw = account.get_bandwidth()
+        # bw = account.get_bandwidth()
         # self.assertTrue(bw['used'] <= bw['allocated'])
         followers = account.get_followers()
         self.assertTrue(isinstance(followers, list))
@@ -516,8 +512,7 @@ class Testcases(unittest.TestCase):
     def test_history_votes(self):
         stm = self.bts
         account = Account("gtg", steem_instance=stm)
-        utc = pytz.timezone("UTC")
-        limit_time = utc.localize(datetime.now(timezone.utc)) - timedelta(days=2)
+        limit_time = datetime.now(timezone.utc) - timedelta(days=2)
         votes_list = []
         for v in account.history(start=limit_time, only_ops=["vote"]):
             votes_list.append(v)

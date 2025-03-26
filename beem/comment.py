@@ -4,8 +4,6 @@ import logging
 import math
 from datetime import date, datetime, timezone
 
-import pytz
-
 from beem.constants import (
     STEEM_REVERSE_AUCTION_WINDOW_SECONDS_HF6,
     STEEM_REVERSE_AUCTION_WINDOW_SECONDS_HF20,
@@ -134,7 +132,7 @@ class Comment(BlockchainObject):
         if isinstance(meta_str, (string_types, bytes_types, bytearray)):
             try:
                 comment["json_metadata"] = json.loads(meta_str)
-            except:
+            except Exception:
                 comment["json_metadata"] = {}
 
         comment["tags"] = []
@@ -166,7 +164,7 @@ class Comment(BlockchainObject):
                     if p in vote and isinstance(vote.get(p), string_types):
                         try:
                             vote[p] = int(vote.get(p, "0"))
-                        except:
+                        except ValueError:
                             vote[p] = int(0)
                 new_active_votes.append(vote)
             comment["active_votes"] = new_active_votes
@@ -390,8 +388,7 @@ class Comment(BlockchainObject):
 
     def time_elapsed(self):
         """Returns a timedelta on how old the post is."""
-        utc = pytz.timezone("UTC")
-        return utc.localize(datetime.now(timezone.utc)) - self["created"]
+        return datetime.now(timezone.utc) - self["created"]
 
     def curation_penalty_compensation_SBD(self):
         """Returns The required post payout amount after 15 minutes

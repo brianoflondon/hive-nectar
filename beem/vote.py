@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 import json
-import logging
 from datetime import date, datetime, timezone
 
-import pytz
 from prettytable import PrettyTable
 
-from beemapi.exceptions import UnkownKey
+from beemapi.exceptions import InvalidParameters, UnknownKey
 from beemgraphenebase.py23 import integer_types, string_types
 
 from .account import Account
@@ -24,28 +22,17 @@ from .utils import (
     resolve_authorpermvoter,
 )
 
-log = logging.getLogger(__name__)
-
 
 class Vote(BlockchainObject):
     """Read data about a Vote in the chain
 
     :param str authorperm: perm link to post/comment
-    :param Steem steem_instance: Steem() instance to use when accesing a RPC
-
-    .. code-block:: python
-
-       >>> from beem.vote import Vote
-       >>> from beem import Steem
-       >>> stm = Steem()
-       >>> v = Vote("@gtg/steem-pressure-4-need-for-speed|gandalf", steem_instance=stm)
-
+    :param beem.beem.Beem blockchain_instance: Beem
+        instance to use when accesing a RPC
     """
 
-    type_id = 11
-
     def __init__(
-        self, voter, authorperm=None, full=False, lazy=False, blockchain_instance=None, **kwargs
+        self, voter, authorperm=None, lazy=False, full=False, blockchain_instance=None, **kwargs
     ):
         self.full = full
         self.lazy = lazy
@@ -119,18 +106,13 @@ class Vote(BlockchainObject):
                     votes = self.blockchain.rpc.get_active_votes(
                         {"author": author, "permlink": permlink}, api="tags"
                     )["votes"]
-                except:
-                    from beemapi.exceptions import InvalidParameters
-
-                    try:
-                        votes = self.blockchain.rpc.get_active_votes(
-                            author, permlink, api="condenser"
-                        )
-                    except InvalidParameters:
-                        raise VoteDoesNotExistsException(self.identifier)
+                except InvalidParameters:
+                    raise VoteDoesNotExistsException(self.identifier)
+                except Exception:  # Fallback to condenser API
+                    votes = self.blockchain.rpc.get_active_votes(author, permlink, api="condenser")
             else:
                 votes = self.blockchain.rpc.get_active_votes(author, permlink, api="condenser")
-        except UnkownKey:
+        except UnknownKey:
             raise VoteDoesNotExistsException(self.identifier)
 
         vote = None
@@ -271,24 +253,11 @@ class Vote(BlockchainObject):
 
 class VotesObject(list):
     def get_sorted_list(self, sort_key="time", reverse=True):
-        utc = pytz.timezone("UTC")
-
-        if sort_key == "sbd" or sort_key == "hbd":
-            sortedList = sorted(self, key=lambda self: self.rshares, reverse=reverse)
-        elif sort_key == "time":
-            sortedList = sorted(
-                self,
-                key=lambda self: (
-                    utc.localize(datetime.now(timezone.utc)) - self.time
-                ).total_seconds(),
-                reverse=reverse,
-            )
-        elif sort_key == "votee":
-            sortedList = sorted(self, key=lambda self: self.votee, reverse=reverse)
-        elif sort_key in ["voter", "rshares", "percent", "weight"]:
-            sortedList = sorted(self, key=lambda self: self[sort_key], reverse=reverse)
-        else:
-            sortedList = self
+        sortedList = sorted(
+            self,
+            key=lambda x: (datetime.now(timezone.utc) - x.time).total_seconds(),
+            reverse=reverse,
+        )
         return sortedList
 
     def printAsTable(
@@ -305,7 +274,6 @@ class VotesObject(list):
         return_str=False,
         **kwargs,
     ):
-        utc = pytz.timezone("UTC")
         table_header = ["Voter", "Votee", "SBD/HBD", "Time", "Rshares", "Percent", "Weight"]
         t = PrettyTable(table_header)
         t.align = "l"
@@ -317,7 +285,7 @@ class VotesObject(list):
 
             d_time = vote.time
             if d_time != formatTimeString("1970-01-01T00:00:00"):
-                td = utc.localize(datetime.now(timezone.utc)) - d_time
+                td = datetime.now(timezone.utc) - d_time
                 timestr = (
                     str(td.days)
                     + " days "
@@ -415,7 +383,7 @@ class VotesObject(list):
         return vote_list
 
     def print_stats(self, return_str=False, **kwargs):
-        # utc = pytz.timezone('UTC')
+        # Using built-in timezone support
         table_header = ["voter", "votee", "sbd/hbd", "time", "rshares", "percent", "weight"]
         t = PrettyTable(table_header)
         t.align = "l"
@@ -478,7 +446,7 @@ class ActiveVotes(VotesObject):
                     raise VoteDoesNotExistsException(
                         construct_authorperm(authorperm["author"], authorperm["permlink"])
                     )
-                except:
+                except Exception:  # Fallback to tags API
                     votes = self.blockchain.rpc.get_active_votes(
                         {"author": authorperm["author"], "permlink": authorperm["permlink"]},
                         api="tags",
@@ -498,7 +466,7 @@ class ActiveVotes(VotesObject):
                     votes = self.blockchain.rpc.get_active_votes(author, permlink, api="condenser")
                 except InvalidParameters:
                     raise VoteDoesNotExistsException(construct_authorperm(author, permlink))
-                except:
+                except Exception:  # Fallback to tags API
                     votes = self.blockchain.rpc.get_active_votes(
                         {"author": author, "permlink": permlink}, api="tags"
                     )["votes"]

@@ -59,7 +59,7 @@ class MissingRequiredActiveAuthority(RPCError):
     pass
 
 
-class UnkownKey(RPCError):
+class UnknownKey(RPCError):
     pass
 
 

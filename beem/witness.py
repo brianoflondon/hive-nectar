@@ -2,33 +2,26 @@
 import json
 from datetime import date, datetime, timezone
 
-import pytz
 from prettytable import PrettyTable
 
-from beem.instance import shared_blockchain_instance
 from beembase import operations
-from beemgraphenebase.py23 import integer_types, string_types
 
 from .account import Account
 from .amount import Amount
 from .blockchainobject import BlockchainObject
 from .exceptions import WitnessDoesNotExistsException
+from .instance import shared_blockchain_instance
 from .utils import formatTimeString
 
 
 class Witness(BlockchainObject):
     """Read data about a witness in the chain
 
-    :param str account_name: Name of the witness
-    :param Steem steem_instance: Steem instance to use when
-           accesing a RPC
-
-    .. code-block:: python
-
-       >>> from beem.witness import Witness
-       >>> Witness("gtg")
-       <Witness gtg>
-
+    :param str owner: Name of the witness
+    :param bool lazy: Use lazy loading
+    :param bool full: Get full data about witness
+    :param beem.beem.Beem blockchain_instance: Beem
+        instance to use when accesing a RPC
     """
 
     type_id = 3
@@ -81,7 +74,7 @@ class Witness(BlockchainObject):
             "last_hbd_exchange_update",
         ]
         for p in parse_times:
-            if p in witness and isinstance(witness.get(p), string_types):
+            if p in witness and isinstance(witness.get(p), str):
                 witness[p] = formatTimeString(witness.get(p, "1970-01-01T00:00:00"))
         parse_int = [
             "votes",
@@ -90,7 +83,7 @@ class Witness(BlockchainObject):
             "virtual_scheduled_time",
         ]
         for p in parse_int:
-            if p in witness and isinstance(witness.get(p), string_types):
+            if p in witness and isinstance(witness.get(p), str):
                 witness[p] = int(witness.get(p, "0"))
         return witness
 
@@ -116,7 +109,7 @@ class Witness(BlockchainObject):
             "virtual_scheduled_time",
         ]
         for p in parse_int:
-            if p in output and isinstance(output[p], integer_types):
+            if p in output and isinstance(output[p], int):
                 output[p] = str(output[p])
         return json.loads(str(json.dumps(output)))
 
@@ -149,7 +142,7 @@ class Witness(BlockchainObject):
         account = Account(account, blockchain_instance=self.blockchain)
         if isinstance(base, Amount):
             base = Amount(base, blockchain_instance=self.blockchain)
-        elif isinstance(base, string_types):
+        elif isinstance(base, str):
             base = Amount(base, blockchain_instance=self.blockchain)
         else:
             base = Amount(
@@ -158,7 +151,7 @@ class Witness(BlockchainObject):
 
         if isinstance(quote, Amount):
             quote = Amount(quote, blockchain_instance=self.blockchain)
-        elif isinstance(quote, string_types):
+        elif isinstance(quote, str):
             quote = Amount(quote, blockchain_instance=self.blockchain)
         else:
             quote = Amount(quote, self.blockchain.token_symbol, blockchain_instance=self.blockchain)
@@ -204,7 +197,6 @@ class Witness(BlockchainObject):
 
 class WitnessesObject(list):
     def printAsTable(self, sort_key="votes", reverse=True, return_str=False, **kwargs):
-        utc = pytz.timezone("UTC")
         no_feed = False
         if (
             len(self) > 0
@@ -249,7 +241,7 @@ class WitnessesObject(list):
             sortedList = sorted(
                 self,
                 key=lambda self: (
-                    utc.localize(datetime.now(timezone.utc)) - self[last_bd_exchange_update]
+                    datetime.now(timezone.utc) - self[last_bd_exchange_update]
                 ).total_seconds(),
                 reverse=reverse,
             )
@@ -287,7 +279,7 @@ class WitnessesObject(list):
                     ]
                 )
             else:
-                td = utc.localize(datetime.now(timezone.utc)) - witness[last_bd_exchange_update]
+                td = datetime.now(timezone.utc) - witness[last_bd_exchange_update]
                 t.add_row(
                     [
                         witness["owner"],
