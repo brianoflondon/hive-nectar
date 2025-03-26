@@ -242,7 +242,7 @@ class Discussions(object):
                     raw_data=raw_data,
                 )
             elif discussion_type == "replies":
-                dd = Replies_by_last_update(
+                dd = Discussions_by_replies(
                     discussion_query,
                     blockchain_instance=self.blockchain,
                     lazy=self.lazy,
@@ -347,12 +347,30 @@ class Discussions_by_trending(list):
             self.blockchain.rpc.get_use_appbase() and use_appbase
         )
         posts = []
-        if self.blockchain.rpc.get_use_appbase() and use_appbase:
-            posts = self.blockchain.rpc.get_discussions_by_trending(reduced_query, api="tags")[
-                "discussions"
-            ]
-        if len(posts) == 0:
-            posts = self.blockchain.rpc.get_discussions_by_trending(reduced_query, api="condenser")
+        try:
+            # Try to use the bridge API first (preferred method)
+            bridge_query = {
+                "sort": "trending",
+                "tag": reduced_query.get("tag", ""),
+                "observer": "",
+            }
+            if "limit" in reduced_query:
+                bridge_query["limit"] = reduced_query["limit"]
+            if "start_author" in reduced_query and "start_permlink" in reduced_query:
+                bridge_query["start_author"] = reduced_query["start_author"]
+                bridge_query["start_permlink"] = reduced_query["start_permlink"]
+            posts = self.blockchain.rpc.get_ranked_posts(bridge_query, api="bridge")
+        except Exception:
+            # Fall back to old API methods
+            if self.blockchain.rpc.get_use_appbase() and use_appbase:
+                try:
+                    posts = self.blockchain.rpc.get_discussions_by_trending(reduced_query, api="tags")[
+                        "discussions"
+                    ]
+                except Exception:
+                    posts = []
+            if len(posts) == 0:
+                posts = self.blockchain.rpc.get_discussions_by_trending(reduced_query)
         if posts is None:
             posts = []
         if raw_data:
@@ -408,20 +426,42 @@ class Discussions_by_author_before_date(list):
             self.blockchain.rpc.get_use_appbase() and use_appbase
         )
         posts = []
-        if self.blockchain.rpc.get_use_appbase() and use_appbase:
-            discussion_query = {
-                "author": author,
-                "start_permlink": start_permlink,
-                "before_date": before_date,
-                "limit": limit,
-            }
-            posts = self.blockchain.rpc.get_discussions_by_author_before_date(
-                discussion_query, api="tags"
-            )["discussions"]
-        if len(posts) == 0:
-            posts = self.blockchain.rpc.get_discussions_by_author_before_date(
-                author, start_permlink, before_date, limit
-            )
+        try:
+            # Try to use the bridge API first (preferred method)
+            if author:
+                bridge_query = {
+                    "sort": "posts",
+                    "account": author,
+                    "limit": limit,
+                }
+                if start_permlink:
+                    bridge_query["start_permlink"] = start_permlink
+                posts = self.blockchain.rpc.get_account_posts(bridge_query, api="bridge")
+                # Filter by before_date if provided
+                if before_date and before_date != "1970-01-01T00:00:00":
+                    filtered_posts = []
+                    for post in posts:
+                        if "created" in post and post["created"] < before_date:
+                            filtered_posts.append(post)
+                    posts = filtered_posts
+        except Exception:
+            # Fall back to old API methods
+            if self.blockchain.rpc.get_use_appbase() and use_appbase:
+                discussion_query = {
+                    "author": author,
+                    "start_permlink": start_permlink,
+                    "before_date": before_date,
+                    "limit": limit,
+                }
+                posts = self.blockchain.rpc.get_discussions_by_author_before_date(
+                    discussion_query, api="tags"
+                )["discussions"]
+            if len(posts) == 0:
+                posts = self.blockchain.rpc.get_discussions_by_author_before_date(
+                    author, start_permlink, before_date, limit
+                )
+        if posts is None:
+            posts = []
         if raw_data:
             super(Discussions_by_author_before_date, self).__init__([x for x in posts])
         else:
@@ -480,12 +520,32 @@ class Comment_discussions_by_payout(list):
             self.blockchain.rpc.get_use_appbase() and use_appbase
         )
         posts = []
-        if self.blockchain.rpc.get_use_appbase() and use_appbase:
-            posts = self.blockchain.rpc.get_comment_discussions_by_payout(
-                reduced_query, api="tags"
-            )["discussions"]
-        if len(posts) == 0:
-            posts = self.blockchain.rpc.get_comment_discussions_by_payout(reduced_query)
+        try:
+            # Try to use the bridge API first (preferred method)
+            bridge_query = {
+                "sort": "payout_comments",
+                "tag": reduced_query.get("tag", ""),
+                "observer": "",
+            }
+            if "limit" in reduced_query:
+                bridge_query["limit"] = reduced_query["limit"]
+            if "start_author" in reduced_query and "start_permlink" in reduced_query:
+                bridge_query["start_author"] = reduced_query["start_author"]
+                bridge_query["start_permlink"] = reduced_query["start_permlink"]
+            posts = self.blockchain.rpc.get_ranked_posts(bridge_query, api="bridge")
+        except Exception:
+            # Fall back to old API methods
+            if self.blockchain.rpc.get_use_appbase() and use_appbase:
+                try:
+                    posts = self.blockchain.rpc.get_comment_discussions_by_payout(
+                        reduced_query, api="tags"
+                    )["discussions"]
+                except Exception:
+                    posts = []
+            if len(posts) == 0:
+                posts = self.blockchain.rpc.get_comment_discussions_by_payout(reduced_query)
+        if posts is None:
+            posts = []
         if raw_data:
             super(Comment_discussions_by_payout, self).__init__([x for x in posts])
         else:
@@ -544,12 +604,32 @@ class Post_discussions_by_payout(list):
             self.blockchain.rpc.get_use_appbase() and use_appbase
         )
         posts = []
-        if self.blockchain.rpc.get_use_appbase() and use_appbase:
-            posts = self.blockchain.rpc.get_post_discussions_by_payout(reduced_query, api="tags")[
-                "discussions"
-            ]
-        if len(posts) == 0:
-            posts = self.blockchain.rpc.get_post_discussions_by_payout(reduced_query)
+        try:
+            # Try to use the bridge API first (preferred method)
+            bridge_query = {
+                "sort": "payout",
+                "tag": reduced_query.get("tag", ""),
+                "observer": "",
+            }
+            if "limit" in reduced_query:
+                bridge_query["limit"] = reduced_query["limit"]
+            if "start_author" in reduced_query and "start_permlink" in reduced_query:
+                bridge_query["start_author"] = reduced_query["start_author"]
+                bridge_query["start_permlink"] = reduced_query["start_permlink"]
+            posts = self.blockchain.rpc.get_ranked_posts(bridge_query, api="bridge")
+        except Exception:
+            # Fall back to old API methods
+            if self.blockchain.rpc.get_use_appbase() and use_appbase:
+                try:
+                    posts = self.blockchain.rpc.get_post_discussions_by_payout(reduced_query, api="tags")[
+                        "discussions"
+                    ]
+                except Exception:
+                    posts = []
+            if len(posts) == 0:
+                posts = self.blockchain.rpc.get_post_discussions_by_payout(reduced_query)
+        if posts is None:
+            posts = []
         if raw_data:
             super(Post_discussions_by_payout, self).__init__([x for x in posts])
         else:
@@ -608,12 +688,32 @@ class Discussions_by_created(list):
             self.blockchain.rpc.get_use_appbase() and use_appbase
         )
         posts = []
-        if self.blockchain.rpc.get_use_appbase() and use_appbase:
-            posts = self.blockchain.rpc.get_discussions_by_created(reduced_query, api="tags")[
-                "discussions"
-            ]
-        if len(posts) == 0:
-            posts = self.blockchain.rpc.get_discussions_by_created(reduced_query)
+        try:
+            # Try to use the bridge API first (preferred method)
+            bridge_query = {
+                "sort": "created",
+                "tag": reduced_query.get("tag", ""),
+                "observer": "",
+            }
+            if "limit" in reduced_query:
+                bridge_query["limit"] = reduced_query["limit"]
+            if "start_author" in reduced_query and "start_permlink" in reduced_query:
+                bridge_query["start_author"] = reduced_query["start_author"]
+                bridge_query["start_permlink"] = reduced_query["start_permlink"]
+            posts = self.blockchain.rpc.get_ranked_posts(bridge_query, api="bridge")
+        except Exception:
+            # Fall back to old API methods
+            if self.blockchain.rpc.get_use_appbase() and use_appbase:
+                try:
+                    posts = self.blockchain.rpc.get_discussions_by_created(reduced_query, api="tags")[
+                        "discussions"
+                    ]
+                except Exception:
+                    posts = []
+            if len(posts) == 0:
+                posts = self.blockchain.rpc.get_discussions_by_created(reduced_query)
+        if posts is None:
+            posts = []
         if raw_data:
             super(Discussions_by_created, self).__init__([x for x in posts])
         else:
@@ -672,12 +772,32 @@ class Discussions_by_active(list):
             self.blockchain.rpc.get_use_appbase() and use_appbase
         )
         posts = []
-        if self.blockchain.rpc.get_use_appbase() and use_appbase:
-            posts = self.blockchain.rpc.get_discussions_by_active(reduced_query, api="tags")[
-                "discussions"
-            ]
-        if len(posts) == 0:
-            posts = self.blockchain.rpc.get_discussions_by_active(reduced_query)
+        try:
+            # Try to use the bridge API first (preferred method)
+            bridge_query = {
+                "sort": "active",
+                "tag": reduced_query.get("tag", ""),
+                "observer": "",
+            }
+            if "limit" in reduced_query:
+                bridge_query["limit"] = reduced_query["limit"]
+            if "start_author" in reduced_query and "start_permlink" in reduced_query:
+                bridge_query["start_author"] = reduced_query["start_author"]
+                bridge_query["start_permlink"] = reduced_query["start_permlink"]
+            posts = self.blockchain.rpc.get_ranked_posts(bridge_query, api="bridge")
+        except Exception:
+            # Fall back to old API methods
+            if self.blockchain.rpc.get_use_appbase() and use_appbase:
+                try:
+                    posts = self.blockchain.rpc.get_discussions_by_active(reduced_query, api="tags")[
+                        "discussions"
+                    ]
+                except Exception:
+                    posts = []
+            if len(posts) == 0:
+                posts = self.blockchain.rpc.get_discussions_by_active(reduced_query)
+        if posts is None:
+            posts = []
         if raw_data:
             super(Discussions_by_active, self).__init__([x for x in posts])
         else:
@@ -737,12 +857,33 @@ class Discussions_by_cashout(list):
             self.blockchain.rpc.get_use_appbase() and use_appbase
         )
         posts = []
-        if self.blockchain.rpc.get_use_appbase() and use_appbase:
-            posts = self.blockchain.rpc.get_discussions_by_cashout(reduced_query, api="tags")[
-                "discussions"
-            ]
-        if len(posts) == 0:
-            posts = self.blockchain.rpc.get_discussions_by_cashout(reduced_query)
+        try:
+            # Try to use the bridge API first (preferred method)
+            # Note: 'payout' is the closest sort to 'cashout' in bridge API
+            bridge_query = {
+                "sort": "payout",
+                "tag": reduced_query.get("tag", ""),
+                "observer": "",
+            }
+            if "limit" in reduced_query:
+                bridge_query["limit"] = reduced_query["limit"]
+            if "start_author" in reduced_query and "start_permlink" in reduced_query:
+                bridge_query["start_author"] = reduced_query["start_author"]
+                bridge_query["start_permlink"] = reduced_query["start_permlink"]
+            posts = self.blockchain.rpc.get_ranked_posts(bridge_query, api="bridge")
+        except Exception:
+            # Fall back to old API methods
+            if self.blockchain.rpc.get_use_appbase() and use_appbase:
+                try:
+                    posts = self.blockchain.rpc.get_discussions_by_cashout(reduced_query, api="tags")[
+                        "discussions"
+                    ]
+                except Exception:
+                    posts = []
+            if len(posts) == 0:
+                posts = self.blockchain.rpc.get_discussions_by_cashout(reduced_query)
+        if posts is None:
+            posts = []
         if raw_data:
             super(Discussions_by_cashout, self).__init__([x for x in posts])
         else:
@@ -801,12 +942,33 @@ class Discussions_by_votes(list):
             self.blockchain.rpc.get_use_appbase() and use_appbase
         )
         posts = []
-        if self.blockchain.rpc.get_use_appbase() and use_appbase:
-            posts = self.blockchain.rpc.get_discussions_by_votes(reduced_query, api="tags")[
-                "discussions"
-            ]
-        if len(posts) == 0:
-            posts = self.blockchain.rpc.get_discussions_by_votes(reduced_query)
+        try:
+            # Try to use the bridge API first (preferred method)
+            # Note: There is no direct 'votes' sort in bridge API, so we'll approximate using trending
+            bridge_query = {
+                "sort": "trending",
+                "tag": reduced_query.get("tag", ""),
+                "observer": "",
+            }
+            if "limit" in reduced_query:
+                bridge_query["limit"] = reduced_query["limit"]
+            if "start_author" in reduced_query and "start_permlink" in reduced_query:
+                bridge_query["start_author"] = reduced_query["start_author"]
+                bridge_query["start_permlink"] = reduced_query["start_permlink"]
+            posts = self.blockchain.rpc.get_ranked_posts(bridge_query, api="bridge")
+        except Exception:
+            # Fall back to old API methods
+            if self.blockchain.rpc.get_use_appbase() and use_appbase:
+                try:
+                    posts = self.blockchain.rpc.get_discussions_by_votes(reduced_query, api="tags")[
+                        "discussions"
+                    ]
+                except Exception:
+                    posts = []
+            if len(posts) == 0:
+                posts = self.blockchain.rpc.get_discussions_by_votes(reduced_query)
+        if posts is None:
+            posts = []
         if raw_data:
             super(Discussions_by_votes, self).__init__([x for x in posts])
         else:
@@ -865,14 +1027,36 @@ class Discussions_by_children(list):
             self.blockchain.rpc.get_use_appbase() and use_appbase
         )
         posts = []
-        if self.blockchain.rpc.get_use_appbase() and use_appbase:
-            posts = self.blockchain.rpc.get_discussions_by_children(reduced_query, api="tags")[
-                "discussions"
-            ]
-        if len(posts) == 0:
-            posts = self.blockchain.rpc.get_discussions_by_children(reduced_query)
+        try:
+            # Try to use the bridge API first (preferred method)
+            # Note: There is no direct 'children' sort in bridge API, we'll use 'trending' as a fallback
+            bridge_query = {
+                "sort": "trending",
+                "tag": reduced_query.get("tag", ""),
+                "observer": "",
+            }
+            if "limit" in reduced_query:
+                bridge_query["limit"] = reduced_query["limit"]
+            if "start_author" in reduced_query and "start_permlink" in reduced_query:
+                bridge_query["start_author"] = reduced_query["start_author"]
+                bridge_query["start_permlink"] = reduced_query["start_permlink"]
+            posts = self.blockchain.rpc.get_ranked_posts(bridge_query, api="bridge")
+            # We could try to sort posts by their children count here if needed
+        except Exception:
+            # Fall back to old API methods
+            if self.blockchain.rpc.get_use_appbase() and use_appbase:
+                try:
+                    posts = self.blockchain.rpc.get_discussions_by_children(reduced_query, api="tags")[
+                        "discussions"
+                    ]
+                except Exception:
+                    posts = []
+            if len(posts) == 0:
+                posts = self.blockchain.rpc.get_discussions_by_children(reduced_query)
+        if posts is None:
+            posts = []
         if raw_data:
-            super(Discussions_by_votes, self).__init__([x for x in posts])
+            super(Discussions_by_children, self).__init__([x for x in posts])
         else:
             super(Discussions_by_children, self).__init__(
                 [Comment(x, lazy=lazy, blockchain_instance=self.blockchain) for x in posts]
@@ -929,12 +1113,32 @@ class Discussions_by_hot(list):
             self.blockchain.rpc.get_use_appbase() and use_appbase
         )
         posts = []
-        if self.blockchain.rpc.get_use_appbase() and use_appbase:
-            posts = self.blockchain.rpc.get_discussions_by_hot(reduced_query, api="tags")[
-                "discussions"
-            ]
-        if len(posts) == 0:
-            posts = self.blockchain.rpc.get_discussions_by_hot(reduced_query)
+        try:
+            # Try to use the bridge API first (preferred method)
+            bridge_query = {
+                "sort": "hot",
+                "tag": reduced_query.get("tag", ""),
+                "observer": "",
+            }
+            if "limit" in reduced_query:
+                bridge_query["limit"] = reduced_query["limit"]
+            if "start_author" in reduced_query and "start_permlink" in reduced_query:
+                bridge_query["start_author"] = reduced_query["start_author"]
+                bridge_query["start_permlink"] = reduced_query["start_permlink"]
+            posts = self.blockchain.rpc.get_ranked_posts(bridge_query, api="bridge")
+        except Exception:
+            # Fall back to old API methods
+            if self.blockchain.rpc.get_use_appbase() and use_appbase:
+                try:
+                    posts = self.blockchain.rpc.get_discussions_by_hot(reduced_query, api="tags")[
+                        "discussions"
+                    ]
+                except Exception:
+                    posts = []
+            if len(posts) == 0:
+                posts = self.blockchain.rpc.get_discussions_by_hot(reduced_query)
+        if posts is None:
+            posts = []
         if raw_data:
             super(Discussions_by_hot, self).__init__([x for x in posts])
         else:
@@ -955,7 +1159,7 @@ class Discussions_by_feed(list):
     .. testcode::
 
         from beem.discussions import Query, Discussions_by_feed
-        q = Query(limit=10, tag="steem")
+        q = Query(limit=10, tag="steemit")
         for h in Discussions_by_feed(q):
             print(h)
 
@@ -976,9 +1180,6 @@ class Discussions_by_feed(list):
             elif kwargs.get("hive_instance"):
                 blockchain_instance = kwargs["hive_instance"]
         self.blockchain = blockchain_instance or shared_blockchain_instance()
-        self.blockchain.rpc.set_next_node_on_empty_reply(
-            self.blockchain.rpc.get_use_appbase() and use_appbase
-        )
         reduced_query = {}
         for key in [
             "tag",
@@ -992,17 +1193,36 @@ class Discussions_by_feed(list):
         ]:
             if key in discussion_query:
                 reduced_query[key] = discussion_query[key]
+        self.blockchain.rpc.set_next_node_on_empty_reply(
+            self.blockchain.rpc.get_use_appbase() and use_appbase
+        )
         posts = []
-        if self.blockchain.rpc.get_use_appbase() and use_appbase:
-            posts = self.blockchain.rpc.get_discussions_by_feed(reduced_query, api="tags")[
-                "discussions"
-            ]
-        if len(posts) == 0:
-            # limit = discussion_query["limit"]
-            # account = discussion_query["tag"]
-            # entryId = 0
-            # posts = self.blockchain.rpc.get_feed(account, entryId, limit, api='follow')["comment"]
-            posts = self.blockchain.rpc.get_discussions_by_feed(reduced_query)
+        try:
+            # Try to use the bridge API first (preferred method)
+            account = reduced_query.get("tag", "")
+            if account:
+                bridge_query = {
+                    "sort": "feed",
+                    "account": account,
+                    "limit": reduced_query.get("limit", 20)
+                }
+                if "start_author" in reduced_query and "start_permlink" in reduced_query:
+                    bridge_query["start_author"] = reduced_query["start_author"]
+                    bridge_query["start_permlink"] = reduced_query["start_permlink"]
+                posts = self.blockchain.rpc.get_account_posts(bridge_query, api="bridge")
+        except Exception:
+            # Fall back to old API methods
+            if self.blockchain.rpc.get_use_appbase() and use_appbase:
+                try:
+                    posts = self.blockchain.rpc.get_discussions_by_feed(reduced_query, api="tags")[
+                        "discussions"
+                    ]
+                except Exception:
+                    posts = []
+            if len(posts) == 0:
+                posts = self.blockchain.rpc.get_discussions_by_feed(reduced_query)
+        if posts is None:
+            posts = []
         if raw_data:
             super(Discussions_by_feed, self).__init__([x for x in posts])
         else:
@@ -1057,19 +1277,37 @@ class Discussions_by_blog(list):
         ]:
             if key in discussion_query:
                 reduced_query[key] = discussion_query[key]
+        self.blockchain.rpc.set_next_node_on_empty_reply(
+            self.blockchain.rpc.get_use_appbase() and use_appbase
+        )
         posts = []
-        if self.blockchain.rpc.get_use_appbase() and use_appbase:
-            self.blockchain.rpc.set_next_node_on_empty_reply(True)
-            posts = self.blockchain.rpc.get_discussions_by_blog(reduced_query, api="tags")
-            if "discussions" in posts:
-                posts = posts["discussions"]  # inconsistent format across node types
-        if len(posts) == 0:
-            self.blockchain.rpc.set_next_node_on_empty_reply(False)
-            # limit = discussion_query["limit"]
-            # account = discussion_query["tag"]
-            # entryId = 0
-            # posts = self.blockchain.rpc.get_feed(account, entryId, limit, api='follow')
-            posts = self.blockchain.rpc.get_discussions_by_blog(reduced_query)
+        try:
+            # Try to use the bridge API first (preferred method)
+            account = reduced_query.get("tag", "")
+            if account:
+                bridge_query = {
+                    "sort": "blog",
+                    "account": account,
+                    "limit": reduced_query.get("limit", 20)
+                }
+                if "start_author" in reduced_query and "start_permlink" in reduced_query:
+                    bridge_query["start_author"] = reduced_query["start_author"]
+                    bridge_query["start_permlink"] = reduced_query["start_permlink"]
+                posts = self.blockchain.rpc.get_account_posts(bridge_query, api="bridge")
+        except Exception:
+            # Fall back to old API methods
+            if self.blockchain.rpc.get_use_appbase() and use_appbase:
+                try:
+                    posts = self.blockchain.rpc.get_discussions_by_blog(reduced_query, api="tags")
+                    if isinstance(posts, dict) and "discussions" in posts:
+                        posts = posts["discussions"]
+                except Exception:
+                    posts = []
+            if len(posts) == 0:
+                self.blockchain.rpc.set_next_node_on_empty_reply(False)
+                posts = self.blockchain.rpc.get_discussions_by_blog(reduced_query)
+        if posts is None:
+            posts = []
         if raw_data:
             super(Discussions_by_blog, self).__init__([x for x in posts])
         else:
@@ -1119,12 +1357,49 @@ class Discussions_by_comments(list):
             self.blockchain.rpc.get_use_appbase() and use_appbase
         )
         posts = []
-        if self.blockchain.rpc.get_use_appbase() and use_appbase:
-            posts = self.blockchain.rpc.get_discussions_by_comments(reduced_query, api="tags")
-            if "discussions" in posts:
-                posts = posts["discussions"]  # inconsistent format across node types
-        if len(posts) == 0:
-            posts = self.blockchain.rpc.get_discussions_by_comments(reduced_query)
+        try:
+            # Try to use the bridge API first (preferred method)
+            if "start_author" in reduced_query and "start_permlink" in reduced_query:
+                # The bridge.get_discussion API retrieves an entire discussion tree
+                author = reduced_query["start_author"]
+                permlink = reduced_query["start_permlink"]
+                bridge_query = {
+                    "author": author,
+                    "permlink": permlink,
+                }
+                # The bridge API returns a discussion tree, we need to flatten it
+                discussion = self.blockchain.rpc.get_discussion(bridge_query, api="bridge")
+                # Extract comments from the discussion tree
+                if discussion and isinstance(discussion, dict):
+                    posts = []
+                    # Start with the main post
+                    main_post = discussion.get(f"@{author}/{permlink}")
+                    if main_post:
+                        posts.append(main_post)
+                    # Add replies
+                    for key, value in discussion.items():
+                        if key != f"@{author}/{permlink}" and isinstance(value, dict):
+                            posts.append(value)
+                    # Limit the number of posts if needed
+                    if "limit" in reduced_query and len(posts) > reduced_query["limit"]:
+                        posts = posts[:reduced_query["limit"]]
+        except Exception:
+            # Fall back to old API methods
+            if self.blockchain.rpc.get_use_appbase() and use_appbase:
+                try:
+                    posts = self.blockchain.rpc.get_discussions_by_comments(reduced_query, api="tags")
+                    if "discussions" in posts:
+                        posts = posts["discussions"]  # inconsistent format across node types
+                except Exception:
+                    posts = self.blockchain.rpc.get_discussions_by_comments(
+                        reduced_query["start_author"],
+                        reduced_query["start_permlink"],
+                        reduced_query["limit"],
+                    )
+            if len(posts) == 0:
+                posts = self.blockchain.rpc.get_discussions_by_comments(reduced_query)
+        if posts is None:
+            posts = []
         if raw_data:
             super(Discussions_by_comments, self).__init__([x for x in posts])
         else:
@@ -1183,16 +1458,138 @@ class Discussions_by_promoted(list):
             self.blockchain.rpc.get_use_appbase() and use_appbase
         )
         posts = []
-        if self.blockchain.rpc.get_use_appbase() and use_appbase:
-            posts = self.blockchain.rpc.get_discussions_by_promoted(reduced_query, api="tags")[
-                "discussions"
-            ]
-        if len(posts) == 0:
-            posts = self.blockchain.rpc.get_discussions_by_promoted(reduced_query)
+        try:
+            # Try to use the bridge API first (preferred method)
+            bridge_query = {
+                "sort": "promoted",
+                "tag": reduced_query.get("tag", ""),
+                "observer": "",
+            }
+            if "limit" in reduced_query:
+                bridge_query["limit"] = reduced_query["limit"]
+            if "start_author" in reduced_query and "start_permlink" in reduced_query:
+                bridge_query["start_author"] = reduced_query["start_author"]
+                bridge_query["start_permlink"] = reduced_query["start_permlink"]
+            posts = self.blockchain.rpc.get_ranked_posts(bridge_query, api="bridge")
+        except Exception:
+            # Fall back to old API methods
+            if self.blockchain.rpc.get_use_appbase() and use_appbase:
+                try:
+                    posts = self.blockchain.rpc.get_discussions_by_promoted(reduced_query, api="tags")[
+                        "discussions"
+                    ]
+                except Exception:
+                    posts = []
+            if len(posts) == 0:
+                posts = self.blockchain.rpc.get_discussions_by_promoted(reduced_query)
+        if posts is None:
+            posts = []
         if raw_data:
             super(Discussions_by_promoted, self).__init__([x for x in posts])
         else:
             super(Discussions_by_promoted, self).__init__(
+                [Comment(x, lazy=lazy, blockchain_instance=self.blockchain) for x in posts]
+            )
+
+
+class Discussions_by_replies(list):
+    """Get replies for an author's post
+
+    :param Query discussion_query: Defines the parameter
+        searching posts, start_parent_author, start_permlink must be set.
+    :param bool use_appbase: use condenser call when set to False, default is False
+    :param bool raw_data: returns list of comments when False, default is False
+    :param Steem blockchain_instance: Steem instance
+
+    .. testcode::
+
+        from beem.discussions import Query, Discussions_by_replies
+        q = Query(limit=10, start_parent_author="steemit", start_permlink="firstpost")
+        for h in Discussions_by_replies(q):
+            print(h)
+
+    """
+
+    def __init__(
+        self,
+        discussion_query,
+        lazy=False,
+        use_appbase=False,
+        raw_data=False,
+        blockchain_instance=None,
+        **kwargs,
+    ):
+        if blockchain_instance is None:
+            if kwargs.get("steem_instance"):
+                blockchain_instance = kwargs["steem_instance"]
+            elif kwargs.get("hive_instance"):
+                blockchain_instance = kwargs["hive_instance"]
+        self.blockchain = blockchain_instance or shared_blockchain_instance()
+        reduced_query = {}
+        for key in ["start_parent_author", "start_permlink", "limit"]:
+            if key in discussion_query:
+                reduced_query[key] = discussion_query[key]
+        self.blockchain.rpc.set_next_node_on_empty_reply(
+            self.blockchain.rpc.get_use_appbase() and use_appbase
+        )
+        posts = []
+        try:
+            # Try to use the bridge API first (preferred method)
+            if "start_parent_author" in reduced_query and "start_permlink" in reduced_query:
+                # The bridge.get_discussion API retrieves replies to a post as well
+                author = reduced_query["start_parent_author"]
+                permlink = reduced_query["start_permlink"]
+                bridge_query = {
+                    "author": author,
+                    "permlink": permlink,
+                }
+                # The bridge API returns a discussion tree
+                discussion = self.blockchain.rpc.get_discussion(bridge_query, api="bridge")
+                # Extract replies from the discussion tree
+                if discussion and isinstance(discussion, dict):
+                    posts = []
+                    # Gather all replies (all items except the main post)
+                    main_post_key = f"@{author}/{permlink}"
+                    for key, value in discussion.items():
+                        if key != main_post_key and isinstance(value, dict):
+                            posts.append(value)
+                    # Limit the number of posts if needed
+                    if "limit" in reduced_query and len(posts) > reduced_query["limit"]:
+                        posts = posts[:reduced_query["limit"]]
+        except Exception:
+            # Fall back to old API methods
+            posts = []
+            if self.blockchain.rpc.get_use_appbase() and use_appbase:
+                try:
+                    posts = self.blockchain.rpc.get_replies_by_last_update(reduced_query, api="tags")
+                    if "discussions" in posts:
+                        posts = posts["discussions"]
+                except Exception:
+                    posts = self.blockchain.rpc.get_replies_by_last_update(
+                        reduced_query["start_parent_author"],
+                        reduced_query["start_permlink"],
+                        reduced_query["limit"],
+                    )
+            if len(posts) == 0:
+                if ("start_parent_author" in reduced_query and reduced_query["start_parent_author"]) and (
+                    "start_permlink" in reduced_query and reduced_query["start_permlink"]
+                ):
+                    if "limit" in reduced_query:
+                        posts = self.blockchain.rpc.get_replies_by_last_update(
+                            reduced_query["start_parent_author"],
+                            reduced_query["start_permlink"],
+                            reduced_query["limit"],
+                        )
+                    else:
+                        posts = self.blockchain.rpc.get_replies_by_last_update(
+                            reduced_query["start_parent_author"], reduced_query["start_permlink"], 100
+                        )
+        if posts is None:
+            posts = []
+        if raw_data:
+            super(Discussions_by_replies, self).__init__([x for x in posts])
+        else:
+            super(Discussions_by_replies, self).__init__(
                 [Comment(x, lazy=lazy, blockchain_instance=self.blockchain) for x in posts]
             )
 
@@ -1239,7 +1636,7 @@ class Replies_by_last_update(list):
                 posts = self.blockchain.rpc.get_replies_by_last_update(discussion_query, api="tags")
                 if "discussions" in posts:
                     posts = posts["discussions"]
-            except:
+            except Exception:
                 posts = self.blockchain.rpc.get_replies_by_last_update(
                     discussion_query["start_author"],
                     discussion_query["start_permlink"],
@@ -1262,17 +1659,16 @@ class Replies_by_last_update(list):
 
 
 class Trending_tags(list):
-    """Returns the list of trending tags.
+    """Get trending tags
 
     :param Query discussion_query: Defines the parameter
-        searching posts, start_tag can be set.
-        :param bool use_appbase: use condenser call when set to False, default is False
+        searching posts, start_tag is used if set
     :param Steem blockchain_instance: Steem instance
 
     .. testcode::
 
         from beem.discussions import Query, Trending_tags
-        q = Query(limit=10, start_tag="")
+        q = Query(limit=10)
         for h in Trending_tags(q):
             print(h)
 
@@ -1290,11 +1686,19 @@ class Trending_tags(list):
         self.blockchain.rpc.set_next_node_on_empty_reply(
             self.blockchain.rpc.get_use_appbase() and use_appbase
         )
-        posts = []
-        if self.blockchain.rpc.get_use_appbase() and use_appbase:
-            tags = self.blockchain.rpc.get_trending_tags(discussion_query, api="tags")["tags"]
-        if len(posts) == 0:
-            tags = self.blockchain.rpc.get_trending_tags(
-                discussion_query["start_tag"], discussion_query["limit"], api="tags"
-            )
-        super(Trending_tags, self).__init__([x for x in tags])
+        limit = discussion_query["limit"] if "limit" in discussion_query else 0
+        tags = []
+        try:
+            # Try to use bridge API for getting trending tags
+            # Unfortunately there's no direct bridge API for tags, so we fall back to tags API
+            if self.blockchain.rpc.get_use_appbase() and use_appbase:
+                tags = self.blockchain.rpc.get_trending_tags({"start": "", "limit": limit}, api="tags")[
+                    "tags"
+                ]
+            else:
+                tags = self.blockchain.rpc.get_trending_tags("", limit)
+        except Exception:
+            # If API fails, return empty list
+            pass
+            
+        super(Trending_tags, self).__init__(tags)
