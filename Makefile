@@ -45,8 +45,12 @@ dev-setup:
 	uv pip install --python-dev-deps -e .
 
 dist: generate-versions
-	python -m build
+	uv build
 	python -m twine upload dist/*
+
+test-dist: generate-versions
+	uv build
+	python -m twine upload --repository testpypi dist/* --verbose
 
 docs:
 	sphinx-apidoc -d 6 -e -f -o docs . *.py tests

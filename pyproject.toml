@@ -3,8 +3,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "nectar"
-version = "0.00.01"
+name = "hive-nectar"
+version = "0.00.02"
 description = "Unofficial Python library for HIVE"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -49,7 +49,7 @@ dependencies = [
 "Bug Tracker" = "https://github.com/thecrazygm/nectar/issues"
 
 [project.scripts]
-nectar = "nectar.cli:cli"
+hive-nectar = "nectar.cli:cli"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/nectar", "src/nectarapi", "src/nectarbase", "src/nectargraphenebase", "src/nectargrapheneapi", "src/nectarstorage"]

@@ -30,7 +30,7 @@ class Memo(object):
     .. code-block:: python
 
         from nectar.memo import Memo
-        m = Memo("thecrazygm", "nectar-cli")
+        m = Memo("thecrazygm", "hive-nectar")
         m.unlock_wallet("secret")
         enc = (m.encrypt("test"))
         print(enc)

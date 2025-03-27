@@ -260,7 +260,11 @@ def export_trx(tx, export):
             json.dump(tx, f)
 
 
-@shell(prompt="nectar-cli> ", intro="Starting nectar-cli... (use help to list all commands)", chain=True)
+@shell(
+    prompt="hive-nectar> ",
+    intro="Starting hive-nectar... (use help to list all commands)",
+    chain=True,
+)
 # @click.group(chain=True)
 @click.option(
     "--node", "-n", default="", help="URL for public Hive API (e.g. https://api.hive.blog)"
@@ -544,7 +548,7 @@ def nextnode(results):
         t.add_row(["Version", stm.get_blockchain_version()])
         t.add_row(["HIVE", stm.is_hive])
     else:
-        t.add_row(["Version", "nectar-cli is in offline mode..."])
+        t.add_row(["Version", "hive-nectar is in offline mode..."])
     print(t)
 
 
@@ -581,9 +585,9 @@ def pingnode(sort, remove):
 
 @cli.command()
 def about():
-    """About nectar-cli"""
+    """About hive-nectar"""
     print("")
-    print("nectar-cli version: %s" % __version__)
+    print("hive-nectar version: %s" % __version__)
     print("")
     print("By @thecrazygm")
     print("")
@@ -2689,7 +2693,7 @@ def message(message_file, account, verify):
             message = f.read()
     elif verify:
         print(
-            "Please store the signed message into a text file and append the file path to nectar-cli message -v"
+            "Please store the signed message into a text file and append the file path to hive-nectar message -v"
         )
         return
     else:
@@ -3153,7 +3157,7 @@ def post(
     title: your title
     tags: tag1,tag2
     community: hive-100000
-    beneficiaries: nectar-cli:5%,thecrazygm:5%
+    beneficiaries: hive-nectar:5%,thecrazygm:5%
     ---
 
     """
@@ -3327,7 +3331,7 @@ def post(
             comment_options=comment_options,
             beneficiaries=beneficiaries,
             parse_body=parse_body,
-            app="nectar-cli/%s" % (__version__),
+            app="hive-nectar/%s" % (__version__),
         )
     else:
         patch_text = make_patch(comment.body, body)
@@ -3348,7 +3352,7 @@ def post(
             tags=tags,
             json_metadata=json_metadata,
             parse_body=False,
-            app="nectar-cli/%s" % (__version__),
+            app="hive-nectar/%s" % (__version__),
         )
     if stm.unsigned and stm.nobroadcast and stm.steemconnect is not None:
         tx = stm.steemconnect.url_from_tx(tx)
@@ -3384,7 +3388,7 @@ def reply(authorperm, body, account, title, export):
         json_metadata=None,
         author=account,
         reply_identifier=authorperm,
-        app="nectar-cli/%s" % (__version__),
+        app="hive-nectar/%s" % (__version__),
     )
     if stm.unsigned and stm.nobroadcast and stm.steemconnect is not None:
         tx = stm.steemconnect.url_from_tx(tx)
@@ -5620,7 +5624,7 @@ def customjson(jsonid, json_data, account, active, export):
     """Broadcasts a custom json
 
     First parameter is the cusom json id, the second field is a json file or a json key value combination
-    e.g. nectar-cli customjson -a thecrazygm dw-heist username thecrazygm amount 100
+    e.g. hive-nectar customjson -a thecrazygm dw-heist username thecrazygm amount 100
     """
     if jsonid is None:
         print("First argument must be the custom_json id")
@@ -6227,7 +6231,7 @@ def draw(
     body = "The following results can be checked with:\n"
     body += "```\n"
     if without_replacement:
-        body += "nectar-cli draw -d %d -p %d -b %d -t %s -h %s -s '%s' -w\n" % (
+        body += "hive-nectar draw -d %d -p %d -b %d -t %s -h %s -s '%s' -w\n" % (
             draws,
             participants,
             block["id"],
@@ -6236,7 +6240,7 @@ def draw(
             separator,
         )
     else:
-        body += "nectar-cli draw -d %d -p %d -b %d -t %s -h %s -s '%s'\n" % (
+        body += "hive-nectar draw -d %d -p %d -b %d -t %s -h %s -s '%s'\n" % (
             draws,
             participants,
             block["id"],

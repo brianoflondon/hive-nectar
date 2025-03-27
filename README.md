@@ -6,9 +6,9 @@ The library name is derived from a nectar of a flower.
 
 nectar includes [python-graphenelib](https://github.com/xeroc/python-graphenelib).
 
-[![Latest Version](https://img.shields.io/pypi/v/nectar.svg)](https://pypi.python.org/pypi/nectar/)
+[![Latest Version](https://img.shields.io/pypi/v/hive-nectar.svg)](https://pypi.python.org/pypi/hive-nectar/)
 
-[![Python Versions](https://img.shields.io/pypi/pyversions/nectar.svg)](https://pypi.python.org/pypi/nectar/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/hive-nectar.svg)](https://pypi.python.org/pypi/hive-nectar/)
 
 ## Current build status
 

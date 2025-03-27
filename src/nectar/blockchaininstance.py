@@ -1124,7 +1124,7 @@ class BlockChainInstance(object):
         if not creator:
             raise ValueError(
                 "Not creator account given. Define it with "
-                + "creator=x, or set the default_account using nectar-cli"
+                + "creator=x, or set the default_account using hive-nectar"
             )
         creator = Account(creator, blockchain_instance=self)
         op = {
@@ -1223,7 +1223,7 @@ class BlockChainInstance(object):
         if not creator:
             raise ValueError(
                 "Not creator account given. Define it with "
-                + "creator=x, or set the default_account using nectar-cli"
+                + "creator=x, or set the default_account using hive-nectar"
             )
         if password and (owner_key or active_key or memo_key):
             raise ValueError("You cannot use 'password' AND provide keys!")
@@ -1420,7 +1420,7 @@ class BlockChainInstance(object):
         if not creator:
             raise ValueError(
                 "Not creator account given. Define it with "
-                + "creator=x, or set the default_account using nectar-cli"
+                + "creator=x, or set the default_account using hive-nectar"
             )
         if password and (owner_key or active_key or memo_key):
             raise ValueError("You cannot use 'password' AND provide keys!")
