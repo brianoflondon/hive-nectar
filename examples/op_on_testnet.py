@@ -2,17 +2,17 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import logging
 
-from beem.account import Account
-from beem.block import Block
-from beem.blockchain import Blockchain
-from beem.steem import Steem
-from beemgraphenebase.account import PasswordKey
+from nectar.account import Account
+from nectar.block import Block
+from nectar.blockchain import Blockchain
+from nectar.steem import Steem
+from nectargraphenebase.account import PasswordKey
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 password = "secretPassword"
-username = "beem5"
+username = "nectar5"
 useWallet = False
 walletpassword = "123"
 
@@ -52,20 +52,20 @@ if __name__ == "__main__":
             },
         )
     account = Account(username, steem_instance=stm)
-    if account["name"] == "beem":
-        account.disallow("beem1", permission="posting")
-        account.allow("beem1", weight=1, permission="posting", account=None)
-        account.follow("beem1")
-    elif account["name"] == "beem5":
-        account.allow("beem4", weight=2, permission="active", account=None)
+    if account["name"] == "nectar":
+        account.disallow("nectar1", permission="posting")
+        account.allow("nectar1", weight=1, permission="posting", account=None)
+        account.follow("nectar1")
+    elif account["name"] == "nectar5":
+        account.allow("nectar4", weight=2, permission="active", account=None)
     if useWallet:
         stm.wallet.getAccountFromPrivateKey(str(active_privkey))
 
-    # stm.create_account("beem1", creator=account, password=password1)
+    # stm.create_account("nectar1", creator=account, password=password1)
 
-    account1 = Account("beem1", steem_instance=stm)
+    account1 = Account("nectar1", steem_instance=stm)
     b = Blockchain(steem_instance=stm)
     blocknum = b.get_current_block().identifier
 
-    account.transfer("beem1", 1, "SBD", "test")
+    account.transfer("nectar1", 1, "SBD", "test")
     b1 = Block(blocknum, steem_instance=stm)

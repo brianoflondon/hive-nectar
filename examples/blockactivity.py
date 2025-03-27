@@ -4,11 +4,11 @@ import sys
 from datetime import timedelta
 from timeit import default_timer as timer
 
-from beem import Blurt, Hive, Steem
-from beem.block import Block
-from beem.blockchain import Blockchain
-from beem.nodelist import NodeList
-from beem.utils import parse_time
+from nectar import Blurt, Hive, Steem
+from nectar.block import Block
+from nectar.blockchain import Blockchain
+from nectar.nodelist import NodeList
+from nectar.utils import parse_time
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

@@ -17,58 +17,58 @@ You can access those variables like a regular dictionary by using
 
 .. code-block:: python
 
-    from beem import Steem
+    from nectar import Steem
     steem = Steem()
     print(steem.config.items())
 
 Keys can be added and changed like they are for regular dictionaries.
 
-If you don't want to load the :class:`beem.steem.Steem` class, you
+If you don't want to load the :class:`nectar.steem.Steem` class, you
 can load the configuration directly by using:
 
 .. code-block:: python
 
-    from beem.storage import configStorage as config
+    from nectar.storage import configStorage as config
 
-It is also possible to access the configuration with the commandline tool `beempy`:
+It is also possible to access the configuration with the commandline tool `nectar-cli`:
 
 .. code-block:: bash
 
-    beempy config
+    nectar-cli config
 
 API node URLs
 -------------
 
-The default node URLs which will be used when  `node` is  `None` in :class:`beem.steem.Steem` class
+The default node URLs which will be used when  `node` is  `None` in :class:`nectar.steem.Steem` class
 is stored in `config["nodes"]` as string. The list can be get and set by:
 
 .. code-block:: python
 
-    from beem import Steem
+    from nectar import Steem
     steem = Steem()
     node_list = steem.get_default_nodes()
     node_list = node_list[1:] + [node_list[0]]
     steem.set_default_nodes(node_list)
 
-beempy can also be used to set nodes:
+nectar-cli can also be used to set nodes:
 
 .. code-block:: bash
 
-        beempy set nodes wss://steemd.privex.io
-        beempy set nodes "['wss://steemd.privex.io', 'wss://gtg.steem.house:8090']"
+        nectar-cli set nodes wss://steemd.privex.io
+        nectar-cli set nodes "['wss://steemd.privex.io', 'wss://gtg.steem.house:8090']"
 
 The default nodes can be reset to the default value. When the first node does not
 answer, steem should be set to the offline mode. This can be done by:
 
 .. code-block:: bash
 
-        beempy -o set nodes ""
+        nectar-cli -o set nodes ""
 
 or
 
 .. code-block:: python
 
-    from beem import Steem
+    from nectar import Steem
     steem = Steem(offline=True)
     steem.set_default_nodes("")
 
@@ -76,20 +76,20 @@ Default account
 ---------------
 
 The default account name is used in some functions, when no account name is given.
-It is also used in  `beempy` for all account related functions.
+It is also used in  `nectar-cli` for all account related functions.
 
 .. code-block:: python
 
-    from beem import Steem
+    from nectar import Steem
     steem = Steem()
     steem.set_default_account("test")
     steem.config["default_account"] = "test"
 
-or by beempy with
+or by nectar-cli with
 
 .. code-block:: bash
 
-        beempy set default_account test
+        nectar-cli set default_account test
 
 Default voting weight
 ---------------------
@@ -98,15 +98,15 @@ The default vote weight is used for voting, when no vote weight is given.
 
 .. code-block:: python
 
-    from beem import Steem
+    from nectar import Steem
     steem = Steem()
     steem.config["default_vote_weight"] = 100
 
-or by beempy with
+or by nectar-cli with
 
 .. code-block:: bash
 
-        beempy set default_vote_weight 100
+        nectar-cli set default_vote_weight 100
 
 
 Setting password_storage
@@ -115,12 +115,12 @@ Setting password_storage
 The password_storage can be set to:
 
 * environment, this is the default setting. The master password for the wallet can be provided in the environment variable `UNLOCK`.
-* keyring (when set with beempy, it asks for the wallet password)
+* keyring (when set with nectar-cli, it asks for the wallet password)
 
 .. code-block:: bash
 
-        beempy set password_storage environment
-        beempy set password_storage keyring
+        nectar-cli set password_storage environment
+        nectar-cli set password_storage keyring
 
 
 
@@ -130,25 +130,25 @@ Environment variable for storing the master password
 When `password_storage` is set to `environment`, the master password can be stored in `UNLOCK`
 for unlocking automatically the wallet.
 
-Keyring support for beempy and wallet
+Keyring support for nectar-cli and wallet
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In order to use keyring for storing the wallet password, the following steps are necessary:
 
 * Install keyring: `pip install keyring`
-* Change `password_storage` to `keyring` with `beempy` and enter the wallet password.
+* Change `password_storage` to `keyring` with `nectar-cli` and enter the wallet password.
 
 It also possible to change the password in the keyring by
 
 .. code-block:: bash
 
-    python -m keyring set beem wallet
+    python -m keyring set nectar wallet
 
 The stored master password can be displayed in the terminal by
 
 .. code-block:: bash
 
-    python -m keyring get beem wallet
+    python -m keyring get nectar wallet
 
 When keyring is set as `password_storage` and the stored password in the keyring
 is identically to the set master password of the wallet, the wallet is automatically
@@ -161,15 +161,15 @@ Testing if the master password is correctly provided by keyring or the `UNLOCK` 
 
 .. code-block:: python
 
-    from beem import Steem
+    from nectar import Steem
     steem = Steem()
     print(steem.wallet.locked())
 
 When the output is False, automatic unlocking with keyring or the `UNLOCK` variable works.
-It can also tested by beempy with
+It can also tested by nectar-cli with
 
 .. code-block:: bash
 
-        beempy walletinfo --test-unlock
+        nectar-cli walletinfo --test-unlock
 
 When no password prompt is shown, unlocking with keyring or the `UNLOCK` variable works.

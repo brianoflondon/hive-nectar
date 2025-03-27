@@ -3,26 +3,24 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "beem"
-version = "0.25.00"
-description = "Unofficial Python library for HIVE and STEEM"
+name = "nectar"
+version = "0.00.01"
+description = "Unofficial Python library for HIVE"
 readme = "README.rst"
-requires-python = ">=3.8"
+requires-python = ">=3.12"
 license = {file = "LICENSE.txt"}
 authors = [
-    {name = "Holger Nahrstaedt", email = "nahrstaedt@gmail.com"},
-]
-maintainers = [
-    {name = "Holger Nahrstaedt", email = "nahrstaedt@gmail.com"},
     {name = "Michael Garcia", email = "thecrazygm@gmail.com"}
 ]
-keywords = ["hive", "steem", "library", "api", "rpc"]
+maintainers = [
+    {name = "Michael Garcia", email = "thecrazygm@gmail.com"}
+]
+keywords = ["hive", "library", "api", "rpc"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Development Status :: 4 - Beta",
@@ -46,15 +44,15 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "http://www.github.com/holgern/beem"
-"Download" = "https://github.com/holgern/beem/tarball/0.24.27"
-"Bug Tracker" = "https://github.com/holgern/beem/issues"
+"Homepage" = "http://www.github.com/thecrazygm/nectar"
+"Download" = "https://github.com/thecrazygm/nectar/tarball/0.00.01"
+"Bug Tracker" = "https://github.com/thecrazygm/nectar/issues"
 
 [project.scripts]
-beempy = "beem.cli:cli"
+nectar = "nectar.cli:cli"
 
 [tool.hatch.build.targets.wheel]
-packages = ["beem", "beemapi", "beembase", "beemgraphenebase", "beemgrapheneapi", "beemstorage"]
+packages = ["src/nectar", "src/nectarapi", "src/nectarbase", "src/nectargraphenebase", "src/nectargrapheneapi", "src/nectarstorage"]
 
 [tool.uv]
 default-groups = [ ]

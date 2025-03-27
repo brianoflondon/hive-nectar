@@ -4,9 +4,9 @@ import logging
 import sys
 import time
 
-from beem.blockchain import Blockchain
-from beem.nodelist import NodeList
-from beem.steem import Steem
+from nectar.blockchain import Blockchain
+from nectar.nodelist import NodeList
+from nectar.steem import Steem
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

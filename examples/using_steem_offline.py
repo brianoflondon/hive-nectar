@@ -2,9 +2,9 @@ from __future__ import division, print_function, unicode_literals
 
 import logging
 
-from beem.steem import Steem
-from beem.transactionbuilder import TransactionBuilder
-from beembase import operations
+from nectar.steem import Steem
+from nectar.transactionbuilder import TransactionBuilder
+from nectarbase import operations
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     stm = Steem(offline=True)
 
     op = operations.Transfer(
-        {"from": "beembot", "to": "holger80", "amount": "0.001 SBD", "memo": ""}
+        {"from": "thecrazygm", "to": "thecrazygm", "amount": "0.001 SBD", "memo": ""}
     )
     tb = TransactionBuilder(steem_instance=stm)
 

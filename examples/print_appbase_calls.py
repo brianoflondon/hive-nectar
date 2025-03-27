@@ -5,7 +5,7 @@ from builtins import str
 
 from prettytable import PrettyTable
 
-from beem.steem import Steem
+from nectar.steem import Steem
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

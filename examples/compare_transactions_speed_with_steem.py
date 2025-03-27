@@ -7,15 +7,15 @@ from steembase import operations as steemOperations
 from steembase.account import PrivateKey as steemPrivateKey
 from steembase.transactions import SignedTransaction as steemSignedTransaction
 
-from beem.amount import Amount
-from beem.steem import Steem
-from beembase import operations
-from beembase.objects import Operation
-from beembase.signedtransactions import Signed_Transaction
-from beemgraphenebase.account import PrivateKey
+from nectar.amount import Amount
+from nectar.steem import Steem
+from nectarbase import operations
+from nectarbase.objects import Operation
+from nectarbase.signedtransactions import Signed_Transaction
+from nectargraphenebase.account import PrivateKey
 
 
-class BeemTest(object):
+class nectarTest(object):
     def setup(self):
         self.prefix = "STEEM"
         self.default_prefix = "STM"
@@ -68,18 +68,18 @@ class SteemTest(object):
 
 if __name__ == "__main__":
     steem_test = SteemTest()
-    beem_test = BeemTest()
+    nectar_test = nectarTest()
     steem_test.setup()
-    beem_test.setup()
+    nectar_test.setup()
     steem_times = []
-    beem_times = []
+    nectar_times = []
     loops = 50
     for i in range(0, loops):
         print(i)
         opSteem = steemOperations.Transfer(
             **{"from": "foo", "to": "baar", "amount": "111.110 STEEM", "memo": "Fooo"}
         )
-        opBeem = operations.Transfer(
+        opnectar = operations.Transfer(
             **{
                 "from": "foo",
                 "to": "baar",
@@ -91,21 +91,21 @@ if __name__ == "__main__":
         t_s, t_v = steem_test.doit(ops=opSteem)
         steem_times.append([t_s, t_v])
 
-        t_s, t_v = beem_test.doit(ops=opBeem)
-        beem_times.append([t_s, t_v])
+        t_s, t_v = nectar_test.doit(ops=opnectar)
+        nectar_times.append([t_s, t_v])
 
     steem_dt = [0, 0]
-    beem_dt = [0, 0]
+    nectar_dt = [0, 0]
     for i in range(0, loops):
         steem_dt[0] += steem_times[i][0]
         steem_dt[1] += steem_times[i][1]
-        beem_dt[0] += beem_times[i][0]
-        beem_dt[1] += beem_times[i][1]
-    print("steem vs beem:\n")
+        nectar_dt[0] += nectar_times[i][0]
+        nectar_dt[1] += nectar_times[i][1]
+    print("steem vs nectar:\n")
     print("steem: sign: %.2f s, verification %.2f s" % (steem_dt[0] / loops, steem_dt[1] / loops))
-    print("beem:  sign: %.2f s, verification %.2f s" % (beem_dt[0] / loops, beem_dt[1] / loops))
+    print("nectar:  sign: %.2f s, verification %.2f s" % (nectar_dt[0] / loops, nectar_dt[1] / loops))
     print("------------------------------------")
     print(
-        "beem is %.2f %% (sign) and %.2f %% (verify) faster than steem"
-        % (steem_dt[0] / beem_dt[0] * 100, steem_dt[1] / beem_dt[1] * 100)
+        "nectar is %.2f %% (sign) and %.2f %% (verify) faster than steem"
+        % (steem_dt[0] / nectar_dt[0] * 100, steem_dt[1] / nectar_dt[1] * 100)
     )

@@ -1,15 +1,15 @@
 import sys
 from datetime import datetime
 
-from beem.account import Account
-from beem.comment import Comment
-from beem.utils import addTzInfo
+from nectar.account import Account
+from nectar.comment import Comment
+from nectar.utils import addTzInfo
 
 if __name__ == "__main__":
     if len(sys.argv) != 2 and len(sys.argv) != 3:
         # print("ERROR: command line parameter mismatch!")
         # print("usage: %s [account]" % (sys.argv[0]))
-        account = "holger80"
+        account = "thecrazygm"
     elif len(sys.argv) == 2:
         account = sys.argv[1]
         n_blogs = 100

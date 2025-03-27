@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate version files for beem packages."""
+"""Generate version files for nectar packages."""
 
 import re
 
@@ -24,7 +24,7 @@ def get_version():
 
 def write_version_py(filename, version):
     """Write version."""
-    content = f'''"""THIS FILE IS GENERATED FROM beem PYPROJECT.TOML."""
+    content = f'''"""THIS FILE IS GENERATED FROM nectar PYPROJECT.TOML."""
 version = '{version}'
 '''
     with open(filename, "w") as file:
@@ -37,10 +37,10 @@ def main():
     print(f"Generating version files for version {version}")
 
     # Write version files for all packages
-    write_version_py("beem/version.py", version)
-    write_version_py("beembase/version.py", version)
-    write_version_py("beemapi/version.py", version)
-    write_version_py("beemgraphenebase/version.py", version)
+    write_version_py("src/nectar/version.py", version)
+    write_version_py("src/nectarbase/version.py", version)
+    write_version_py("src/nectarapi/version.py", version)
+    write_version_py("src/nectargraphenebase/version.py", version)
 
     print("Version files generated successfully!")
 

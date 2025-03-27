@@ -9,12 +9,12 @@
    http://openalea.gforge.inria.fr/doc/openalea/doc/_build/html/source/sphinx/rest_syntax.html
    http://rest-sphinx-memo.readthedocs.org/en/latest/ReST.html
 
-.. image:: _static/beem-logo.svg
+.. image:: _static/nectar-logo.svg
    :width: 300 px
-   :alt: beem
+   :alt: nectar
    :align: center
 
-Welcome to beem's documentation!
+Welcome to nectar's documentation!
 ================================
 
 Steem/Hive is a blockchain-based rewards platform for publishers to monetize 
@@ -25,7 +25,7 @@ software) that allows for fast transactions and ascalable blockchain
 solution. In case of Steem/Hive, it comes with decentralized publishing of
 content.
 
-The beem library has been designed to allow developers to easily
+The nectar library has been designed to allow developers to easily
 access its routines and make use of the network without dealing with all
 the related blockchain technology and cryptography. This library can be
 used to do anything that is allowed according to the Steem/Hive
@@ -35,7 +35,7 @@ blockchain protocol.
 About this Library
 ------------------
 
-The purpose of *beem* is to simplify development of products and
+The purpose of *nectar* is to simplify development of products and
 services that use the Hive blockchain. It comes with
 
 * its own (bip32-encrypted) wallet
@@ -63,7 +63,7 @@ Quickstart
 
 .. code-block:: python
 
-   from beem import Hive
+   from nectar import Hive
    hive = Hive()
    hive.wallet.unlock("wallet-passphrase")
    account = Account("test", blockchain_instance=hive)
@@ -71,19 +71,19 @@ Quickstart
 
 .. code-block:: python
 
-   from beem.blockchain import Blockchain
+   from nectar.blockchain import Blockchain
    blockchain = Blockchain()
    for op in blockchain.stream():
        print(op)
 
 .. code-block:: python
 
-   from beem.block import Block
+   from nectar.block import Block
    print(Block(1))
 
 .. code-block:: python
 
-   from beem.account import Account
+   from nectar.account import Account
    account = Account("test")
    print(account.balances)
    for h in account.history():
@@ -91,7 +91,7 @@ Quickstart
 
 .. code-block:: python
 
-   from beem.hive import Hive
+   from nectar.hive import Hive
    hive = Hive()
    hive.wallet.wipe(True)
    hive.wallet.create("wallet-passphrase")
@@ -101,7 +101,7 @@ Quickstart
 
 .. code-block:: python
 
-   from beem.market import Market
+   from nectar.market import Market
    market = Market("HBD:HIVE")
    print(market.ticker())
    market.steem.wallet.unlock("wallet-passphrase")

@@ -4,13 +4,13 @@ from binascii import hexlify
 from builtins import chr, range
 from collections import OrderedDict
 
-from beem.amount import Amount
-from beem.steem import Steem
-from beembase import operations
-from beembase.objects import Operation
-from beembase.signedtransactions import Signed_Transaction
-from beemgraphenebase.account import PrivateKey
-from beemgraphenebase.py23 import py23_bytes
+from nectar.amount import Amount
+from nectar.steem import Steem
+from nectarbase import operations
+from nectarbase.objects import Operation
+from nectarbase.signedtransactions import Signed_Transaction
+from nectargraphenebase.account import PrivateKey
+from nectargraphenebase.py23 import py23_bytes
 
 
 class Benchmark(object):

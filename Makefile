@@ -17,10 +17,10 @@ generate-versions:
 	python3 generate_versions.py
 
 lint:
-	uv run ruff check beem beemapi beembase beemgraphenebase beemstorage
+	uv run ruff check src 
 
 format:
-	uv run ruff format beem beemapi beembase beemgraphenebase beemstorage
+	uv run ruff format src
 
 test:
 	python -m pytest

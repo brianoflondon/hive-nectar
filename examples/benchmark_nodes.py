@@ -6,13 +6,13 @@ from datetime import datetime, timedelta
 
 from prettytable import PrettyTable
 
-from beem.account import Account
-from beem.block import Block
-from beem.blockchain import Blockchain
-from beem.nodelist import NodeList
-from beem.steem import Steem
-from beem.utils import formatTimedelta, parse_time
-from beemapi.exceptions import NumRetriesReached
+from nectar.account import Account
+from nectar.block import Block
+from nectar.blockchain import Blockchain
+from nectar.nodelist import NodeList
+from nectar.steem import Steem
+from nectar.utils import formatTimedelta, parse_time
+from nectarapi.exceptions import NumRetriesReached
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

@@ -4,10 +4,10 @@ import logging
 
 from memory_profiler import profile
 
-from beem.account import Account
-from beem.blockchain import Blockchain
-from beem.instance import clear_cache, set_shared_steem_instance
-from beem.steem import Steem
+from nectar.account import Account
+from nectar.blockchain import Blockchain
+from nectar.instance import clear_cache, set_shared_steem_instance
+from nectar.steem import Steem
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

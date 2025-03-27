@@ -2,9 +2,9 @@
 # mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 
-from beem import Steem
-from beem.amount import Amount
-from beem.utils import reputation_to_score
+from nectar import Steem
+from nectar.amount import Amount
+from nectar.utils import reputation_to_score
 
 if __name__ == "__main__":
     stm = Steem()

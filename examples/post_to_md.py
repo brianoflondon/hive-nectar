@@ -4,8 +4,8 @@ import argparse
 import logging
 import sys
 
-from beem.comment import Comment
-from beem.utils import (
+from nectar.comment import Comment
+from nectar.utils import (
     reputation_to_score,
 )
 

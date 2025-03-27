@@ -9,8 +9,8 @@ import jinja2
 import markdown
 import pytz
 
-from beem.comment import Comment
-from beem.utils import (
+from nectar.comment import Comment
+from nectar.utils import (
     formatTimedelta,
     reputation_to_score,
 )

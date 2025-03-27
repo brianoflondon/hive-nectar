@@ -2,8 +2,8 @@ from __future__ import print_function
 
 import logging
 
-from beem.blockchain import Blockchain
-from beem.instance import shared_blockchain_instance
+from nectar.blockchain import Blockchain
+from nectar.instance import shared_blockchain_instance
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

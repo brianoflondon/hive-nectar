@@ -3,11 +3,11 @@ from __future__ import print_function
 import logging
 from datetime import timedelta
 
-from beem import exceptions
-from beem.account import Account
-from beem.blockchain import Blockchain
-from beem.comment import Comment
-from beem.utils import construct_authorperm
+from nectar import exceptions
+from nectar.account import Account
+from nectar.blockchain import Blockchain
+from nectar.comment import Comment
+from nectar.utils import construct_authorperm
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

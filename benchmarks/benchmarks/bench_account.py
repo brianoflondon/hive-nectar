@@ -3,8 +3,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from builtins import str
 
-from beemgraphenebase.account import Address, BrainKey, PasswordKey, PrivateKey, PublicKey
-from beemgraphenebase.base58 import Base58
+from nectargraphenebase.account import Address, BrainKey, PasswordKey, PrivateKey, PublicKey
+from nectargraphenebase.base58 import Base58
 
 
 class Benchmark(object):

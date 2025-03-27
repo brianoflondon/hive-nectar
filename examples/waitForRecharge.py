@@ -2,7 +2,7 @@ import time
 
 from win10toast import ToastNotifier
 
-from beem.account import Account
+from nectar.account import Account
 
 if __name__ == "__main__":
     toaster = ToastNotifier()

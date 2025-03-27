@@ -6,19 +6,19 @@ from timeit import default_timer as timer
 
 from prettytable import PrettyTable
 
-from beem.account import Account
-from beem.block import Block
-from beem.blockchain import Blockchain
-from beem.comment import Comment
-from beem.nodelist import NodeList
-from beem.steem import Steem
-from beem.utils import (
+from nectar.account import Account
+from nectar.block import Block
+from nectar.blockchain import Blockchain
+from nectar.comment import Comment
+from nectar.nodelist import NodeList
+from nectar.steem import Steem
+from nectar.utils import (
     construct_authorperm,
     parse_time,
     resolve_authorpermvoter,
 )
-from beem.vote import Vote
-from beemapi.exceptions import NumRetriesReached
+from nectar.vote import Vote
+from nectarapi.exceptions import NumRetriesReached
 
 FUTURES_MODULE = None
 if not FUTURES_MODULE:
@@ -220,4 +220,4 @@ if __name__ == "__main__":
         stm = Steem(offline=True)
         stm.set_default_nodes(working_nodes)
     else:
-        print("beempy set nodes " + str(working_nodes))
+        print("nectar-cli set nodes " + str(working_nodes))

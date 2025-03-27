@@ -22,15 +22,15 @@ install:
     $env:COMM_HASH = $env:APPVEYOR_REPO_COMMIT.Substring(0,8)
     
     if ($env:APPVEYOR_PULL_REQUEST_NUMBER) {
-        $env:BUILD = "beempy-{0}-{1}-{2}_win64.zip" -f $env:COMM_TAG, $env:COMM_HASH, $env:COMM_PY
-        $env:BUILD2 = "beempy-onefile-{0}-{1}-{2}_win64.zip" -f $env:COMM_TAG, $env:COMM_HASH, $env:COMM_PY
-        $env:BUILD3 = "BeempySetup-{0}-{1}-{2}_win64.exe" -f $env:COMM_TAG, $env:COMM_HASH, $env:COMM_PY
+        $env:BUILD = "nectar-cli-{0}-{1}-{2}_win64.zip" -f $env:COMM_TAG, $env:COMM_HASH, $env:COMM_PY
+        $env:BUILD2 = "nectar-cli-onefile-{0}-{1}-{2}_win64.zip" -f $env:COMM_TAG, $env:COMM_HASH, $env:COMM_PY
+        $env:BUILD3 = "nectar-cliSetup-{0}-{1}-{2}_win64.exe" -f $env:COMM_TAG, $env:COMM_HASH, $env:COMM_PY
         $env:AVVER = "{0}-{1}" -f $env:COMM_TAG.TrimStart("v"), $env:COMM_HASH
     }
     else {
-        $env:BUILD = "beempy-{0}-{1}-{2}-{3}_win64.zip" -f $env:COMM_TAG, $env:COMM_COUNT, $env:COMM_HASH, $env:COMM_PY
-        $env:BUILD2 = "beempy-onefile-{0}-{1}-{2}-{3}_win64.zip" -f $env:COMM_TAG, $env:COMM_COUNT, $env:COMM_HASH, $env:COMM_PY
-        $env:BUILD3 = "BeempySetup-{0}-{1}-{2}-{3}_win64.exe" -f $env:COMM_TAG, $env:COMM_COUNT, $env:COMM_HASH, $env:COMM_PY
+        $env:BUILD = "nectar-cli-{0}-{1}-{2}-{3}_win64.zip" -f $env:COMM_TAG, $env:COMM_COUNT, $env:COMM_HASH, $env:COMM_PY
+        $env:BUILD2 = "nectar-cli-onefile-{0}-{1}-{2}-{3}_win64.zip" -f $env:COMM_TAG, $env:COMM_COUNT, $env:COMM_HASH, $env:COMM_PY
+        $env:BUILD3 = "nectar-cliSetup-{0}-{1}-{2}-{3}_win64.exe" -f $env:COMM_TAG, $env:COMM_COUNT, $env:COMM_HASH, $env:COMM_PY
         $env:AVVER = "{0}-{1}" -f $env:COMM_TAG.TrimStart("v"), $env:COMM_COUNT
     }
 
@@ -64,26 +64,26 @@ build_script:
 test_script:
 # Run the project tests
 - cmd: activate root
-- cmd: py.test tests/beembase
-- cmd: py.test tests/beemgraphene
+- cmd: py.test tests/nectarbase
+- cmd: py.test tests/nectargraphene
 
 after_test:
  # If tests are successful, create binary packages for the project.
 - cmd: activate root
-- cmd: pyinstaller pyinstaller\beempy-onedir.spec
-- cmd: pyinstaller pyinstaller\beempy-onefile.spec
+- cmd: pyinstaller pyinstaller\nectar-cli-onedir.spec
+- cmd: pyinstaller pyinstaller\nectar-cli-onefile.spec
 
 # package artifacts
-- cmd: copy /Y C:\OpenSSL-v111-Win64\bin\libcrypto-1_1-x64.dll dist\beempy
-- cmd: copy /Y C:\OpenSSL-v111-Win64\bin\libssl-1_1-x64.dll dist\beempy
-- cmd: copy /Y C:\OpenSSL-Win64\bin\ssleay32.dll dist\beempy
-- cmd: copy /Y C:\OpenSSL-Win64\bin\libeay32.dll dist\beempy
-# - cmd: 7z a -­mx9 beempy.zip %APPVEYOR_BUILD_FOLDER%\dist\beempy
-#- ps: 7z a -m0=LZMA2 -mx9 $env:BUILD .\dist\beempy
-- ps: 7z a $env:BUILD .\dist\beempy
-- ps: 7z a $env:BUILD2 .\dist\beempy.exe
+- cmd: copy /Y C:\OpenSSL-v111-Win64\bin\libcrypto-1_1-x64.dll dist\nectar-cli
+- cmd: copy /Y C:\OpenSSL-v111-Win64\bin\libssl-1_1-x64.dll dist\nectar-cli
+- cmd: copy /Y C:\OpenSSL-Win64\bin\ssleay32.dll dist\nectar-cli
+- cmd: copy /Y C:\OpenSSL-Win64\bin\libeay32.dll dist\nectar-cli
+# - cmd: 7z a -ï¿½mx9 nectar-cli.zip %APPVEYOR_BUILD_FOLDER%\dist\nectar-cli
+#- ps: 7z a -m0=LZMA2 -mx9 $env:BUILD .\dist\nectar-cli
+- ps: 7z a $env:BUILD .\dist\nectar-cli
+- ps: 7z a $env:BUILD2 .\dist\nectar-cli.exe
 - cmd: makensis.exe /V4 pyinstaller\windows_installer.nsi
-- ps: Copy-Item .\pyinstaller\BeempySetup.exe -Destination $env:BUILD3
+- ps: Copy-Item .\pyinstaller\nectar-cliSetup.exe -Destination $env:BUILD3
 
 - ps: | # generate sha256 hashes
     (get-filehash $env:BUILD -algorithm SHA256).Hash | out-file ("{0}.sha256" -f $env:BUILD) -encoding ascii
@@ -93,26 +93,26 @@ after_test:
     (get-filehash $env:BUILD3 -algorithm SHA256).Hash | out-file ("{0}.sha256" -f $env:BUILD3) -encoding ascii
     type ("{0}.sha256" -f $env:BUILD3)
     
-#(get-filehash beempy.zip -algorithm SHA256).Hash | out-file "beempy.zip.sha256" -encoding ascii 
+#(get-filehash nectar-cli.zip -algorithm SHA256).Hash | out-file "nectar-cli.zip.sha256" -encoding ascii 
 
 artifacts:
   # Archive the generated packages in the ci.appveyor.com build report.
 - path: $(BUILD)
-  name: beempy
+  name: nectar-cli
 - path: $(BUILD).sha256
-  name: beempy_sha256
+  name: nectar-cli_sha256
 - path: $(BUILD2)
-  name: beempy_onefile
+  name: nectar-cli_onefile
 - path: $(BUILD2).sha256
-  name: beempy_onefile_sha256
+  name: nectar-cli_onefile_sha256
 - path: $(BUILD3)
-  name: beempy_installer
+  name: nectar-cli_installer
 - path: $(BUILD3).sha256
-  name: beempy_installer_sha256
-#- path: beempy.zip
-#  name: beempy_zip
-#- path: beempy.zip.sha256
-#  name: beempy_zip sha256 hash
+  name: nectar-cli_installer_sha256
+#- path: nectar-cli.zip
+#  name: nectar-cli_zip
+#- path: nectar-cli.zip.sha256
+#  name: nectar-cli_zip sha256 hash
 
 on_finish: 
 - ps: | # update appveyor build version, done last to prevent webhook breakage
@@ -122,10 +122,10 @@ deploy:
   provider: GitHub
   auth_token:
     secure: 0/vpfUG++7riJDu6Zc0smoTJJJm1t9/qiOzY/IR5vtaFNZNVYmRbEt8jS8LxpnFW
-  artifact: beempy, beempy_sha256, beempy_onefile, beempy_onefile_sha256, beempy_installer, beempy_installer_sha256
+  artifact: nectar-cli, nectar-cli_sha256, nectar-cli_onefile, nectar-cli_onefile_sha256, nectar-cli_installer, nectar-cli_installer_sha256
   draft: true
   prerelease: true
-  description: "standalone executable of beempy for windows"
+  description: "standalone executable of nectar-cli for windows"
   tag: $(APPVEYOR_REPO_TAG_NAME) # will not work until tag is pushed
   on:
 #    configuration: Release    # Debug contains non-redist MS DLLs

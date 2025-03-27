@@ -1,20 +1,20 @@
-beempy CLI
+nectar-cli CLI
 ~~~~~~~~~~
-`beempy` is a convenient CLI utility that enables you to manage your wallet, transfer funds, check
+`nectar-cli` is a convenient CLI utility that enables you to manage your wallet, transfer funds, check
 balances and more.
 
 Using the Wallet
 ----------------
-`beempy` lets you leverage your BIP38 encrypted wallet to perform various actions on your accounts.
+`nectar-cli` lets you leverage your BIP38 encrypted wallet to perform various actions on your accounts.
 
-The first time you use `beempy`, you will be prompted to enter a password. This password will be used to encrypt
-the `beempy` wallet, which contains your private keys.
+The first time you use `nectar-cli`, you will be prompted to enter a password. This password will be used to encrypt
+the `nectar-cli` wallet, which contains your private keys.
 
 You can change the password via `changewalletpassphrase` command.
 
 ::
 
-    beempy changewalletpassphrase
+    nectar-cli changewalletpassphrase
 
 
 From this point on, every time an action requires your private keys, you will be prompted ot enter
@@ -24,12 +24,12 @@ To bypass password entry, you can set an environment variable ``UNLOCK``.
 
 ::
 
-    UNLOCK=mysecretpassword beempy transfer <recipient_name> 100 STEEM
+    UNLOCK=mysecretpassword nectar-cli transfer <recipient_name> 100 STEEM
 
 Using a key json file
 ---------------------
 
-A key_file.json can be used to provide private keys to beempy:
+A key_file.json can be used to provide private keys to nectar-cli:
 ::
 
     {
@@ -41,7 +41,7 @@ with
 
 ::
 
-    beempy --keys key_file.json command
+    nectar-cli --keys key_file.json command
 
 When set, the wallet cannot be used.
 
@@ -51,51 +51,51 @@ First, you may like to import your Steem account:
 
 ::
 
-    beempy importaccount
+    nectar-cli importaccount
 
 
 You can also import individual private keys:
 
 ::
 
-   beempy addkey <private_key>
+   nectar-cli addkey <private_key>
 
 Listing accounts:
 
 ::
 
-   beempy listaccounts
+   nectar-cli listaccounts
 
 Show balances:
 
 ::
 
-   beempy balance account_name1 account_name2
+   nectar-cli balance account_name1 account_name2
 
 Sending funds:
 
 ::
 
-   beempy transfer --account <account_name> <recipient_name> 100 STEEM memo
+   nectar-cli transfer --account <account_name> <recipient_name> 100 STEEM memo
 
 Upvoting a post:
 
 ::
 
-   beempy upvote --account <account_name> https://steemit.com/funny/@mynameisbrian/the-content-stand-a-comic
+   nectar-cli upvote --account <account_name> https://steemit.com/funny/@mynameisbrian/the-content-stand-a-comic
 
 
 Setting Defaults
 ----------------
-For a more convenient use of ``beempy`` as well as the ``beem`` library, you can set some defaults.
+For a more convenient use of ``nectar-cli`` as well as the ``nectar`` library, you can set some defaults.
 This is especially useful if you have a single Steem account.
 
 ::
 
-   beempy set default_account test
-   beempy set default_vote_weight 100
+   nectar-cli set default_account test
+   nectar-cli set default_vote_weight 100
 
-   beempy config
+   nectar-cli config
     +---------------------+--------+
     | Key                 | Value  |
     +---------------------+--------+
@@ -107,23 +107,23 @@ If you've set up your `default_account`, you can now send funds by omitting this
 
 ::
 
-    beempy transfer <recipient_name> 100 STEEM memo
+    nectar-cli transfer <recipient_name> 100 STEEM memo
 
 Commands
 --------
 
-.. click:: beem.cli:cli
-    :prog: beempy
+.. click:: nectar.cli:cli
+    :prog: nectar-cli
     :show-nested:
 
-beempy --help
+nectar-cli --help
 -------------
-You can see all available commands with ``beempy --help``
+You can see all available commands with ``nectar-cli --help``
 
 ::
 
-    ~ % beempy --help
-   Usage: beempy [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
+    ~ % nectar-cli --help
+   Usage: nectar-cli [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
 
    Options:
      -n, --node TEXT        URL for public Steem API (e.g.
@@ -150,7 +150,7 @@ You can see all available commands with ``beempy --help``
      --help                 Show this message and exit.
 
    Commands:
-     about                   About beempy
+     about                   About nectar-cli
      addkey                  Add key to wallet When no [OPTION] is given,...
      addtoken                Add key to wallet When no [OPTION] is given, a...
      allow                   Allow an account/key to interact with your...

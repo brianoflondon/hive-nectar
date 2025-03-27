@@ -5,7 +5,7 @@ import logging
 from binascii import hexlify, unhexlify
 from datetime import timedelta
 
-from beem.blockchain import Blockchain
+from nectar.blockchain import Blockchain
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
