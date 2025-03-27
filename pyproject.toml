@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "nectar"
 version = "0.00.01"
 description = "Unofficial Python library for HIVE"
-readme = "README.rst"
+readme = "README.md"
 requires-python = ">=3.12"
 license = {file = "LICENSE.txt"}
 authors = [
