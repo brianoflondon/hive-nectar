@@ -104,7 +104,7 @@ class Vote(BlockchainObject):
             if self.blockchain.rpc.get_use_appbase():
                 try:
                     votes = self.blockchain.rpc.get_active_votes(
-                        {"author": author, "permlink": permlink}, api="tags"
+                        {"author": author, "permlink": permlink}, api="condenser"
                     )["votes"]
                 except InvalidParameters:
                     raise VoteDoesNotExistsException(self.identifier)
