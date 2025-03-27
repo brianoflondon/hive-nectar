@@ -1690,9 +1690,9 @@ class Trending_tags(list):
         tags = []
         try:
             # Try to use bridge API for getting trending tags
-            # Unfortunately there's no direct bridge API for tags, so we fall back to tags API
+            # Unfortunately there's no direct bridge API for tags, so we fall back to condenser API
             if self.blockchain.rpc.get_use_appbase() and use_appbase:
-                tags = self.blockchain.rpc.get_trending_tags({"start": "", "limit": limit}, api="tags")[
+                tags = self.blockchain.rpc.get_trending_tags({"start": "", "limit": limit}, api="condenser")[
                     "tags"
                 ]
             else:
@@ -1700,5 +1700,4 @@ class Trending_tags(list):
         except Exception:
             # If API fails, return empty list
             pass
-            
         super(Trending_tags, self).__init__(tags)

@@ -723,10 +723,10 @@ class Comment(BlockchainObject):
         self.blockchain.rpc.set_next_node_on_empty_reply(False)
         if self.blockchain.rpc.get_use_appbase():
             return self.blockchain.rpc.get_reblogged_by(
-                {"author": post_author, "permlink": post_permlink}, api="follow"
+                {"author": post_author, "permlink": post_permlink}, api="condenser"
             )["accounts"]
         else:
-            return self.blockchain.rpc.get_reblogged_by(post_author, post_permlink, api="follow")
+            return self.blockchain.rpc.get_reblogged_by(post_author, post_permlink, api="condenser")
 
     def get_replies(self, raw_data=False, identifier=None):
         """Returns content replies

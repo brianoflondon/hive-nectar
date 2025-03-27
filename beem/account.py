@@ -1113,7 +1113,7 @@ class Account(BlockchainObject):
                 if raw_data and short_entries:
                     ret = self.blockchain.rpc.get_blog_entries(
                         {"account": account, "start_entry_id": start_entry_id, "limit": limit},
-                        api="follow",
+                        api="condenser",
                     )
                     if isinstance(ret, dict) and "blog" in ret:
                         ret = ret["blog"]
@@ -1121,7 +1121,7 @@ class Account(BlockchainObject):
                 elif raw_data:
                     ret = self.blockchain.rpc.get_blog(
                         {"account": account, "start_entry_id": start_entry_id, "limit": limit},
-                        api="follow",
+                        api="condenser",
                     )
                     if isinstance(ret, dict) and "blog" in ret:
                         ret = ret["blog"]
@@ -1131,7 +1131,7 @@ class Account(BlockchainObject):
 
                     ret = self.blockchain.rpc.get_blog(
                         {"account": account, "start_entry_id": start_entry_id, "limit": limit},
-                        api="follow",
+                        api="condenser",
                     )
                     if isinstance(ret, dict) and "blog" in ret:
                         ret = ret["blog"]
@@ -1144,7 +1144,7 @@ class Account(BlockchainObject):
                 return [
                     c
                     for c in self.blockchain.rpc.get_blog_entries(
-                        account, start_entry_id, limit, api="follow"
+                        account, start_entry_id, limit, api="condenser"
                     )
                 ]
 
@@ -1152,7 +1152,7 @@ class Account(BlockchainObject):
                 return [
                     c
                     for c in self.blockchain.rpc.get_blog(
-                        account, start_entry_id, limit, api="follow"
+                        account, start_entry_id, limit, api="condenser"
                     )
                 ]
 
@@ -1160,7 +1160,7 @@ class Account(BlockchainObject):
                 from .comment import Comment
 
                 blog_list = self.blockchain.rpc.get_blog(
-                    account, start_entry_id, limit, api="follow"
+                    account, start_entry_id, limit, api="condenser"
                 )
                 if blog_list is None:
                     return []
@@ -1260,12 +1260,12 @@ class Account(BlockchainObject):
         if self.blockchain.rpc.get_use_appbase():
             try:
                 return self.blockchain.rpc.get_blog_authors(
-                    {"blog_account": account}, api="follow"
+                    {"blog_account": account}, api="condenser"
                 )["blog_authors"]
             except:
-                return self.blockchain.rpc.get_blog_authors(account, api="follow")
+                return self.blockchain.rpc.get_blog_authors(account, api="condenser")
         else:
-            return self.blockchain.rpc.get_blog_authors(account, api="follow")
+            return self.blockchain.rpc.get_blog_authors(account, api="condenser")
 
     def get_follow_count(self, account=None):
         """get_follow_count"""
@@ -1277,11 +1277,11 @@ class Account(BlockchainObject):
         self.blockchain.rpc.set_next_node_on_empty_reply(False)
         if self.blockchain.rpc.get_use_appbase():
             try:
-                return self.blockchain.rpc.get_follow_count({"account": account}, api="follow")
+                return self.blockchain.rpc.get_follow_count({"account": account}, api="condenser")
             except:
                 return self.blockchain.rpc.get_follow_count(account, api="condenser")
         else:
-            return self.blockchain.rpc.get_follow_count(account, api="follow")
+            return self.blockchain.rpc.get_follow_count(account, api="condenser")
 
     def get_followers(self, raw_name_list=True, limit=100):
         """Returns the account followers as list"""
@@ -1369,7 +1369,7 @@ class Account(BlockchainObject):
                 query = {"account": self.name, "start": last_user, "type": what, "limit": limit}
                 if direction == "follower":
                     try:
-                        followers = self.blockchain.rpc.get_followers(query, api="follow")
+                        followers = self.blockchain.rpc.get_followers(query, api="condenser")
                     except:
                         followers = self.blockchain.rpc.get_followers(
                             self.name, last_user, what, limit, api="condenser"
@@ -1378,7 +1378,7 @@ class Account(BlockchainObject):
                         followers = followers["followers"]
                 elif direction == "following":
                     try:
-                        followers = self.blockchain.rpc.get_following(query, api="follow")
+                        followers = self.blockchain.rpc.get_following(query, api="condenser")
                     except:
                         followers = self.blockchain.rpc.get_following(
                             self.name, last_user, what, limit, api="condenser"
@@ -1389,7 +1389,7 @@ class Account(BlockchainObject):
                 if direction == "follower":
                     try:
                         followers = self.blockchain.rpc.get_followers(
-                            self.name, last_user, what, limit, api="follow"
+                            self.name, last_user, what, limit, api="condenser"
                         )
                     except:
                         followers = self.blockchain.rpc.get_followers(
@@ -1398,7 +1398,7 @@ class Account(BlockchainObject):
                 elif direction == "following":
                     try:
                         followers = self.blockchain.rpc.get_following(
-                            self.name, last_user, what, limit, api="follow"
+                            self.name, last_user, what, limit, api="condenser"
                         )
                     except:
                         followers = self.blockchain.rpc.get_following(
@@ -2013,11 +2013,11 @@ class Account(BlockchainObject):
             raise OfflineHasNoRPCException("No RPC available in offline mode!")
         self.blockchain.rpc.set_next_node_on_empty_reply(False)
         if self.blockchain.rpc.get_use_appbase():
-            return self.blockchain.rpc.get_tags_used_by_author({"author": account}, api="tags")[
+            return self.blockchain.rpc.get_tags_used_by_author({"author": account}, api="condenser")[
                 "tags"
             ]
         else:
-            return self.blockchain.rpc.get_tags_used_by_author(account, api="tags")
+            return self.blockchain.rpc.get_tags_used_by_author(account, api="condenser")
 
     def get_expiring_vesting_delegations(self, after=None, limit=1000, account=None):
         """Returns the expirations for vesting delegations.

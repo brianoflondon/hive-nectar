@@ -1029,10 +1029,10 @@ class Blockchain(object):
         while True:
             if self.blockchain.rpc.get_use_appbase():
                 ret = self.blockchain.rpc.get_account_reputations(
-                    {"account_lower_bound": lastname, "limit": steps}, api="follow"
+                    {"account_lower_bound": lastname, "limit": steps}, api="condenser"
                 )["reputations"]
             else:
-                ret = self.blockchain.rpc.get_account_reputations(lastname, steps, api="follow")
+                ret = self.blockchain.rpc.get_account_reputations(lastname, steps, api="condenser")
             for account in ret:
                 if isinstance(account, dict):
                     account_name = account["name"]
