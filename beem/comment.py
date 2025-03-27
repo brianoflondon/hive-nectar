@@ -460,6 +460,7 @@ class Comment(BlockchainObject):
         :param pending_payout_SBD: When not None this value instead of the current
             value is used for calculating the rewards
         :type pending_payout_SBD: float, str
+
         """
         specific_vote = None
         if voter is None:
@@ -1005,20 +1006,43 @@ class RecentReplies(list):
 class RecentByPath(list):
     """Obtain a list of posts recent by path, does the same as RankedPosts
 
-    :param str account: Account name
+    :param str path: path
+    :param str tag: tag
+    :param str observer: observer
     :param Steem blockchain_instance: Steem() instance to use when accesing a RPC
     """
 
     def __init__(
         self,
         path="trending",
-        category=None,
+        tag="",
+        observer="",
         lazy=False,
         full=True,
+        limit=20,
         blockchain_instance=None,
         **kwargs,
     ):
-        super(RecentByPath, self).__init__(RankedPosts(sort=path, tag=category))
+        if blockchain_instance is None:
+            if kwargs.get("steem_instance"):
+                blockchain_instance = kwargs["steem_instance"]
+            elif kwargs.get("hive_instance"):
+                blockchain_instance = kwargs["hive_instance"]
+        self.blockchain = blockchain_instance or shared_blockchain_instance()
+
+        # Create RankedPosts with proper parameters
+        ranked_posts = RankedPosts(
+            sort=path,
+            tag=tag,
+            observer=observer,
+            limit=limit,
+            lazy=lazy,
+            full=full,
+            blockchain_instance=self.blockchain,
+            **kwargs,
+        )
+
+        super(RecentByPath, self).__init__(ranked_posts)
 
 
 class RankedPosts(list):
@@ -1063,39 +1087,47 @@ class RankedPosts(list):
         while len(comments) < limit and last_n != len(comments):
             last_n = len(comments)
             self.blockchain.rpc.set_next_node_on_empty_reply(False)
-            posts = self.blockchain.rpc.get_ranked_posts(
-                {
-                    "sort": sort,
-                    "tag": tag,
-                    "observer": observer,
-                    "limit": api_limit,
-                    "start_author": start_author,
-                    "start_permlink": start_permlink,
-                },
-                api="bridge",
-            )
-            if posts is None:
-                continue
-            for post in posts:
-                if (
-                    len(comments) > 0
-                    and comments[-1]["author"] == post["author"]
-                    and comments[-1]["permlink"] == post["permlink"]
-                ):
+            try:
+                posts = self.blockchain.rpc.get_ranked_posts(
+                    {
+                        "sort": sort,
+                        "tag": tag,
+                        "observer": observer,
+                        "limit": api_limit,
+                        "start_author": start_author,
+                        "start_permlink": start_permlink,
+                    },
+                    api="bridge",
+                )
+                if posts is None:
                     continue
-                if len(comments) >= limit:
-                    continue
-                if raw_data:
-                    comments.append(post)
-                else:
-                    comments.append(
-                        Comment(post, lazy=lazy, full=full, blockchain_instance=self.blockchain)
-                    )
-            if len(comments) > 0:
-                start_author = comments[-1]["author"]
-                start_permlink = comments[-1]["permlink"]
-            if limit - len(comments) < 100:
-                api_limit = limit - len(comments) + 1
+                for post in posts:
+                    if (
+                        len(comments) > 0
+                        and comments[-1]["author"] == post["author"]
+                        and comments[-1]["permlink"] == post["permlink"]
+                    ):
+                        continue
+                    if len(comments) >= limit:
+                        continue
+                    if raw_data:
+                        comments.append(post)
+                    else:
+                        comments.append(
+                            Comment(post, lazy=lazy, full=full, blockchain_instance=self.blockchain)
+                        )
+                if len(comments) > 0:
+                    start_author = comments[-1]["author"]
+                    start_permlink = comments[-1]["permlink"]
+                if limit - len(comments) < 100:
+                    api_limit = limit - len(comments) + 1
+            except Exception as e:
+                # If we get an error but have some posts, return what we have
+                if len(comments) > 0:
+                    logging.warning(f"Error in RankedPosts: {str(e)}. Returning partial results.")
+                    break
+                # Otherwise, re-raise the exception
+                raise
         super(RankedPosts, self).__init__(comments)
 
 
@@ -1141,37 +1173,45 @@ class AccountPosts(list):
         while len(comments) < limit and last_n != len(comments):
             last_n = len(comments)
             self.blockchain.rpc.set_next_node_on_empty_reply(False)
-            posts = self.blockchain.rpc.get_account_posts(
-                {
-                    "sort": sort,
-                    "account": account,
-                    "observer": observer,
-                    "limit": api_limit,
-                    "start_author": start_author,
-                    "start_permlink": start_permlink,
-                },
-                api="bridge",
-            )
-            if posts is None:
-                continue
-            for post in posts:
-                if (
-                    len(comments) > 0
-                    and comments[-1]["author"] == post["author"]
-                    and comments[-1]["permlink"] == post["permlink"]
-                ):
+            try:
+                posts = self.blockchain.rpc.get_account_posts(
+                    {
+                        "sort": sort,
+                        "account": account,
+                        "observer": observer,
+                        "limit": api_limit,
+                        "start_author": start_author,
+                        "start_permlink": start_permlink,
+                    },
+                    api="bridge",
+                )
+                if posts is None:
                     continue
-                if len(comments) >= limit:
-                    continue
-                if raw_data:
-                    comments.append(post)
-                else:
-                    comments.append(
-                        Comment(post, lazy=lazy, full=full, blockchain_instance=self.blockchain)
-                    )
-            if len(comments) > 0:
-                start_author = comments[-1]["author"]
-                start_permlink = comments[-1]["permlink"]
-            if limit - len(comments) < 100:
-                api_limit = limit - len(comments) + 1
+                for post in posts:
+                    if (
+                        len(comments) > 0
+                        and comments[-1]["author"] == post["author"]
+                        and comments[-1]["permlink"] == post["permlink"]
+                    ):
+                        continue
+                    if len(comments) >= limit:
+                        continue
+                    if raw_data:
+                        comments.append(post)
+                    else:
+                        comments.append(
+                            Comment(post, lazy=lazy, full=full, blockchain_instance=self.blockchain)
+                        )
+                if len(comments) > 0:
+                    start_author = comments[-1]["author"]
+                    start_permlink = comments[-1]["permlink"]
+                if limit - len(comments) < 100:
+                    api_limit = limit - len(comments) + 1
+            except Exception as e:
+                # If we get an error but have some posts, return what we have
+                if len(comments) > 0:
+                    logging.warning(f"Error in AccountPosts: {str(e)}. Returning partial results.")
+                    break
+                # Otherwise, re-raise the exception
+                raise
         super(AccountPosts, self).__init__(comments)

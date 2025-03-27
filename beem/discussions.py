@@ -364,9 +364,9 @@ class Discussions_by_trending(list):
             # Fall back to old API methods
             if self.blockchain.rpc.get_use_appbase() and use_appbase:
                 try:
-                    posts = self.blockchain.rpc.get_discussions_by_trending(reduced_query, api="tags")[
-                        "discussions"
-                    ]
+                    posts = self.blockchain.rpc.get_discussions_by_trending(
+                        reduced_query, api="tags"
+                    )["discussions"]
                 except Exception:
                     posts = []
             if len(posts) == 0:
@@ -621,9 +621,9 @@ class Post_discussions_by_payout(list):
             # Fall back to old API methods
             if self.blockchain.rpc.get_use_appbase() and use_appbase:
                 try:
-                    posts = self.blockchain.rpc.get_post_discussions_by_payout(reduced_query, api="tags")[
-                        "discussions"
-                    ]
+                    posts = self.blockchain.rpc.get_post_discussions_by_payout(
+                        reduced_query, api="tags"
+                    )["discussions"]
                 except Exception:
                     posts = []
             if len(posts) == 0:
@@ -705,9 +705,9 @@ class Discussions_by_created(list):
             # Fall back to old API methods
             if self.blockchain.rpc.get_use_appbase() and use_appbase:
                 try:
-                    posts = self.blockchain.rpc.get_discussions_by_created(reduced_query, api="tags")[
-                        "discussions"
-                    ]
+                    posts = self.blockchain.rpc.get_discussions_by_created(
+                        reduced_query, api="tags"
+                    )["discussions"]
                 except Exception:
                     posts = []
             if len(posts) == 0:
@@ -789,9 +789,9 @@ class Discussions_by_active(list):
             # Fall back to old API methods
             if self.blockchain.rpc.get_use_appbase() and use_appbase:
                 try:
-                    posts = self.blockchain.rpc.get_discussions_by_active(reduced_query, api="tags")[
-                        "discussions"
-                    ]
+                    posts = self.blockchain.rpc.get_discussions_by_active(
+                        reduced_query, api="tags"
+                    )["discussions"]
                 except Exception:
                     posts = []
             if len(posts) == 0:
@@ -875,9 +875,9 @@ class Discussions_by_cashout(list):
             # Fall back to old API methods
             if self.blockchain.rpc.get_use_appbase() and use_appbase:
                 try:
-                    posts = self.blockchain.rpc.get_discussions_by_cashout(reduced_query, api="tags")[
-                        "discussions"
-                    ]
+                    posts = self.blockchain.rpc.get_discussions_by_cashout(
+                        reduced_query, api="tags"
+                    )["discussions"]
                 except Exception:
                     posts = []
             if len(posts) == 0:
@@ -1046,9 +1046,9 @@ class Discussions_by_children(list):
             # Fall back to old API methods
             if self.blockchain.rpc.get_use_appbase() and use_appbase:
                 try:
-                    posts = self.blockchain.rpc.get_discussions_by_children(reduced_query, api="tags")[
-                        "discussions"
-                    ]
+                    posts = self.blockchain.rpc.get_discussions_by_children(
+                        reduced_query, api="tags"
+                    )["discussions"]
                 except Exception:
                     posts = []
             if len(posts) == 0:
@@ -1204,7 +1204,7 @@ class Discussions_by_feed(list):
                 bridge_query = {
                     "sort": "feed",
                     "account": account,
-                    "limit": reduced_query.get("limit", 20)
+                    "limit": reduced_query.get("limit", 20),
                 }
                 if "start_author" in reduced_query and "start_permlink" in reduced_query:
                     bridge_query["start_author"] = reduced_query["start_author"]
@@ -1288,7 +1288,7 @@ class Discussions_by_blog(list):
                 bridge_query = {
                     "sort": "blog",
                     "account": account,
-                    "limit": reduced_query.get("limit", 20)
+                    "limit": reduced_query.get("limit", 20),
                 }
                 if "start_author" in reduced_query and "start_permlink" in reduced_query:
                     bridge_query["start_author"] = reduced_query["start_author"]
@@ -1382,12 +1382,14 @@ class Discussions_by_comments(list):
                             posts.append(value)
                     # Limit the number of posts if needed
                     if "limit" in reduced_query and len(posts) > reduced_query["limit"]:
-                        posts = posts[:reduced_query["limit"]]
+                        posts = posts[: reduced_query["limit"]]
         except Exception:
             # Fall back to old API methods
             if self.blockchain.rpc.get_use_appbase() and use_appbase:
                 try:
-                    posts = self.blockchain.rpc.get_discussions_by_comments(reduced_query, api="tags")
+                    posts = self.blockchain.rpc.get_discussions_by_comments(
+                        reduced_query, api="tags"
+                    )
                     if "discussions" in posts:
                         posts = posts["discussions"]  # inconsistent format across node types
                 except Exception:
@@ -1475,9 +1477,9 @@ class Discussions_by_promoted(list):
             # Fall back to old API methods
             if self.blockchain.rpc.get_use_appbase() and use_appbase:
                 try:
-                    posts = self.blockchain.rpc.get_discussions_by_promoted(reduced_query, api="tags")[
-                        "discussions"
-                    ]
+                    posts = self.blockchain.rpc.get_discussions_by_promoted(
+                        reduced_query, api="tags"
+                    )["discussions"]
                 except Exception:
                     posts = []
             if len(posts) == 0:
@@ -1555,13 +1557,15 @@ class Discussions_by_replies(list):
                             posts.append(value)
                     # Limit the number of posts if needed
                     if "limit" in reduced_query and len(posts) > reduced_query["limit"]:
-                        posts = posts[:reduced_query["limit"]]
+                        posts = posts[: reduced_query["limit"]]
         except Exception:
             # Fall back to old API methods
             posts = []
             if self.blockchain.rpc.get_use_appbase() and use_appbase:
                 try:
-                    posts = self.blockchain.rpc.get_replies_by_last_update(reduced_query, api="tags")
+                    posts = self.blockchain.rpc.get_replies_by_last_update(
+                        reduced_query, api="tags"
+                    )
                     if "discussions" in posts:
                         posts = posts["discussions"]
                 except Exception:
@@ -1571,9 +1575,9 @@ class Discussions_by_replies(list):
                         reduced_query["limit"],
                     )
             if len(posts) == 0:
-                if ("start_parent_author" in reduced_query and reduced_query["start_parent_author"]) and (
-                    "start_permlink" in reduced_query and reduced_query["start_permlink"]
-                ):
+                if (
+                    "start_parent_author" in reduced_query and reduced_query["start_parent_author"]
+                ) and ("start_permlink" in reduced_query and reduced_query["start_permlink"]):
                     if "limit" in reduced_query:
                         posts = self.blockchain.rpc.get_replies_by_last_update(
                             reduced_query["start_parent_author"],
@@ -1582,7 +1586,9 @@ class Discussions_by_replies(list):
                         )
                     else:
                         posts = self.blockchain.rpc.get_replies_by_last_update(
-                            reduced_query["start_parent_author"], reduced_query["start_permlink"], 100
+                            reduced_query["start_parent_author"],
+                            reduced_query["start_permlink"],
+                            100,
                         )
         if posts is None:
             posts = []
@@ -1692,9 +1698,9 @@ class Trending_tags(list):
             # Try to use bridge API for getting trending tags
             # Unfortunately there's no direct bridge API for tags, so we fall back to condenser API
             if self.blockchain.rpc.get_use_appbase() and use_appbase:
-                tags = self.blockchain.rpc.get_trending_tags({"start": "", "limit": limit}, api="condenser")[
-                    "tags"
-                ]
+                tags = self.blockchain.rpc.get_trending_tags(
+                    {"start": "", "limit": limit}, api="condenser"
+                )["tags"]
             else:
                 tags = self.blockchain.rpc.get_trending_tags("", limit)
         except Exception:

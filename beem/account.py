@@ -2013,9 +2013,9 @@ class Account(BlockchainObject):
             raise OfflineHasNoRPCException("No RPC available in offline mode!")
         self.blockchain.rpc.set_next_node_on_empty_reply(False)
         if self.blockchain.rpc.get_use_appbase():
-            return self.blockchain.rpc.get_tags_used_by_author({"author": account}, api="condenser")[
-                "tags"
-            ]
+            return self.blockchain.rpc.get_tags_used_by_author(
+                {"author": account}, api="condenser"
+            )["tags"]
         else:
             return self.blockchain.rpc.get_tags_used_by_author(account, api="condenser")
 
