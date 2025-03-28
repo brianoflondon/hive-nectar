@@ -19,8 +19,9 @@ You may find help in the [nectar-discord-channel](). The discord channel can als
 A complete library documentation is available at
 [temporary]()
 
-# About nectar
+# About hive-nectar
 
+- Highly opinionated fork of beem
 - High unit test coverage
 - Complete documentation of hive-nectar and all classes including all functions
 - hivesigner integration
@@ -83,16 +84,17 @@ pip3 install -U secp256k1prp
 Install or update nectar by pip(you may need to replace pip3 by pip):
 
 ```bash
-pip3 install -U nectar
+pip3 install -U hive-nectar
 ```
 
 You can install nectar from this repository if you want the latest but
 possibly non-compiling version:
 
 ```bash
-git clone https://github.com/thecrazygm/nectar.git
-cd nectar
+git clone https://github.com/thecrazygm/hive-nectar.git
+cd hive-nectar
 uv sync
+uv sync --dev
 ```
 
 Run tests after install:

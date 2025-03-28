@@ -46,15 +46,15 @@ Install nectar with pip:
 
 .. code:: bash
 
-    pip install -U nectar
+    pip install -U hive-nectar
 
 Sometimes this does not work. Please try::
 
-    pip3 install -U nectar
+    pip3 install -U hive-nectar
 
 or::
 
-    python -m pip install nectar
+    python -m pip install hive-nectar
 
 Manual installation
 -------------------
@@ -62,32 +62,15 @@ Manual installation
 You can install nectar from this repository if you want the latest
 but possibly non-compiling version::
 
-    git clone https://github.com/holgern/nectar.git
-    cd nectar
-    python setup.py build
-    
-    python setup.py install --user
+    git clone https://github.com/thecrazygm/hive-nectar.git
+    cd hive-nectar
+    uv sync 
+    uv sync --dev
 
 Run tests after install::
 
     pytest
     
-    
-Installing nectar with conda-forge
---------------------------------
-
-Installing nectar from the conda-forge channel can be achieved by adding conda-forge to your channels with::
-
-    conda config --add channels conda-forge
-    
-Once the conda-forge channel has been enabled, nectar can be installed with::
-
-    conda install nectar
-
-Signing and Verify can be fasten (200 %) by installing cryptography::
-
-    conda install cryptography
-
 Enable Logging
 --------------
 

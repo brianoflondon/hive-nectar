@@ -3060,12 +3060,12 @@ class Account(BlockchainObject):
         .. code-block:: js
 
             {
-                'name': 'Holger',
-                'about': 'nectar Developer',
-                'location': 'Germany',
-                'profile_image': 'https://c1.staticflickr.com/5/4715/38733717165_7070227c89_n.jpg',
-                'cover_image': 'https://farm1.staticflickr.com/894/26382750057_69f5c8e568.jpg',
-                'website': 'https://github.com/holgern/nectar'
+                'name': 'TheCrazyGM',
+                'about': 'hive-nectar Developer',
+                'location': 'United States',
+                'profile_image': 'https://.jpg',
+                'cover_image': 'https://.jpg',
+                'website': 'https://github.com/thecrazygm/hive-nectar'
             }
 
         .. code-block:: python
