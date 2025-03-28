@@ -8,13 +8,13 @@ Nodes for using nectar with the Hive blockchain can be set by the command line t
 
 .. code-block:: bash
 
-   nectar-cli updatenodes --hive
+   hive-nectar updatenodes --hive
 
 Nodes for the Hive blockchain are set with
 
 .. code-block:: bash
 
-   nectar-cli updatenodes
+   hive-nectar updatenodes
 
 
 Hive nodes can be set in a python script with
@@ -88,7 +88,7 @@ of the author or upvoter. Private keys can be provided to nectar temporary or ca
 stored encrypted in a sql-database (wallet).
 
 .. note:: Before using the wallet the first time, it has to be created and a password has
-          to set. The wallet content is available to nectar-cli and all python scripts, which have
+          to set. The wallet content is available to hive-nectar and all python scripts, which have
           access to the sql database file.
 
 Creating a wallet

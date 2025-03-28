@@ -220,4 +220,4 @@ if __name__ == "__main__":
         stm = Steem(offline=True)
         stm.set_default_nodes(working_nodes)
     else:
-        print("nectar-cli set nodes " + str(working_nodes))
+        print("hive-nectar set nodes " + str(working_nodes))

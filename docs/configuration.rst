@@ -30,11 +30,11 @@ can load the configuration directly by using:
 
     from nectar.storage import configStorage as config
 
-It is also possible to access the configuration with the commandline tool `nectar-cli`:
+It is also possible to access the configuration with the commandline tool `hive-nectar`:
 
 .. code-block:: bash
 
-    nectar-cli config
+    hive-nectar config
 
 API node URLs
 -------------
@@ -50,19 +50,19 @@ is stored in `config["nodes"]` as string. The list can be get and set by:
     node_list = node_list[1:] + [node_list[0]]
     steem.set_default_nodes(node_list)
 
-nectar-cli can also be used to set nodes:
+hive-nectar can also be used to set nodes:
 
 .. code-block:: bash
 
-        nectar-cli set nodes wss://steemd.privex.io
-        nectar-cli set nodes "['wss://steemd.privex.io', 'wss://gtg.steem.house:8090']"
+        hive-nectar set nodes wss://steemd.privex.io
+        hive-nectar set nodes "['wss://steemd.privex.io', 'wss://gtg.steem.house:8090']"
 
 The default nodes can be reset to the default value. When the first node does not
 answer, steem should be set to the offline mode. This can be done by:
 
 .. code-block:: bash
 
-        nectar-cli -o set nodes ""
+        hive-nectar -o set nodes ""
 
 or
 
@@ -76,7 +76,7 @@ Default account
 ---------------
 
 The default account name is used in some functions, when no account name is given.
-It is also used in  `nectar-cli` for all account related functions.
+It is also used in  `hive-nectar` for all account related functions.
 
 .. code-block:: python
 
@@ -85,11 +85,11 @@ It is also used in  `nectar-cli` for all account related functions.
     steem.set_default_account("test")
     steem.config["default_account"] = "test"
 
-or by nectar-cli with
+or by hive-nectar with
 
 .. code-block:: bash
 
-        nectar-cli set default_account test
+        hive-nectar set default_account test
 
 Default voting weight
 ---------------------
@@ -102,11 +102,11 @@ The default vote weight is used for voting, when no vote weight is given.
     steem = Steem()
     steem.config["default_vote_weight"] = 100
 
-or by nectar-cli with
+or by hive-nectar with
 
 .. code-block:: bash
 
-        nectar-cli set default_vote_weight 100
+        hive-nectar set default_vote_weight 100
 
 
 Setting password_storage
@@ -115,12 +115,12 @@ Setting password_storage
 The password_storage can be set to:
 
 * environment, this is the default setting. The master password for the wallet can be provided in the environment variable `UNLOCK`.
-* keyring (when set with nectar-cli, it asks for the wallet password)
+* keyring (when set with hive-nectar, it asks for the wallet password)
 
 .. code-block:: bash
 
-        nectar-cli set password_storage environment
-        nectar-cli set password_storage keyring
+        hive-nectar set password_storage environment
+        hive-nectar set password_storage keyring
 
 
 
@@ -130,13 +130,13 @@ Environment variable for storing the master password
 When `password_storage` is set to `environment`, the master password can be stored in `UNLOCK`
 for unlocking automatically the wallet.
 
-Keyring support for nectar-cli and wallet
+Keyring support for hive-nectar and wallet
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In order to use keyring for storing the wallet password, the following steps are necessary:
 
 * Install keyring: `pip install keyring`
-* Change `password_storage` to `keyring` with `nectar-cli` and enter the wallet password.
+* Change `password_storage` to `keyring` with `hive-nectar` and enter the wallet password.
 
 It also possible to change the password in the keyring by
 
@@ -166,10 +166,10 @@ Testing if the master password is correctly provided by keyring or the `UNLOCK` 
     print(steem.wallet.locked())
 
 When the output is False, automatic unlocking with keyring or the `UNLOCK` variable works.
-It can also tested by nectar-cli with
+It can also tested by hive-nectar with
 
 .. code-block:: bash
 
-        nectar-cli walletinfo --test-unlock
+        hive-nectar walletinfo --test-unlock
 
 When no password prompt is shown, unlocking with keyring or the `UNLOCK` variable works.

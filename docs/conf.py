@@ -52,8 +52,8 @@ master_doc = "index"
 
 # General information about the project.
 project = "nectar"
-copyright = "2017, ChainSquad GmbH, 2018-2020, Holger Nahrstaedt"
-author = "Holger Nahrstaedt"
+copyright = "2017, ChainSquad GmbH, 2018-2020, Holger Nahrstaedt, 2025, Michael Garcia"
+author = "Michael Garcia"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

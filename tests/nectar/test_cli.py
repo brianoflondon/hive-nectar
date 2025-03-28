@@ -55,12 +55,12 @@ class Testcases(unittest.TestCase):
 
     def test_balance(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ["balance", "thecrazygm", "nectar-cli"])
+        result = runner.invoke(cli, ["balance", "thecrazygm", "hive-nectar"])
         self.assertEqual(result.exit_code, 0)
 
     def test_interest(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ["-dx", "interest", "thecrazygm", "nectar-cli"])
+        result = runner.invoke(cli, ["-dx", "interest", "thecrazygm", "hive-nectar"])
         self.assertEqual(result.exit_code, 0)
 
     def test_config(self):
@@ -262,7 +262,7 @@ class Testcases(unittest.TestCase):
         runner = CliRunner()
         result = runner.invoke(
             cli,
-            ["-dx", "allow", "--account", "thecrazygm", "--permission", "posting", "nectar-cli"],
+            ["-dx", "allow", "--account", "thecrazygm", "--permission", "posting", "hive-nectar"],
             input="test\n",
         )
         self.assertEqual(result.exit_code, 0)
@@ -289,20 +289,20 @@ class Testcases(unittest.TestCase):
     def test_approvewitness(self):
         runner = CliRunner()
         result = runner.invoke(
-            cli, ["-dx", "approvewitness", "-a", "nectar-cli", "thecrazygm"], input="test\n"
+            cli, ["-dx", "approvewitness", "-a", "hive-nectar", "thecrazygm"], input="test\n"
         )
         self.assertEqual(result.exit_code, 0)
 
     def test_disapprovewitness(self):
         runner = CliRunner()
         result = runner.invoke(
-            cli, ["-dx", "disapprovewitness", "-a", "nectar-cli", "thecrazygm"], input="test\n"
+            cli, ["-dx", "disapprovewitness", "-a", "hive-nectar", "thecrazygm"], input="test\n"
         )
         self.assertEqual(result.exit_code, 0)
 
     def test_addproxy(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ["-dx", "setproxy", "-a", "nectar-cli", "thecrazygm"], input="test\n")
+        result = runner.invoke(cli, ["-dx", "setproxy", "-a", "hive-nectar", "thecrazygm"], input="test\n")
         self.assertEqual(result.exit_code, 0)
 
     def test_delproxy(self):
@@ -451,16 +451,16 @@ class Testcases(unittest.TestCase):
 
     def test_follow_unfollow(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ["-dto", "follow", "nectar-cli"], input="test\n")
+        result = runner.invoke(cli, ["-dto", "follow", "hive-nectar"], input="test\n")
         self.assertEqual(result.exit_code, 0)
-        result = runner.invoke(cli, ["-dto", "unfollow", "nectar-cli"], input="test\n")
+        result = runner.invoke(cli, ["-dto", "unfollow", "hive-nectar"], input="test\n")
         self.assertEqual(result.exit_code, 0)
 
     def test_mute_unmute(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ["-dto", "mute", "nectar-cli"], input="test\n")
+        result = runner.invoke(cli, ["-dto", "mute", "hive-nectar"], input="test\n")
         self.assertEqual(result.exit_code, 0)
-        result = runner.invoke(cli, ["-dto", "unfollow", "nectar-cli"], input="test\n")
+        result = runner.invoke(cli, ["-dto", "unfollow", "hive-nectar"], input="test\n")
         self.assertEqual(result.exit_code, 0)
 
     def test_witnesscreate(self):

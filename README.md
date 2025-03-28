@@ -22,13 +22,13 @@ A complete library documentation is available at
 # About nectar
 
 - High unit test coverage
-- Complete documentation of nectar-cli and all classes including all functions
+- Complete documentation of hive-nectar and all classes including all functions
 - hivesigner integration
 - Works on read-only systems
 - Own BlockchainObject class with cache
 - Contains all broadcast operations
 - Estimation of virtual account operation index from date or block number
-- the command line tool nectar-cli uses click and has more commands
+- the command line tool hive-nectar uses click and has more commands
 - NodeRPC can be used to execute even not implemented RPC-Calls
 - More complete implemention
 
@@ -44,7 +44,7 @@ For Debian and Ubuntu, please ensure that the following packages are installed:
 sudo apt-get install build-essential libssl-dev python3-dev python3-pip python3-setuptools
 ```
 
-The following package speeds up nectar-cli:
+The following package speeds up hive-nectar:
 
 > sudo apt-get install python3-gmpy2
 
