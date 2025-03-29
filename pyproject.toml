@@ -41,7 +41,6 @@ dependencies = [
     "ruamel.yaml",
     "diff_match_patch",
     "asn1crypto",
-    "sphinx-rtd-theme>=3.0.2",
 ]
 
 [project.urls]
@@ -109,6 +108,7 @@ dev = [
     "coverage",
     "tox",
     "sphinx",
+    "sphinx-rtd-theme",
     "doc8",
     "ruff",
     "mypy",

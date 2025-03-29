@@ -359,7 +359,6 @@ dependencies = [
     { name = "requests" },
     { name = "ruamel-yaml" },
     { name = "scrypt" },
-    { name = "sphinx-rtd-theme" },
     { name = "websocket-client" },
 ]
 
@@ -381,6 +380,7 @@ dev = [
     { name = "ruff" },
     { name = "sphinx" },
     { name = "sphinx-click" },
+    { name = "sphinx-rtd-theme" },
     { name = "tomli" },
     { name = "tox" },
     { name = "twine" },
@@ -399,7 +399,6 @@ requires-dist = [
     { name = "requests" },
     { name = "ruamel-yaml" },
     { name = "scrypt" },
-    { name = "sphinx-rtd-theme", specifier = ">=3.0.2" },
     { name = "websocket-client" },
 ]
 
@@ -421,6 +420,7 @@ dev = [
     { name = "ruff" },
     { name = "sphinx" },
     { name = "sphinx-click" },
+    { name = "sphinx-rtd-theme" },
     { name = "tomli" },
     { name = "tox" },
     { name = "twine" },
