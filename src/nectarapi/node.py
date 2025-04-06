@@ -158,11 +158,11 @@ class Nodes(list):
         if showMsg:
             if call_retry:
                 log.warning(
-                    "Retry RPC Call on node: %s (%d/%d) \n" % (self.url, cnt, self.num_retries_call)
+                    "Retry RPC Call on node: %s (%d/%d)" % (self.url, cnt, self.num_retries_call)
                 )
             else:
                 log.warning(
-                    "Lost connection or internal error on node: %s (%d/%d) \n"
+                    "Lost connection or internal error on node: %s (%d/%d)"
                     % (self.url, cnt, self.num_retries)
                 )
         if not sleep:
