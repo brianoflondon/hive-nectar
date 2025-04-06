@@ -180,5 +180,5 @@ class Nodes(list):
         else:
             sleeptime = 10
         if sleeptime:
-            log.warning("Retrying in %d seconds\n" % sleeptime)
+            log.warning("Retrying in %d seconds" % sleeptime)
             time.sleep(sleeptime)
