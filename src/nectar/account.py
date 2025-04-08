@@ -1135,7 +1135,9 @@ class Account(BlockchainObject):
                     )
                     if isinstance(ret, dict) and "blog" in ret:
                         ret = ret["blog"]
-                    return [Comment(c["comment"], blockchain_instance=self.blockchain) for c in ret]
+                    return [
+                        Comment(c["comment"], blockchain_instance=self.blockchain) for c in ret
+                    ]
             except:
                 success = False
 
@@ -1427,7 +1429,9 @@ class Account(BlockchainObject):
         self.blockchain.rpc.set_next_node_on_empty_reply(True)
         return self.blockchain.rpc.list_all_subscriptions({"account": account}, api="bridge")
 
-    def get_account_posts(self, sort="feed", limit=20, account=None, observer=None, raw_data=False):
+    def get_account_posts(
+        self, sort="feed", limit=20, account=None, observer=None, raw_data=False
+    ):
         """Returns account feed"""
         if account is None:
             account = self["name"]
@@ -1922,7 +1926,7 @@ class Account(BlockchainObject):
         self.blockchain.rpc.set_next_node_on_empty_reply(False)
         if self.blockchain.rpc.get_use_appbase():
             return self.blockchain.rpc.find_account_recovery_requests(
-                {"account": account}, api="database"
+                {"accounts": [account]}, api="database"
             )["requests"]
         else:
             return self.blockchain.rpc.get_recovery_request(account)
@@ -2173,7 +2177,12 @@ class Account(BlockchainObject):
                 return 0
 
     def _get_account_history(
-        self, account=None, start=-1, limit=1, operation_filter_low=None, operation_filter_high=None
+        self,
+        account=None,
+        start=-1,
+        limit=1,
+        operation_filter_low=None,
+        operation_filter_high=None,
     ):
         if account is None:
             account = self["name"]
@@ -2198,7 +2207,9 @@ class Account(BlockchainObject):
                         account, start, limit, api="condenser"
                     )
             else:
-                ret = self.blockchain.rpc.get_account_history(account, start, limit, api="database")
+                ret = self.blockchain.rpc.get_account_history(
+                    account, start, limit, api="database"
+                )
         else:
             if self.blockchain.rpc.get_use_appbase():
                 try:
@@ -3358,7 +3369,9 @@ class Account(BlockchainObject):
         if memo and memo[0] == "#":
             from .memo import Memo
 
-            memoObj = Memo(from_account=account, to_account=to, blockchain_instance=self.blockchain)
+            memoObj = Memo(
+                from_account=account, to_account=to, blockchain_instance=self.blockchain
+            )
             memo = memoObj.encrypt(memo[1:])["message"]
 
         op = operations.Transfer(
@@ -3429,7 +3442,9 @@ class Account(BlockchainObject):
         if memo and memo[0] == "#":
             from .memo import Memo
 
-            memoObj = Memo(from_account=account, to_account=to, blockchain_instance=self.blockchain)
+            memoObj = Memo(
+                from_account=account, to_account=to, blockchain_instance=self.blockchain
+            )
             memo = memoObj.encrypt(memo[1:])["message"]
 
         op = operations.Recurring_transfer(
