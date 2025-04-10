@@ -345,7 +345,7 @@ wheels = [
 
 [[package]]
 name = "hive-nectar"
-version = "0.0.3"
+version = "0.0.4"
 source = { editable = "." }
 dependencies = [
     { name = "appdirs" },
@@ -395,7 +395,7 @@ requires-dist = [
     { name = "diff-match-patch" },
     { name = "ecdsa" },
     { name = "prettytable" },
-    { name = "pycryptodomex" },
+    { name = "pycryptodomex", specifier = ">=3.22.0" },
     { name = "requests" },
     { name = "ruamel-yaml" },
     { name = "scrypt" },

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hive-nectar"
-version = "0.0.3"
+version = "0.0.4"
 description = "Unofficial Python library for HIVE"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -34,7 +34,7 @@ dependencies = [
     "websocket-client",
     "appdirs",
     "scrypt",
-    "pycryptodomex",
+    "pycryptodomex>=3.22.0",
     "Click",
     "prettytable",
     "ruamel.yaml",
