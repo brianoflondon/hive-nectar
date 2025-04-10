@@ -391,7 +391,7 @@ requires-dist = [
     { name = "appdirs" },
     { name = "asn1crypto" },
     { name = "click" },
-    { name = "click-shell" },
+    { name = "click-shell", specifier = ">=2.1" },
     { name = "diff-match-patch" },
     { name = "ecdsa" },
     { name = "prettytable" },
