@@ -5,6 +5,7 @@ import logging
 import math
 import time
 from datetime import timedelta
+from queue import Queue
 from threading import Event, Thread
 from time import sleep
 
@@ -23,7 +24,6 @@ from .exceptions import (
 from .utils import addTzInfo
 
 log = logging.getLogger(__name__)
-from queue import Queue
 
 FUTURES_MODULE = None
 if not FUTURES_MODULE:
@@ -40,7 +40,8 @@ if not FUTURES_MODULE:
 # maybe add the task back into the queue, then make your own handler and pass it in
 def default_handler(name, exception, *args, **kwargs):
     log.warn(
-        "%s raised %s with args %s and kwargs %s" % (name, str(exception), repr(args), repr(kwargs))
+        "%s raised %s with args %s and kwargs %s"
+        % (name, str(exception), repr(args), repr(kwargs))
     )
     pass
 
@@ -277,7 +278,9 @@ class Blockchain(object):
             raise OfflineHasNoRPCException("No RPC available in offline mode!")
         self.blockchain.rpc.set_next_node_on_empty_reply(False)
         if self.blockchain.rpc.get_use_appbase():
-            ret = self.blockchain.rpc.get_transaction({"id": transaction_id}, api="account_history")
+            ret = self.blockchain.rpc.get_transaction(
+                {"id": transaction_id}, api="account_history"
+            )
         else:
             ret = self.blockchain.rpc.get_transaction(transaction_id, api="database")
         return ret
@@ -548,7 +551,9 @@ class Blockchain(object):
                             checked_results.append(b)
                             result_block_nums.append(int(b.block_num))
 
-                    missing_block_num = list(set(block_num_list).difference(set(result_block_nums)))
+                    missing_block_num = list(
+                        set(block_num_list).difference(set(result_block_nums))
+                    )
                     while len(missing_block_num) > 0:
                         for blocknum in missing_block_num:
                             try:
@@ -1010,7 +1015,7 @@ class Blockchain(object):
             ret = self.blockchain.rpc.get_account_count()
         return ret
 
-    def get_account_reputations(self, start="", stop="", steps=1e3, limit=-1, **kwargs):
+    def get_account_reputations(self, start="", stop="", steps=1000, limit=-1, **kwargs):
         """Yields account reputation between start and stop.
 
         :param str start: Start at this account name

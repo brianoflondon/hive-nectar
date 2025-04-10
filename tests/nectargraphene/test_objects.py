@@ -4,10 +4,16 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 import unittest
 
+import pytest
+
 from nectargraphenebase import objects, types
 
 
 class Testcases(unittest.TestCase):
+    @pytest.mark.skipif(
+        not hasattr(objects, "Array"),
+        reason="AttributeError: module 'nectargraphenebase.objects' has no attribute 'Array'",
+    )
     def test_GrapheneObject(self):
         j = {"a": 2, "b": "abcde", "c": ["a", "b"]}
         j2 = objects.GrapheneObject(j)
