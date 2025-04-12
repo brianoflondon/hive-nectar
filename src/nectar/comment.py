@@ -231,8 +231,6 @@ class Comment(BlockchainObject):
             output["json_metadata"] = json.dumps(output["json_metadata"], separators=[",", ":"])
         if "tags" in output:
             output.pop("tags")
-        if "community" in output:
-            output.pop("community")
         parse_times = [
             "active",
             "cashout_time",
