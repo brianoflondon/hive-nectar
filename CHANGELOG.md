@@ -1,6 +1,18 @@
 # Changelog
 
-## 0.00.01
+## 0.0.4
+
+Small community fixes
+
+## 0.0.3
+
+Working on bridge api
+
+## 0.0.2
+
+Rebranded to Nectar
+
+## 0.0.1
 
 - Initial release
 - Beem stops and Nectar starts

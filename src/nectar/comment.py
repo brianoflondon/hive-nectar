@@ -136,11 +136,10 @@ class Comment(BlockchainObject):
                 comment["json_metadata"] = {}
 
         comment["tags"] = []
-        comment["community"] = ""
         if isinstance(comment["json_metadata"], dict):
             if "tags" in comment["json_metadata"]:
                 comment["tags"] = comment["json_metadata"]["tags"]
-            if "community" in comment["json_metadata"]:
+            if "community" in comment["json_metadata"] and not comment["community"]:
                 comment["community"] = comment["json_metadata"]["community"]
 
         parse_int = [
@@ -308,6 +307,13 @@ class Comment(BlockchainObject):
     def category(self):
         if "category" in self:
             return self["category"]
+        else:
+            return ""
+
+    @property
+    def community(self):
+        if "community" in self:
+            return self["community"]
         else:
             return ""
 
