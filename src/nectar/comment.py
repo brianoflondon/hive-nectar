@@ -316,6 +316,14 @@ class Comment(BlockchainObject):
             return ""
 
     @property
+    def community_title(self):
+        """The Community title property."""
+        if "community_title" in self:
+            return self["community_title"]
+        else:
+            return ""
+
+    @property
     def parent_author(self):
         if "parent_author" in self:
             return self["parent_author"]
