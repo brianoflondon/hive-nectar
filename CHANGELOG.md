@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.5
+
+More community fixes, including the Community Title Property
+
 ## 0.0.4
 
 Small community fixes
