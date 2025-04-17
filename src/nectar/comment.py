@@ -136,11 +136,10 @@ class Comment(BlockchainObject):
                 comment["json_metadata"] = {}
 
         comment["tags"] = []
-        comment["community"] = ""
         if isinstance(comment["json_metadata"], dict):
             if "tags" in comment["json_metadata"]:
                 comment["tags"] = comment["json_metadata"]["tags"]
-            if "community" in comment["json_metadata"]:
+            if "community" in comment["json_metadata"] and not comment["community"]:
                 comment["community"] = comment["json_metadata"]["community"]
 
         parse_int = [
@@ -232,8 +231,6 @@ class Comment(BlockchainObject):
             output["json_metadata"] = json.dumps(output["json_metadata"], separators=[",", ":"])
         if "tags" in output:
             output.pop("tags")
-        if "community" in output:
-            output.pop("community")
         parse_times = [
             "active",
             "cashout_time",
@@ -308,6 +305,21 @@ class Comment(BlockchainObject):
     def category(self):
         if "category" in self:
             return self["category"]
+        else:
+            return ""
+
+    @property
+    def community(self):
+        if "community" in self:
+            return self["community"]
+        else:
+            return ""
+
+    @property
+    def community_title(self):
+        """The Community title property."""
+        if "community_title" in self:
+            return self["community_title"]
         else:
             return ""
 

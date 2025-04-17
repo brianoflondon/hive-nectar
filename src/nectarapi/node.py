@@ -142,18 +142,13 @@ class Nodes(list):
         if self.node is not None:
             self.node.error_cnt = 0
 
-    def sleep_and_check_retries(
-        self, errorMsg=None, sleep=True, call_retry=False, showMsg=True
-    ):
+    def sleep_and_check_retries(self, errorMsg=None, sleep=True, call_retry=False, showMsg=True):
         """Sleep and check if num_retries is reached"""
         if errorMsg:
             log.warning("Error: {}".format(errorMsg))
         if call_retry:
             cnt = self.error_cnt_call
-            if (
-                self.num_retries_call >= 0
-                and self.error_cnt_call > self.num_retries_call
-            ):
+            if self.num_retries_call >= 0 and self.error_cnt_call > self.num_retries_call:
                 raise CallRetriesReached()
         else:
             cnt = self.error_cnt
@@ -163,8 +158,7 @@ class Nodes(list):
         if showMsg:
             if call_retry:
                 log.warning(
-                    "Retry RPC Call on node: %s (%d/%d)"
-                    % (self.url, cnt, self.num_retries_call)
+                    "Retry RPC Call on node: %s (%d/%d)" % (self.url, cnt, self.num_retries_call)
                 )
             else:
                 log.warning(
