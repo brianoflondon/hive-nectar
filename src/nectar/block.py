@@ -374,6 +374,8 @@ class BlockHeader(BlockchainObject):
 
     def time(self):
         """Return a datetime instance for the timestamp of this block"""
+        if self.get("timestamp") is None:
+            return datetime(1970, 1, 1, 0, 0)
         return self["timestamp"]
 
     @property
