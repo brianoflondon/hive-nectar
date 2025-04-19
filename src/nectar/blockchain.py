@@ -39,9 +39,7 @@ if not FUTURES_MODULE:
 # default exception handler. if you want to take some action on failed tasks
 # maybe add the task back into the queue, then make your own handler and pass it in
 def default_handler(name, exception, *args, **kwargs):
-    log.warning(
-        f"{name} raised {exception} with args {args!r} and kwargs {kwargs!r}"
-    )
+    log.warning(f"{name} raised {exception} with args {args!r} and kwargs {kwargs!r}")
     pass
 
 
@@ -277,9 +275,7 @@ class Blockchain(object):
             raise OfflineHasNoRPCException("No RPC available in offline mode!")
         self.blockchain.rpc.set_next_node_on_empty_reply(False)
         if self.blockchain.rpc.get_use_appbase():
-            ret = self.blockchain.rpc.get_transaction(
-                {"id": transaction_id}, api="account_history"
-            )
+            ret = self.blockchain.rpc.get_transaction({"id": transaction_id}, api="account_history")
         else:
             ret = self.blockchain.rpc.get_transaction(transaction_id, api="database")
         return ret
@@ -550,9 +546,7 @@ class Blockchain(object):
                             checked_results.append(b)
                             result_block_nums.append(int(b.block_num))
 
-                    missing_block_num = list(
-                        set(block_num_list).difference(set(result_block_nums))
-                    )
+                    missing_block_num = list(set(block_num_list).difference(set(result_block_nums)))
                     while len(missing_block_num) > 0:
                         for blocknum in missing_block_num:
                             try:
