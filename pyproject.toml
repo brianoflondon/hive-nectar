@@ -41,6 +41,7 @@ dependencies = [
     "ruamel.yaml",
     "diff_match_patch",
     "asn1crypto",
+    "types-requests>=2.32.0.20250328",
 ]
 
 [project.urls]

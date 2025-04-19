@@ -39,9 +39,8 @@ if not FUTURES_MODULE:
 # default exception handler. if you want to take some action on failed tasks
 # maybe add the task back into the queue, then make your own handler and pass it in
 def default_handler(name, exception, *args, **kwargs):
-    log.warn(
-        "%s raised %s with args %s and kwargs %s"
-        % (name, str(exception), repr(args), repr(kwargs))
+    log.warning(
+        f"{name} raised {exception} with args {args!r} and kwargs {kwargs!r}"
     )
     pass
 
@@ -68,7 +67,7 @@ class Worker(Thread):
                 # get a task and raise immediately if none available
                 func, args, kwargs = self.queue.get(False)
                 self.idle.clear()
-            except:
+            except Exception:
                 # no work to do
                 # if not self.idle.is_set():
                 #  print >> stdout, '%s is idle' % self.name
@@ -176,7 +175,7 @@ class Pool:
                 # get a result, raises empty exception immediately if none available
                 results.append(self.resultQueue.get(False))
                 self.resultQueue.task_done()
-        except:
+        except Exception:
             return results
         return results
 
