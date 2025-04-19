@@ -485,9 +485,9 @@ class GrapheneRPC(object):
         try:
             if response is None:
                 try:
-                    ret = json.loads(reply, strict=False, encoding="utf-8")
+                    ret = json.loads(reply, strict=False)
                 except ValueError:
-                    log.error(f"Non-JSON response: {reply}")
+                    log.error(f"Non-JSON response: {reply} Node: {self.url}")
                     self._check_for_server_error(reply)
                     raise RPCError("Invalid response format")
             else:
@@ -520,6 +520,7 @@ class GrapheneRPC(object):
             self.nodes.reset_error_cnt_call()
             return ret["result"]
         else:
+            log.error(f"Unexpected response format: {ret} Node: {self.url}")
             raise RPCError(f"Unexpected response format: {ret}")
 
     # End of Deprecated methods
