@@ -40,7 +40,8 @@ if not FUTURES_MODULE:
 # maybe add the task back into the queue, then make your own handler and pass it in
 def default_handler(name, exception, *args, **kwargs):
     log.warn(
-        "%s raised %s with args %s and kwargs %s" % (name, str(exception), repr(args), repr(kwargs))
+        "%s raised %s with args %s and kwargs %s"
+        % (name, str(exception), repr(args), repr(kwargs))
     )
     pass
 
@@ -277,7 +278,9 @@ class Blockchain(object):
             raise OfflineHasNoRPCException("No RPC available in offline mode!")
         self.blockchain.rpc.set_next_node_on_empty_reply(False)
         if self.blockchain.rpc.get_use_appbase():
-            ret = self.blockchain.rpc.get_transaction({"id": transaction_id}, api="account_history")
+            ret = self.blockchain.rpc.get_transaction(
+                {"id": transaction_id}, api="account_history"
+            )
         else:
             ret = self.blockchain.rpc.get_transaction(transaction_id, api="database")
         return ret
@@ -548,7 +551,9 @@ class Blockchain(object):
                             checked_results.append(b)
                             result_block_nums.append(int(b.block_num))
 
-                    missing_block_num = list(set(block_num_list).difference(set(result_block_nums)))
+                    missing_block_num = list(
+                        set(block_num_list).difference(set(result_block_nums))
+                    )
                     while len(missing_block_num) > 0:
                         for blocknum in missing_block_num:
                             try:
@@ -627,7 +632,9 @@ class Blockchain(object):
                                 )
 
                     if not bool(block_batch):
-                        raise BatchedCallsNotSupported()
+                        raise BatchedCallsNotSupported(
+                            f"{self.rpc.url} Doesn't support batched calls"
+                        )
                     if not isinstance(block_batch, list):
                         block_batch = [block_batch]
                     for block in block_batch:
