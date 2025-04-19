@@ -633,7 +633,7 @@ class Blockchain(object):
 
                     if not bool(block_batch):
                         raise BatchedCallsNotSupported(
-                            f"{self.rpc.url} Doesn't support batched calls"
+                            f"{self.blockchain.rpc.url} Doesn't support batched calls"
                         )
                     if not isinstance(block_batch, list):
                         block_batch = [block_batch]
