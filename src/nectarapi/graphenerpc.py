@@ -502,7 +502,7 @@ class GrapheneRPC(object):
                 error_message = ret["error"].get(
                     "detail", ret["error"].get("message", "Unknown error")
                 )
-            raise RPCError(error_message)
+                raise RPCError(error_message)
         elif isinstance(ret, list):
             ret_list = []
             for r in ret:
