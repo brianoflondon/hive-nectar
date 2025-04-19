@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hive-nectar"
-version = "0.0.5"
+version = "0.0.6"
 description = "Unofficial Python library for HIVE"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -41,6 +41,7 @@ dependencies = [
     "ruamel.yaml",
     "diff_match_patch",
     "asn1crypto",
+    "types-requests>=2.32.0.20250328",
 ]
 
 [project.urls]

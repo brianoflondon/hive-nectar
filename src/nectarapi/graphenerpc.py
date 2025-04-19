@@ -46,7 +46,7 @@ log = logging.getLogger(__name__)
 
 
 class SessionInstance(object):
-    """Singelton for the Session Instance"""
+    """Singleton for the Session Instance"""
 
     instance = None
 
@@ -59,7 +59,7 @@ def set_session_instance(instance):
 def shared_session_instance():
     """Get session instance"""
     if REQUEST_MODULE is None:
-        raise Exception()
+        raise Exception("Requests module is not available.")
     if not SessionInstance.instance:
         SessionInstance.instance = requests.Session()
     return SessionInstance.instance
@@ -68,7 +68,7 @@ def shared_session_instance():
 def create_ws_instance(use_ssl=True, enable_multithread=True):
     """Get websocket instance"""
     if WEBSOCKET_MODULE is None:
-        raise Exception()
+        raise Exception("WebSocket module is not available.")
     if use_ssl:
         ssl_defaults = ssl.get_default_verify_paths()
         sslopt_ca_certs = {"ca_certs": ssl_defaults.cafile}
@@ -79,47 +79,24 @@ def create_ws_instance(use_ssl=True, enable_multithread=True):
 
 class GrapheneRPC(object):
     """
-    This class allows to call API methods synchronously, without callbacks.
+    This class allows calling API methods synchronously, without callbacks.
 
     It logs warnings and errors.
 
     :param str urls: Either a single Websocket/Http URL, or a list of URLs
     :param str user: Username for Authentication
     :param str password: Password for Authentication
-    :param int num_retries: Try x times to num_retries to a node on disconnect, -1 for indefinitely (default is 100)
-    :param int num_retries_call: Repeat num_retries_call times a rpc call on node error (default is 5)
-    :param int timeout: Timeout setting for https nodes (default is 60)
-    :param bool autoconnect: When set to false, connection is performed on the first rpc call (default is True)
-    :param bool use_condenser: Use the old condenser_api rpc protocol on nodes with version
-        0.19.4 or higher. The settings has no effect on nodes with version of 0.19.3 or lower.
-    :param bool use_tor: When set to true, 'socks5h://localhost:9050' is set as proxy
-    :param dict custom_chains: custom chain which should be added to the known chains
-
-    Available APIs:
-
-          * database
-          * network_node
-          * network_broadcast
-
-    Usage:
-
-        .. code-block:: python
-
-            from nectarapi.graphenerpc import GrapheneRPC
-            ws = GrapheneRPC("wss://steemd.pevo.science","","")
-            print(ws.get_account_count())
-
-            ws = GrapheneRPC("https://api.steemit.com","","")
-            print(ws.get_account_count())
-
-    .. note:: This class allows to call methods available via
-              websocket. If you want to use the notification
-              subsystem, please use ``GrapheneWebsocket`` instead.
-
+    :param int num_retries: Number of retries for node connection (default is 100)
+    :param int num_retries_call: Number of retries for RPC calls on node error (default is 5)
+    :param int timeout: Timeout setting for HTTP nodes (default is 60)
+    :param bool autoconnect: Automatically connect on initialization (default is True)
+    :param bool use_condenser: Use the old condenser_api RPC protocol
+    :param bool use_tor: Use Tor proxy for connections
+    :param dict custom_chains: Custom chains to add to known chains
     """
 
     def __init__(self, urls, user=None, password=None, **kwargs):
-        """Init."""
+        """Initialize the RPC client."""
         self.rpc_methods = {"offline": -1, "ws": 0, "jsonrpc": 1, "wsappbase": 2, "appbase": 3}
         self.current_rpc = self.rpc_methods["ws"]
         self._request_id = 0
@@ -454,11 +431,12 @@ class GrapheneRPC(object):
         :raises ValueError: if the server does not respond in proper JSON format
         :raises RPCError: if the server returns an error
         """
-        log.debug(json.dumps(payload))
+        log.debug(f"Payload: {json.dumps(payload)}")
         if self.nodes.working_nodes_count == 0:
-            raise WorkingNodeMissing
+            raise WorkingNodeMissing("No working nodes available.")
         if self.url is None:
             raise RPCConnection("RPC is not connected!")
+
         reply = {}
         response = None
         while True:
@@ -488,13 +466,9 @@ class GrapheneRPC(object):
             except KeyboardInterrupt:
                 raise
             except WebSocketConnectionClosedException as e:
-                if self.nodes.num_retries_call_reached:
-                    self.nodes.increase_error_cnt()
-                    self.nodes.sleep_and_check_retries(str(e), sleep=False, call_retry=False)
-                    self.rpcconnect()
-                else:
-                    # self.nodes.sleep_and_check_retries(str(e), sleep=True, call_retry=True)
-                    self.rpcconnect(next_url=False)
+                self.nodes.increase_error_cnt()
+                self.nodes.sleep_and_check_retries(str(e), sleep=False, call_retry=False)
+                self.rpcconnect()
             except ConnectionError as e:
                 self.nodes.increase_error_cnt()
                 self.nodes.sleep_and_check_retries(str(e), sleep=False, call_retry=False)
@@ -508,48 +482,47 @@ class GrapheneRPC(object):
                 self.nodes.sleep_and_check_retries(str(e), sleep=False, call_retry=False)
                 self.rpcconnect()
 
-        ret = {}
         try:
             if response is None:
-                ret = json.loads(reply, strict=False, encoding="utf-8")
+                try:
+                    ret = json.loads(reply, strict=False)
+                except ValueError:
+                    log.error(f"Non-JSON response: {reply} Node: {self.url}")
+                    self._check_for_server_error(reply)
+                    raise RPCError("Invalid response format")
             else:
                 ret = response.json()
         except ValueError:
             self._check_for_server_error(reply)
 
-        log.debug(json.dumps(reply))
+        log.debug(f"Reply: {json.dumps(reply)}")
 
         if isinstance(ret, dict) and "error" in ret:
-            if "detail" in ret["error"]:
-                raise RPCError(ret["error"]["detail"])
-            else:
-                raise RPCError(ret["error"]["message"])
-        else:
-            if isinstance(ret, list):
-                ret_list = []
-                for r in ret:
-                    if isinstance(r, dict) and "error" in r:
-                        if "detail" in r["error"]:
-                            raise RPCError(r["error"]["detail"])
-                        else:
-                            raise RPCError(r["error"]["message"])
-                    elif isinstance(r, dict) and "result" in r:
-                        ret_list.append(r["result"])
-                    else:
-                        ret_list.append(r)
-                self.nodes.reset_error_cnt_call()
-                return ret_list
-            elif isinstance(ret, dict) and "result" in ret:
-                self.nodes.reset_error_cnt_call()
-                return ret["result"]
-            elif isinstance(ret, int):
-                raise RPCError(
-                    "Client returned invalid format. Expected JSON! Output: %s" % (str(ret))
+            if isinstance(ret["error"], dict):
+                error_message = ret["error"].get(
+                    "detail", ret["error"].get("message", "Unknown error")
                 )
-            else:
-                self.nodes.reset_error_cnt_call()
-                return ret
-        return ret
+                raise RPCError(error_message)
+        elif isinstance(ret, list):
+            ret_list = []
+            for r in ret:
+                if isinstance(r, dict) and "error" in r:
+                    error_message = r["error"].get(
+                        "detail", r["error"].get("message", "Unknown error")
+                    )
+                    raise RPCError(error_message)
+                elif isinstance(r, dict) and "result" in r:
+                    ret_list.append(r["result"])
+                else:
+                    ret_list.append(r)
+            self.nodes.reset_error_cnt_call()
+            return ret_list
+        elif isinstance(ret, dict) and "result" in ret:
+            self.nodes.reset_error_cnt_call()
+            return ret["result"]
+        else:
+            log.error(f"Unexpected response format: {ret} Node: {self.url}")
+            raise RPCError(f"Unexpected response format: {ret}")
 
     # End of Deprecated methods
     ####################################################################
