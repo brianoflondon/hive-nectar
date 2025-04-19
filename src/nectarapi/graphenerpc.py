@@ -502,8 +502,6 @@ class GrapheneRPC(object):
                 error_message = ret["error"].get(
                     "detail", ret["error"].get("message", "Unknown error")
                 )
-            else:
-                error_message = str(ret["error"])
             raise RPCError(error_message)
         elif isinstance(ret, list):
             ret_list = []
