@@ -498,12 +498,12 @@ class GrapheneRPC(object):
         log.debug(f"Reply: {json.dumps(reply)}")
 
         if isinstance(ret, dict) and "error" in ret:
-            if isinstance(ret, dict):
+            if isinstance(ret["error"], dict):
                 error_message = ret["error"].get(
                     "detail", ret["error"].get("message", "Unknown error")
                 )
             else:
-                error_message = str(ret)
+                error_message = str(ret["error"])
             raise RPCError(error_message)
         elif isinstance(ret, list):
             ret_list = []
