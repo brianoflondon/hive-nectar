@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hive-nectar"
-version = "0.0.6"
+version = "0.0.7b"
 description = "Unofficial Python library for HIVE"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -46,7 +46,7 @@ dependencies = [
 
 [project.urls]
 "Homepage" = "http://www.github.com/thecrazygm/hive-nectar"
-"Download" = "https://github.com/thecrazygm/hive-nectar/tarball/0.0.6"
+"Download" = "https://github.com/thecrazygm/hive-nectar/tarball/0.0.7"
 "Bug Tracker" = "https://github.com/thecrazygm/hive-nectar/issues"
 
 [project.scripts]
